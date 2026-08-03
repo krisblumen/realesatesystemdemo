@@ -46,6 +46,14 @@ Sólo las rutas del registro se acotan al host central.
 
 Requiere DNS comodín y certificado comodín, y por eso el despliegue es en VPS.
 
+**El demo es un entorno cerrado (RFC-14), y eso no cambia esta decisión.** Quita
+una de las razones —"cada inquilino tiene una URL compartible"— y deja en pie la
+principal: el `Host` llega antes de que corra una sola línea nuestra, así que
+ningún error de la aplicación puede confundir de quién es una petición. La
+alternativa evaluada era un solo host con el inquilino guardado en la sesión;
+ahorra el comodín una vez y a cambio apoya la frontera en el orden de middleware
+y en el ciclo de vida de la sesión, para siempre.
+
 ## Orden en la cadena
 
 **El middleware corre antes del que arranca la sesión.** No es preferencia, es

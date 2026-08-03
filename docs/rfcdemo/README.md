@@ -42,6 +42,7 @@ límite.
 | 06 | [Resolución de inquilino por subdominio](RFC-06-RESOLUCION-DE-INQUILINO-POR-SUBDOMINIO.md) | D | C-1 del diseño, menor Mn-1 |
 | 07 | [Aislamiento de caché](RFC-07-AISLAMIENTO-DE-CACHE.md) | E | C-2 del diseño |
 | 08 | [Aislamiento de archivos](RFC-08-AISLAMIENTO-DE-ARCHIVOS.md) | E | C-3 del diseño |
+| 14 | [Entorno cerrado](RFC-14-ENTORNO-CERRADO.md) | D | — |
 | 09 | [Expiración y borrado](RFC-09-EXPIRACION-Y-BORRADO.md) | F | C-7, medio M-1 |
 | 12 | [Padrón del operador](RFC-12-PADRON-DEL-OPERADOR.md) | transversal | medio M-4 |
 
@@ -54,7 +55,7 @@ límite.
 
 ## Orden de lectura
 
-Para implementar fase 1: 01, 02, 03 → 04 → 05, 13 → 06 → 07, 08 → 09. El 12
+Para implementar fase 1: 01, 02, 03 → 04 → 05, 13 → 06, 14 → 07, 08 → 09. El 12
 entra cuando haya inquilinos que mirar.
 
 **RFC-02 no se saltea.** Es el andamiaje de pruebas, y los otros contratos de la
@@ -84,7 +85,8 @@ ciegas.
 - Los números de RFC-10 dependen de medir el VPS. En fase 1 el plazo lo fija
   quien invita (RFC-13).
 - Falta la auditoría de diseño con contexto fresco.
-- **A revisar**: con invitación y pocos inquilinos, el certificado comodín deja
-  de ser obligatorio — alcanzaría un certificado por subdominio, que los planes
-  compartidos sí emiten. El VPS sigue haciendo falta por el rol con `CREATEDB`,
-  pero conviene confirmarlo antes de contratar.
+- ~~A revisar: si hace falta el certificado comodín.~~ **Resuelto**: el VPS ya
+  existe y la frontera sigue siendo el subdominio, así que el comodín se emite
+  con certbot y validación DNS-01. Se evaluó un solo host con el inquilino en la
+  sesión y se descartó: ahorra el comodín una vez y apoya la frontera en el orden
+  de middleware para siempre.
