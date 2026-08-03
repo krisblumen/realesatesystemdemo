@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Backend**: Laravel 13.x, PHP 8.3+
 - **Frontend**: Vite 8, Tailwind CSS v4, vanilla JS (no React/Vue)
 - **Database**: PostgreSQL with the PostGIS extension. Spatial features use `clickbar/laravel-magellan` ^2.2 (PostGIS functions like `ST_Contains`, `ST_Centroid`, `ST_AsGeoJSON`, `geometry(Polygon,4326)` columns, and GIST indexes — see `app/Models/Zone.php`). Set via `DB_CONNECTION=pgsql` in `.env`. Note: Laravel's framework fallback in `config/database.php` is still `sqlite`, but the app always runs on `pgsql` — these PostGIS features do NOT work on SQLite.
-- **Testing**: PHPUnit 12 against a live PostgreSQL+PostGIS instance (database `inmo_test`, see `phpunit.xml`)
+- **Testing**: PHPUnit 12 against a live PostgreSQL+PostGIS instance (database `demo_test`, see `phpunit.xml`)
 - **Admin panel**: Filament ^3.2 (with Spatie Media Library plugin)
 - **Permissions/Media**: `spatie/laravel-permission` ^8.0, `spatie/laravel-medialibrary` ^11.23
 - **Font**: Bunny-served "Instrument Sans" via `laravel-vite-plugin/fonts`
@@ -16,7 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 > **Prerequisite**: a running PostgreSQL instance with the PostGIS extension is
 > required for both development and testing. The default dev database uses the
-> `pgsql` connection from `.env`; the test suite connects to `inmo_test` (host
+> `pgsql` connection from `.env` (`demo_db`); the test suite connects to `demo_test` (host
 > `127.0.0.1:5432`, user `postgres`). Migrations create PostGIS geometry columns
 > and GIST indexes, so the extension must be enabled before migrating.
 
@@ -60,7 +60,7 @@ Standard Laravel MVC. Currently a minimal skeleton — no auth starter kit, no s
 
 ## Testing
 
-Tests run against PostgreSQL+PostGIS, not SQLite. `phpunit.xml` forces `DB_CONNECTION=pgsql` and `DB_DATABASE=inmo_test` (host `127.0.0.1`, port `5432`, user `postgres`), overriding any `.env` setting. A live Postgres instance with PostGIS enabled and the `inmo_test` database is required before running the suite — the spatial functions used by `app/Models/Zone.php` (`ST_Contains`, `ST_Centroid`, `ST_AsGeoJSON`, etc.) cannot run on SQLite. The `Feature` suite hits the full HTTP stack; `Unit` tests are pure PHP.
+Tests run against PostgreSQL+PostGIS, not SQLite. `phpunit.xml` forces `DB_CONNECTION=pgsql` and `DB_DATABASE=demo_test` (host `127.0.0.1`, port `5432`, user `postgres`), overriding any `.env` setting. A live Postgres instance with PostGIS enabled and the `demo_test` database is required before running the suite — the spatial functions used by `app/Models/Zone.php` (`ST_Contains`, `ST_Centroid`, `ST_AsGeoJSON`, etc.) cannot run on SQLite. The `Feature` suite hits the full HTTP stack; `Unit` tests are pure PHP.
 
 ## Code style
 
