@@ -1,0 +1,115 @@
+# Despliegue del demo multi-inquilino
+
+Requisitos de infraestructura de EPICA-DEMO. Complementa `SERVER-SETUP.md` y
+`DATABASE-DEPLOYMENT.md`; no los reemplaza.
+
+Diseño: `docs/epicas/epica-demo-multi-inquilino.md`.
+RFC: `docs/rfcdemo/`.
+
+## Por qué esto no corre en hosting compartido
+
+Tres requisitos, y el certificado es el menor de los tres.
+
+| Requisito | Por qué | Si falta |
+|---|---|---|
+| Rol de Postgres con `CREATEDB` y capacidad de terminar sesiones | El sistema crea una base en cada alta y la borra al expirar | No hay aprovisionamiento; el diseño entero cae |
+| Proceso largo para la cola más cron | La expiración corre sola y el sistema ya tiene trabajos de fondo | Nada expira |
+| Certificado y DNS comodín | Un subdominio por inquilino | Se cae la resolución por subdominio |
+
+Hostinger emite certificados comodín **sólo en VPS**. Los planes Web, Cloud y
+Agency dan SSL DV por dominio o subdominio individual. Pero aunque ofrecieran
+comodín en compartido, los dos primeros requisitos seguirían exigiendo VPS.
+
+## Versión de PostgreSQL
+
+**Producción: 16.14.** Desarrollo local puede diferir (se observó 18.3).
+
+Importa por una razón concreta y verificada en las dos versiones:
+
+```
+ERROR: source database "demo_template" is being accessed by other users
+```
+
+`CREATE DATABASE ... TEMPLATE` **falla si la plantilla tiene cualquier conexión
+encima**. La documentación de 16 y de 18 lo declara igual. De ahí salen dos
+reglas del diseño: la aplicación nunca se conecta a la plantilla, y la plantilla
+se versiona en vez de migrarse en su lugar.
+
+Y una segunda, también verificada:
+
+```
+ERROR: CREATE DATABASE cannot run inside a transaction block
+```
+
+Por eso el cerrojo que serializa las altas es de sesión y no transaccional, y por
+eso el caso base de pruebas necesita una conexión de mantenimiento aparte.
+
+## Medición del VPS
+
+Tomada en `srv650075`. Repetir antes de abrir el demo a más gente.
+
+| Dato | Valor |
+|---|---|
+| Disco en `/var/lib/postgresql` | 96 GB, 55 GB libres |
+| Peso de un inquilino recién creado | 18 MB |
+| Techo por disco | ~3.000 inquilinos. **No es el límite** |
+| `max_connections` | 100 |
+| Otras bases en la instancia | `inmo_db`, `museo_textil`, `mail_server`, `postfixadmin`, `roundcubemail` |
+
+## El riesgo operativo real
+
+**El demo comparte instancia de Postgres con la producción de New Hauz y con el
+stack de correo.** Las 100 conexiones son de todos.
+
+Un demo descontrolado —un bucle, un worker mal configurado, alguien probando de
+más— puede dejar sin conexiones al sitio que factura y al correo. Ese es el
+riesgo de esta épica, y no tiene relación con cuántos inquilinos haya.
+
+Se cierra con dos topes, y los dos van **antes de que exista el primer
+inquilino**:
+
+```sql
+ALTER ROLE demo_app CONNECTION LIMIT 20;
+```
+
+Y uno por base de inquilino, fijado en el alta (`ALTER DATABASE ... CONNECTION
+LIMIT`). El primero protege a los vecinos del demo; el segundo protege a los
+inquilinos entre sí.
+
+> **Sobre las conexiones**, porque es contraintuitivo: no son un costo por
+> inquilino sino por petición concurrente. Laravel abre al empezar la petición y
+> cierra al terminar, así que un inquilino dormido no consume ninguna. Lo que
+> importa no es cuántos inquilinos hay sino cuántas peticiones simultáneas.
+
+## Roles de base de datos
+
+Dos roles distintos, y no es opcional:
+
+| Rol | Privilegios | Lo usa |
+|---|---|---|
+| `demo_app` | Sin `CREATEDB`. `CONNECTION LIMIT` puesto | La aplicación, en cada petición |
+| `demo_provisioner` | `CREATEDB`, terminar sesiones | Sólo el comando de invitación y el borrado, desde consola |
+
+El motivo está en RFC-05: el nombre de una base se interpola en DDL porque
+Postgres no acepta parámetros para identificadores. Si el rol que ejecuta esa
+sentencia fuera el mismo que atiende peticiones, un error de validación dejaría
+de ser «un inquilino ve a otro» y pasaría a ser «se pierden todos».
+
+## DNS y certificado
+
+- Registro comodín `*.demo.<dominio>` apuntando al VPS.
+- Certificado comodín con certbot y validación **DNS-01** — la validación HTTP-01
+  no emite comodines.
+- Renovación automática verificada antes de invitar a nadie.
+
+## Checklist antes del primer inquilino
+
+- [ ] PostgreSQL 16 con PostGIS en el VPS.
+- [ ] Rol `demo_provisioner` con `CREATEDB`, separado de `demo_app`.
+- [ ] `CONNECTION LIMIT` puesto en `demo_app`.
+- [ ] Base central creada y migrada.
+- [ ] Plantilla construida, y **ninguna** conexión de la aplicación apuntándole.
+- [ ] Cola corriendo y cron activo.
+- [ ] DNS comodín resolviendo.
+- [ ] Certificado comodín emitido y renovando solo.
+- [ ] Verificado que sin sesión ninguna ruta de inquilino devuelve contenido.

@@ -2,6 +2,13 @@
 
 > Estado: diseño, sin implementar.
 > RFC de referencia: `docs/rfc/EPICA-DEMO-MULTI-INQUILINO.md`.
+> RFC de implementación: `docs/rfcdemo/` (índice en su `README.md`).
+>
+> **El demo arranca por invitación y cerrado.** El registro público y los límites
+> de abuso quedan diseñados en fase 2 (RFC-10 y RFC-11) y no se implementan. Este
+> documento describe el diseño técnico completo; donde dice «visitante que se
+> registra», en fase 1 es «persona invitada» (RFC-13), y el sitio del inquilino
+> exige su sesión (RFC-14).
 
 ## 1. Contexto
 
@@ -9,8 +16,8 @@ El código de este repositorio se copió de un sistema construido para una
 inmobiliaria concreta. Funciona, está en producción, y todo su modelo asume una
 sola empresa.
 
-Esta épica lo convierte en un demo donde cualquiera se registra y recibe un
-espacio propio, temporal y aislado.
+Esta épica lo convierte en un demo donde cada persona invitada recibe un espacio
+propio, cerrado, temporal y aislado.
 
 ## 2. Evidencia verificada en código real
 
@@ -46,13 +53,13 @@ Todo lo que sigue se comprobó en este árbol, no se supone.
 
 ## 3. Problema a resolver
 
-Dos visitantes probando al mismo tiempo se pisan. No en el sentido de permisos:
+Dos personas probando al mismo tiempo se pisan. No en el sentido de permisos:
 literalmente escriben sobre la misma fila. El primero que publica su página de
 inicio le cambia el sitio al segundo.
 
 ## 4. Objetivos
 
-1. Que un visitante se registre y reciba un espacio propio en segundos.
+1. Que una persona invitada reciba un espacio propio en segundos.
 2. Que ese espacio esté aislado por construcción y no por disciplina.
 3. Que expire y se borre solo.
 4. Que el sistema de roles siga significando lo mismo adentro de cada espacio.
@@ -92,20 +99,23 @@ Tabla `tenants` en la central:
 | `id`, `slug` | El `slug` es el subdominio y el nombre de la base |
 | `estado` | `aprovisionando`, `activo`, `fallido`, `expirado`, `borrado` |
 | `database` | Nombre real de la base; no se deriva del slug al vuelo |
-| `email`, `origen_ip_hash` | Contacto y control de abuso |
+| `email` | Contacto |
+| `origen_hash` | **Fase 2.** Control de abuso; con invitación queda vacío |
 | `expira_en`, `borrado_en` | Ciclo de vida |
 | `template_version` | Con qué plantilla nació; sirve para diagnosticar |
 
-`origen_ip_hash` guarda un hash con sal, no la IP. Sirve para limitar altas
-repetidas sin retener un dato personal más tiempo del necesario.
+`origen_hash` guardaría un hash con sal, no la dirección. En fase 1 queda vacío:
+con invitación no hay altas repetidas que limitar, y guardar un dato personal que
+nadie usa es guardarlo por nada.
 
 ## 8. Diseño técnico consolidado
 
 ### 8.1 Resolución del inquilino: por subdominio
 
-`{slug}.demo.example.com` sirve el sitio público del inquilino, y
-`{slug}.demo.example.com/admin` su panel. El host central —sin slug— sirve el
-registro.
+`{slug}.demo.example.com` sirve el sitio del inquilino, y
+`{slug}.demo.example.com/admin` su panel. Las dos cosas exigen su sesión
+(RFC-14). El host central —sin slug— sirve el padrón del operador y, en fase 2,
+el registro.
 
 **Por qué subdominio y no sesión.** La sesión es circular: la sesión vive en la
 base de datos, así que para leerla hace falta saber a qué base conectarse, y
@@ -307,7 +317,7 @@ menor de las tres razones. Las tres son requisitos, no preferencias:
 | Requisito | Por qué | Qué pasa si falta |
 |---|---|---|
 | Rol de Postgres con `CREATEDB` y `pg_terminate_backend` | El sistema crea una base en cada alta y la borra al expirar | No hay aprovisionamiento posible; el diseño entero cae |
-| Proceso largo para la cola (`queue:work`) más cron | El alta va en cola para que el visitante no espere; la expiración corre sola | El alta vuelve al request y el primer pico la rompe; nada expira |
+| Proceso largo para la cola (`queue:work`) más cron | La expiración corre sola, y el sistema ya tiene trabajos de fondo. En fase 1 el alta va por consola, no por cola | Nada expira; los trabajos de fondo existentes quedan sin correr |
 | Certificado comodín y DNS comodín | Un subdominio por inquilino | Se cae 8.1 y hay que volver a prefijo de ruta |
 
 En hosting compartido las bases se crean desde el panel de control, con un tope
@@ -395,7 +405,9 @@ borra todo lo que quedó de corridas anteriores.
 | Un inquilino expirado no deja entrar | Ciclo de vida |
 | Borrar un inquilino con sesión abierta no falla | C-7 |
 | Borrar un inquilino no deja base, archivos ni filas | Regla de oro 5 |
-| El host central no resuelve a ningún inquilino | Que el registro no quede adentro de uno |
+| El host central no resuelve a ningún inquilino | Que el padrón del operador no quede adentro de uno |
+| Sin sesión, ninguna ruta del inquilino devuelve contenido | El entorno cerrado (RFC-14) |
+| Un enlace de firma funciona sin sesión, y no cruza de inquilino | La excepción del entorno cerrado |
 
 El primero es el que justifica la épica entera. Si sólo se pudiera escribir uno,
 sería ese.
@@ -412,8 +424,11 @@ sería ese.
 | **F** | Expiración, borrado y límites de abuso | C, D |
 | **G** | Registro público y entrega de credenciales | C, D, E |
 
-El registro —que es por donde uno querría empezar— es el último. Sin A a E, un
-visitante registrado entra a un sistema que se pisa con el vecino.
+El acceso —que es por donde uno querría empezar— es el último. Sin A a E, una
+persona invitada entra a un sistema que se pisa con el vecino.
+
+En fase 1 el lote G se reduce al comando de invitación (RFC-13), que es parte del
+lote C. El registro público (RFC-11) queda para cuando el demo se abra.
 
 ## 11.1 RFC de la épica
 
@@ -464,14 +479,15 @@ que se copió el código. El índice está en `docs/rfcdemo/README.md`.
 - [x] Confirmado que el hosting emite certificado comodín. Hostinger lo hace
       **sólo en VPS**; los planes compartidos no. Decisión 8.1 sostenida sobre
       VPS, y 8.11 documenta que el VPS haría falta igual sin el certificado.
-- [ ] Confirmada la versión de Postgres de producción y anotada en despliegue.
-      Sabido: 16.14. Falta anotarlo en `docs/deployment/`.
+- [x] Confirmada la versión de Postgres de producción y anotada en despliegue:
+      16.14, en `docs/deployment/DEMO-MULTI-INQUILINO.md`, con las dos
+      restricciones que de ahí se derivan.
 - [x] Medido en el VPS: 55 GB libres, 18 MB por inquilino, `max_connections` 100
       compartidas con producción, otro proyecto y el correo.
 - [ ] Confirmado en el VPS: rol con `CREATEDB` separado del rol de peticiones
       (C-8), y con `CONNECTION LIMIT` puesto.
-- [ ] Definido el plazo de vida de un inquilino y el límite por origen (M-2 de la
-      auditoría), derivados del techo de bases del punto anterior.
+- [x] Definido cómo se fija el plazo de vida: en fase 1 lo pone quien invita
+      (RFC-13). El límite por origen no aplica con invitación (fase 2, RFC-10).
 - [ ] Los nueve contratos tienen un test nombrado que los verifica.
 - [x] Corregidos C-1, C-2 y C-3 de la auditoría: 8.6 (cerrojo con `finally` y
       espera acotada), 8.6.1 (el nombre de la base como superficie de inyección)
