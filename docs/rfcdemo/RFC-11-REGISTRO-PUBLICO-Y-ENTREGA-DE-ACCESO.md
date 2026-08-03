@@ -1,5 +1,9 @@
 # RFC-11 Registro público y entrega de acceso
 
+> **FASE 2 — no se implementa todavía.** El demo arranca por invitación
+> (`RFC-13`), y con invitación esto no hace falta. Queda escrito para cuando el
+> demo se abra al público.
+
 ## Objetivo
 
 Que un visitante se registre y entre a probar el sistema, sin que un correo

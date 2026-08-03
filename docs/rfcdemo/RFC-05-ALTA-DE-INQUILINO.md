@@ -16,6 +16,11 @@ Cierra los contratos C-5, C-2 y C-8.
 
 Backend.
 
+> **En fase 1 el alta la dispara `RFC-13` desde consola, no una cola.** Las
+> secciones 1 (validación del `slug`) y 4 (usuario del inquilino) se mantienen
+> completas. La sección 2 (cerrojo) se mantiene en su versión mínima. La sección
+> 3 la ejecuta el comando en vez de un trabajo en cola.
+
 ## Alcance
 
 - Generación y validación del `slug`.

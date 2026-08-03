@@ -1,5 +1,9 @@
 # RFC-10 Límites de abuso y plazo de vida
 
+> **FASE 2 — no se implementa todavía.** El demo arranca por invitación
+> (`RFC-13`), y con invitación esto no hace falta. Queda escrito para cuando el
+> demo se abra al público.
+
 ## Objetivo
 
 Que el demo no se pueda usar para llenar el servidor de bases de datos, y que el

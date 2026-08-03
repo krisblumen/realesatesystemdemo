@@ -41,7 +41,7 @@ explícita. Nunca por herencia de la conexión ambiente.
 | `database` | string(64) único | Nombre real de la base. No se deriva del slug al vuelo |
 | `estado` | string | Ver abajo |
 | `email` | string | Contacto del visitante |
-| `origen_hash` | string(64) | Hash con sal del origen. Ver RFC-10 |
+| `origen_hash` | string(64) nulo | **Fase 2.** Hash con sal del origen, para limitar altas repetidas (RFC-10). Con invitación no se usa: es un dato personal menos que retener |
 | `template_version` | string | Con qué plantilla nació |
 | `expira_en` | timestamp | |
 | `borrado_en` | timestamp nulo | |
@@ -50,8 +50,10 @@ explícita. Nunca por herencia de la conexión ambiente.
 `database` se guarda y no se recalcula. Si mañana cambia la forma de nombrar las
 bases, los inquilinos viejos tienen que seguir encontrando la suya.
 
-`origen_hash` guarda un hash, no la dirección. Sirve para limitar altas repetidas
-sin retener un dato personal más tiempo del necesario.
+`origen_hash` guarda un hash, no la dirección. En fase 1 queda vacío: el demo es
+por invitación y no hay altas repetidas que limitar. La columna existe desde el
+principio para no migrar después, pero **no se llena hasta que el demo se abra**.
+Guardar un dato personal que nadie usa es guardarlo por nada.
 
 ## Estados
 
