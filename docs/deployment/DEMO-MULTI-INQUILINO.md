@@ -95,6 +95,24 @@ Postgres no acepta parámetros para identificadores. Si el rol que ejecuta esa
 sentencia fuera el mismo que atiende peticiones, un error de validación dejaría
 de ser «un inquilino ve a otro» y pasaría a ser «se pierden todos».
 
+## Proxy de confianza
+
+`bootstrap/app.php:27` usa `trustProxies(at: '*')`, y entre los encabezados
+confiados está `X-Forwarded-Host` (`TrustProxies.php:23`).
+
+Con el inquilino resuelto por subdominio, eso significa que **quien alcance el
+origen sin pasar por CloudPanel elige a qué inquilino resuelve**. No le da
+acceso —siguen haciendo falta credenciales— pero convierte la frontera en algo
+que el cliente puede elegir, que es justo lo que el diseño evita.
+
+Confiar sólo en la dirección del proxy. CloudPanel corre en el mismo host.
+
+> Lo mismo aplica al New Hauz de producción, que corre el mismo
+> `bootstrap/app.php`. Ahí no hay inquilinos, pero un `Host` elegible afecta la
+> generación de URL — enlaces de recuperación de contraseña, entre otros.
+> Depende de si el origen es alcanzable sin pasar por el proxy: confirmarlo con
+> el firewall.
+
 ## DNS y certificado
 
 - Registro comodín `*.demo.<dominio>` apuntando al VPS.
@@ -110,6 +128,7 @@ de ser «un inquilino ve a otro» y pasaría a ser «se pierden todos».
 - [ ] Base central creada y migrada.
 - [ ] Plantilla construida, y **ninguna** conexión de la aplicación apuntándole.
 - [ ] Cola corriendo y cron activo.
+- [ ] `trustProxies` acotado a la dirección del proxy, no `'*'`.
 - [ ] DNS comodín resolviendo.
 - [ ] Certificado comodín emitido y renovando solo.
 - [ ] Verificado que sin sesión ninguna ruta de inquilino devuelve contenido.

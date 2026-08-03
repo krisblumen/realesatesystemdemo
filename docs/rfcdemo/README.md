@@ -11,6 +11,7 @@ Documentos de referencia:
 - `docs/audits/epica-demo-auditoria-diseno.md` — la auditoría de diseño.
 - `docs/epicas/epica-demo-lote-a-diseno.md` — diseño de detalle del lote A.
 - `docs/epicas/epica-demo-lotes-b-c-diseno.md` — diseño de detalle de los lotes B y C.
+- `docs/epicas/epica-demo-lotes-d-e-f-diseno.md` — diseño de detalle de los lotes D, E y F.
 - `docs/deployment/DEMO-MULTI-INQUILINO.md` — requisitos de infraestructura.
 
 ## Dos fases

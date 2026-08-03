@@ -83,6 +83,24 @@ Un slug que no corresponde a ningún inquilino activo devuelve la misma respuest
 que uno expirado: no se distingue entre "no existe" y "venció". Distinguirlos
 permitiría enumerar inquilinos.
 
+## El `Host` sólo es una frontera dura si el proxy es de confianza
+
+La tesis de este RFC —«el `Host` llega antes de que corra una línea nuestra, así
+que ningún error de la aplicación puede confundir de quién es una petición»—
+**hoy no se cumple en este despliegue**.
+
+`bootstrap/app.php:27` confía en todos los proxies (`trustProxies(at: '*')`) y
+los encabezados confiados incluyen `X-Forwarded-Host` (`TrustProxies.php:23`).
+Quien alcance el origen sin pasar por CloudPanel elige a qué inquilino resuelve.
+
+Sin dramatizar: resolver no da acceso, siguen haciendo falta credenciales, y la
+sesión se lee de la base de ese inquilino. Pero convierte una frontera dura en
+una blanda, que es justo lo que evitamos al descartar la sesión.
+
+**Se corrige en despliegue, no en código**: confiar sólo en la dirección del
+proxy. Va antes de invitar a nadie. Ver
+`docs/epicas/epica-demo-lotes-d-e-f-diseno.md`, D.1.
+
 ## El valor de la conexión antes de resolver
 
 No es nulo. **Postgres, con nombre de base vacío, conecta a una base con el
