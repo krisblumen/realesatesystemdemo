@@ -321,9 +321,15 @@ Queda por confirmar en el VPS, antes del lote A:
 - Que el rol de la aplicación —o un rol aparte dedicado al aprovisionamiento—
   tenga `CREATEDB`. Ver C-2 de la auditoría: **no debe ser el mismo rol con el
   que la aplicación atiende peticiones.**
-- Cuántas bases de datos soporta la instancia antes de degradarse. Ese número es
-  el techo real de inquilinos simultáneos, y define el plazo de vida (M-2 de la
-  auditoría), no al revés.
+- ~~Cuántas bases de datos soporta la instancia.~~ **Medido**: 55 GB libres y 18
+  MB por inquilino dan unos 3.000. El disco no es el límite.
+
+**Lo que la medición sí encontró** es otra cosa, y más seria: la instancia de
+Postgres del VPS está **compartida con la producción de New Hauz, con otro
+proyecto y con el stack de correo**, y sus 100 conexiones son de todos. El riesgo
+de esta épica no es quedarse sin lugar para inquilinos: es que el demo deje sin
+conexiones al sitio que factura y al correo. Se cierra con topes de conexión por
+rol y por base — ver RFC-01, «Convivencia con los vecinos del servidor».
 
 ### 8.12 Cómo se prueba todo esto (contrato C-9)
 
@@ -436,7 +442,8 @@ que se copió el código. El índice está en `docs/rfcdemo/README.md`.
 | Se despliega en hosting compartido | El diseño no corre: ni crea bases, ni sostiene la cola | Resuelto: **VPS obligatorio** (8.11) |
 | Un trabajo deja la conexión apuntando al inquilino anterior | Escritura en la base equivocada, sin error | C-4 con test explícito |
 | Alguien mueve el caché a Redis y se pierde el aislamiento | Fuga entre inquilinos | Prefijo de clave desde el día uno (8.3) |
-| Cantidad de bases: cada inquilino es una base completa | Límite operativo de Postgres y de disco | Expiración agresiva; medir cuántas soporta el servidor antes de abrir |
+| El demo agota las conexiones y tumba producción y correo, que comparten la instancia | **Alto**: no afecta al demo, afecta a lo que factura | Topes `CONNECTION LIMIT` por rol y por base, puestos antes del primer inquilino (RFC-01) |
+| Cantidad de bases: cada inquilino es una base completa | Bajo: 55 GB ÷ 18 MB ≈ 3.000 inquilinos | Medido. No requiere acción |
 | 3.8 MB de polígonos por inquilino | Disco | Aceptado; se revisa si el volumen lo obliga |
 | Una conexión olvidada contra la plantilla | Las altas fallan | La plantilla no está en ninguna configuración de la app |
 | Postgres 16 en producción, 18 en desarrollo | Comportamiento distinto entre ambientes | Documentado; la restricción de plantilla aplica en las dos |
@@ -459,8 +466,10 @@ que se copió el código. El índice está en `docs/rfcdemo/README.md`.
       VPS, y 8.11 documenta que el VPS haría falta igual sin el certificado.
 - [ ] Confirmada la versión de Postgres de producción y anotada en despliegue.
       Sabido: 16.14. Falta anotarlo en `docs/deployment/`.
-- [ ] Confirmado en el VPS: rol con `CREATEDB` separado del rol de peticiones, y
-      cuántas bases soporta la instancia (C-8).
+- [x] Medido en el VPS: 55 GB libres, 18 MB por inquilino, `max_connections` 100
+      compartidas con producción, otro proyecto y el correo.
+- [ ] Confirmado en el VPS: rol con `CREATEDB` separado del rol de peticiones
+      (C-8), y con `CONNECTION LIMIT` puesto.
 - [ ] Definido el plazo de vida de un inquilino y el límite por origen (M-2 de la
       auditoría), derivados del techo de bases del punto anterior.
 - [ ] Los nueve contratos tienen un test nombrado que los verifica.

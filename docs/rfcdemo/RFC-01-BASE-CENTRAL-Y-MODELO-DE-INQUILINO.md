@@ -68,13 +68,57 @@ Guardar un dato personal que nadie usa es guardarlo por nada.
 Las transiciones pasan por un único método del modelo. Un `estado` asignado a
 mano en cualquier otro lugar es un error de implementación, no una alternativa.
 
+## Convivencia con los vecinos del servidor
+
+**Medido en el VPS (`srv650075`), no supuesto:**
+
+| Dato | Valor |
+|---|---|
+| Disco libre en `/var/lib/postgresql` | 55 GB de 96 GB |
+| Peso de un inquilino recién creado | 18 MB |
+| `max_connections` | 100 |
+| Bases ya existentes en esa instancia | 6 |
+
+El disco no es el límite: 55 GB ÷ 18 MB son unos 3.000 inquilinos. Ni cerca de
+apretar.
+
+**El límite real es que la instancia de Postgres está compartida.** En ella
+conviven la producción de New Hauz (`inmo_db`), otro proyecto (`museo_textil`) y
+el stack de correo completo (`mail_server`, `postfixadmin`, `roundcubemail`). Las
+100 conexiones son de todos.
+
+Un demo descontrolado —un bucle, un worker mal configurado, alguien probando de
+más— puede dejar sin conexiones a la producción inmobiliaria **y al servidor de
+correo**. Ese es el riesgo operativo de esta épica, y no tiene nada que ver con
+cuántos inquilinos haya.
+
+Se cierra con dos topes, que son dos sentencias:
+
+1. **Tope de conexiones al rol del demo** (`ALTER ROLE ... CONNECTION LIMIT`).
+   El demo no puede pasar de su cuota, pase lo que pase adentro.
+2. **Tope de conexiones por base de inquilino** (`ALTER DATABASE ... CONNECTION
+   LIMIT`), fijado en el alta. Un inquilino no puede consumir la cuota de los
+   demás.
+
+El primero protege a los vecinos del demo. El segundo protege a los inquilinos
+entre sí. Los dos hacen falta.
+
+> **Nota sobre las conexiones**, porque es contraintuitivo: no son un costo *por
+> inquilino* sino *por petición concurrente*. Laravel abre al empezar la petición
+> y cierra al terminar, así que un inquilino dormido no consume ninguna. Con dos
+> conexiones por petición —la central y la del inquilino— las 100 dan margen de
+> sobra para un demo por invitación. Lo que importa no es cuántos inquilinos hay
+> sino cuántas peticiones simultáneas, y que el demo no se pase de su cuota.
+
 ## Reglas
 
 1. La fila del inquilino **sobrevive al borrado de su base**. Sirve para medir el
    uso y para que el mismo origen no recicle inquilinos sin límite.
 2. Sólo `activo` permite resolver una petición hacia ese inquilino.
 3. `expira_en` se fija en el alta, no se calcula al leer.
-4. La central nunca guarda contenido de ningún inquilino. Si algún día hace
+4. El rol del demo tiene tope de conexiones antes de que exista el primer
+   inquilino. No después.
+5. La central nunca guarda contenido de ningún inquilino. Si algún día hace
    falta un dato de adentro, se copia explícitamente y se documenta por qué.
 
 ## Definition of Done
