@@ -36,9 +36,15 @@ real de Postgres.
 
 **No apto para pasar a implementación sin corregir C-1, C-2 y C-3.**
 
+> **Estado tras la corrección**: los tres críticos están cerrados en el documento
+> de épica (8.6, 8.6.1, 8.12) y aparecen marcados abajo. Siguen abiertos los
+> medios y menores, y sigue faltando la pasada con contexto fresco.
+
 ## 2. Hallazgos críticos
 
 ### C-1 — El cerrojo propuesto no se suelta si el trabajo falla, y la variante que sí lo haría es imposible
+
+> **CORREGIDO** en la sección 8.6 del documento de épica.
 
 La sección 8.6 dice:
 
@@ -61,12 +67,24 @@ operación que hay que proteger no puede estar dentro de una.
 Corrección requerida:
 
 1. `pg_advisory_unlock` en un `finally`, no en el camino feliz.
-2. Un barrido al arrancar el worker que suelte cerrojos de la épica huérfanos.
+2. ~~Un barrido al arrancar el worker que suelte cerrojos de la épica
+   huérfanos.~~ **Esta prescripción era incorrecta y no se aplicó.** Si el worker
+   muere, su sesión de base de datos se cierra y Postgres suelta el cerrojo solo:
+   no hay cerrojo huérfano que barrer. El único caso real es el del trabajo que
+   falla con el worker vivo, y ese lo cubre el `finally` del punto 1. El barrido
+   habría sido ceremonia sin causa. Queda anotado en 8.6 por qué no está.
 3. Un tiempo máximo de espera al tomar el cerrojo (`pg_try_advisory_lock` en
    bucle con límite), para que una alta bloqueada falle con un mensaje en vez de
    colgarse para siempre.
 
+Nota: el barrido **sí** hace falta para las bases de prueba (8.12), y por la
+razón opuesta — una corrida de tests interrumpida deja bases reales que no
+desaparecen solas. Que las dos cosas suenen parecidas y necesiten respuestas
+contrarias es justamente por qué conviene escribirlo.
+
 ### C-2 — El nombre de la base sale de un dato del visitante y se interpola en DDL
+
+> **CORREGIDO**: sección 8.6.1 nueva, dedicada al tema, más el contrato C-8.
 
 El diseño deriva la base del inquilino de su `slug`, y el `slug` nace del
 registro público. `CREATE DATABASE` es DDL: **Postgres no acepta parámetros
@@ -93,6 +111,8 @@ Este es el hallazgo más grave del conjunto, porque el resto del diseño protege
 inquilino contra inquilino y este permite saltar por encima de todos.
 
 ### C-3 — El test que justifica la épica no tiene forma de correr
+
+> **CORREGIDO**: sección 8.12 nueva, contrato C-9, y movido al lote A.
 
 La matriz de tests (sección 10) empieza con:
 
@@ -215,8 +235,9 @@ seguro contra un cambio de infraestructura probable.
 
 ## 8. Qué falta antes de implementar
 
-1. Corregir C-1, C-2 y C-3 en el documento de épica.
-2. Confirmar el certificado comodín del hosting, o cambiar la decisión 8.1.
-3. Poner números a M-2.
+1. ~~Corregir C-1, C-2 y C-3 en el documento de épica.~~ Hecho: 8.6, 8.6.1, 8.12.
+2. ~~Confirmar el certificado comodín del hosting.~~ Hecho: Hostinger lo emite
+   sólo en VPS. Y la sección 8.11 documenta que el VPS haría falta igual sin él.
+3. Poner números a M-2, derivados del techo de bases del servidor.
 4. **Una auditoría con contexto fresco.** Esta encontró lo que se puede encontrar
    releyendo; falta la que cuestione los supuestos.

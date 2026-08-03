@@ -179,23 +179,83 @@ de todo este diseño, porque no da error: escribe en la base equivocada.
 
 ### 8.6 Alta de un inquilino (contrato C-5)
 
-Serializada con un **cerrojo de aviso de Postgres** (`pg_advisory_lock`) sobre la
-conexión central, no con un cerrojo de caché con vencimiento. Si el worker muere
-a mitad de la copia, el cerrojo de Postgres se suelta solo al cerrarse la sesión;
-uno con TTL puede vencer mientras la copia sigue corriendo y dejar entrar a un
-segundo.
+Serializada con un **cerrojo de aviso de Postgres** sobre la conexión central, no
+con un cerrojo de caché con vencimiento: uno con TTL puede vencer mientras la
+copia sigue corriendo y dejar entrar a un segundo.
+
+**Por qué no el cerrojo transaccional.** `pg_advisory_xact_lock` sería lo
+natural, porque se suelta solo al terminar la transacción. No se puede usar:
+
+```
+ERROR: CREATE DATABASE cannot run inside a transaction block
+```
+
+La operación que hay que proteger no admite estar dentro de una transacción, así
+que el cerrojo transaccional queda descartado por construcción. Queda el de
+sesión, con las precauciones que siguen.
+
+**El cerrojo de sesión y su modo de falla.** `pg_advisory_lock` se ata a la
+sesión de base de datos, y **la sesión de un worker de cola no se cierra entre
+trabajos**. Eso parte en dos casos:
+
+- **El worker muere** (se lo mata, se cae el proceso): la sesión se cierra y
+  Postgres suelta el cerrojo solo. Este caso no necesita nada. Por eso el diseño
+  **no** incluye un barrido de cerrojos huérfanos: sería ceremonia sin causa.
+- **El trabajo lanza una excepción y el worker sigue vivo**: la sesión sigue
+  abierta y **el cerrojo queda tomado**. Todas las altas siguientes esperan, y no
+  hay error que lo delate: se ve como lentitud. Este es el caso real, y es el que
+  hay que cerrar.
 
 Pasos del trabajo:
 
-1. Tomar el cerrojo.
+1. Tomar el cerrojo con `pg_try_advisory_lock` en un bucle acotado —unos pocos
+   intentos con espera entre ellos—. **Nunca con el `pg_advisory_lock` que
+   espera sin límite**: si algo dejó el cerrojo tomado, el alta tiene que fallar
+   con un mensaje, no colgarse para siempre.
 2. `CREATE DATABASE demo_t_{slug} TEMPLATE demo_template_vN`.
-3. Soltar el cerrojo. **La copia es lo único serializado**; lo que sigue no
-   toca la plantilla y puede correr en paralelo.
-4. Conectarse al inquilino y crear su usuario `owner` con contraseña generada.
-5. Marcar `activo` y notificar al visitante.
+3. Soltar el cerrojo **en un `finally`**, no en el camino feliz. Ese `finally` es
+   la corrección: sin él, una excepción entre 1 y 3 congela las altas hasta que
+   alguien reinicie el worker.
+4. **La copia es lo único serializado.** Lo que sigue no toca la plantilla y
+   puede correr en paralelo.
+5. Conectarse al inquilino y crear su usuario `owner` con contraseña generada.
+6. Marcar `activo` y entregar el acceso.
 
 Si algo falla: estado `fallido`, y una tarea de limpieza borra la base a medias
 si llegó a crearse.
+
+Vigilancia: una alerta si algún cerrojo de esta clase lleva tomado más que lo que
+tarda una copia con holgura. Es la señal de que el `finally` se rompió.
+
+### 8.6.1 El nombre de la base es una superficie de inyección (contrato C-2)
+
+`CREATE DATABASE` es DDL, y **Postgres no acepta parámetros enlazados para
+identificadores**. El nombre de la base se interpola en la sentencia sí o sí. Si
+ese nombre desciende de algo que escribió un visitante, esto es inyección SQL
+ejecutada por un rol con permiso para crear y borrar bases de datos, desde un
+formulario abierto a cualquiera.
+
+Es el único punto del diseño donde una falla no significa "un inquilino ve a
+otro" sino "se pierden todos". Se cierra con cuatro medidas, y las cuatro
+son obligatorias:
+
+1. **El `slug` lo genera el servidor.** El visitante no lo elige ni lo sugiere.
+   No hay campo en el formulario que llegue a este camino.
+2. **Formato cerrado**: `^[a-z][a-z0-9]{7,31}$`. Se valida contra ese patrón
+   **inmediatamente antes** de componer la sentencia, no sólo al crear la fila.
+   La validación tiene que estar pegada al uso peligroso; si está lejos, alguien
+   agrega un segundo camino que no pasa por ella.
+3. **El nombre se compone de un prefijo fijo más el slug validado**:
+   `demo_t_{slug}`. Con el prefijo el identificador queda entre 14 y 38 bytes,
+   bajo el límite de 63 de Postgres, y no puede coincidir con una palabra
+   reservada.
+4. **El rol que crea bases no es el rol de las peticiones** (contrato C-8). Aun
+   si las tres medidas anteriores fallaran, el rol con el que corre el panel no
+   puede ejecutar `CREATE DATABASE` ni `DROP DATABASE`.
+
+Como red final, la sentencia se arma citando el identificador con las reglas de
+Postgres, no concatenando a mano. Es redundante con el punto 2 y va igual: las
+redundancias baratas en el único lugar catastrófico del sistema se pagan solas.
 
 ### 8.7 Actualizar la plantilla (contrato C-6)
 
@@ -265,6 +325,44 @@ Queda por confirmar en el VPS, antes del lote A:
   el techo real de inquilinos simultáneos, y define el plazo de vida (M-2 de la
   auditoría), no al revés.
 
+### 8.12 Cómo se prueba todo esto (contrato C-9)
+
+El test que justifica la épica —dos inquilinos publican una home distinta y cada
+uno ve la suya— **no puede correr con la suite tal como está**, y por eso este
+apartado es trabajo del **lote A** y no del final. Un plan de pruebas que no sabe
+cómo montar su prueba más importante lo descubre cuando ya no hay tiempo.
+
+**El choque.** `RefreshDatabase` envuelve cada test en una transacción sobre la
+conexión por defecto. Este diseño cambia la conexión por defecto en mitad de la
+petición, y además necesita crear bases de verdad — que es justamente lo que no
+se puede hacer dentro de una transacción.
+
+**La salida** son tres piezas:
+
+1. **Transaccionar sólo la central.** `RefreshDatabase` permite acotar qué
+   conexiones envuelve. La central se prueba como siempre; los inquilinos no se
+   transaccionan porque son bases efímeras que se tiran enteras.
+2. **Una conexión de mantenimiento**, apuntada a la base `postgres` y sin
+   transacción abierta, que es la que ejecuta `CREATE DATABASE` y
+   `DROP DATABASE` en los tests. Así el `CREATE` nunca cae dentro de la
+   transacción del test.
+3. **Un caso base propio** —`TenantTestCase`— que da un método para levantar un
+   inquilino de prueba y los borra a todos al terminar el test, pase o falle.
+
+**La plantilla de tests se construye una vez para toda la suite**, no por test.
+Copiarla cuesta 0.2 s; migrar desde cero cuesta segundos. Con dos inquilinos por
+test y una decena de tests de aislamiento, el costo total ronda los cuatro
+segundos: aceptable.
+
+Si la plantilla no existe, el caso base **falla con un mensaje que dice qué
+comando correr**. No con un error de Postgres sobre una base inexistente, que
+manda a depurar el lugar equivocado.
+
+**Acá sí hace falta un barrido**, al revés que con los cerrojos de 8.6: una
+corrida de tests interrumpida deja bases reales en el servidor, y esas no
+desaparecen solas. Se nombran con un prefijo reconocible y hay un comando que
+borra todo lo que quedó de corridas anteriores.
+
 ## 9. Contratos que la implementación debe cerrar
 
 | # | Contrato | Dónde se verifica |
@@ -277,6 +375,7 @@ Queda por confirmar en el VPS, antes del lote A:
 | C-6 | La plantilla se versiona, no se migra en su lugar | Comando + test del cambio de versión |
 | C-7 | El borrado corta conexiones antes del `DROP` | Test de borrado con sesión abierta |
 | C-8 | El rol que crea bases no es el rol de las peticiones | Revisión de despliegue + verificación al arrancar |
+| C-9 | Existe un caso base capaz de levantar dos inquilinos reales | Es la condición para verificar C-1 a C-7 |
 
 ## 10. Matriz de tests
 
@@ -299,7 +398,7 @@ sería ese.
 
 | Lote | Contenido | Depende de |
 |---|---|---|
-| **A** | Base central: conexión, tabla `tenants`, cola fijada a central | — |
+| **A** | Base central: conexión, tabla `tenants`, cola fijada a central. **Y el caso base de tests con inquilinos reales (8.12)** | — |
 | **B** | Plantilla versionada y comando para construirla | A |
 | **C** | Alta en cola, con cerrojo, y creación del usuario del inquilino | A, B |
 | **D** | Resolución por subdominio y orden de middleware | A |
@@ -344,6 +443,8 @@ visitante registrado entra a un sistema que se pisa con el vecino.
       cuántas bases soporta la instancia (C-8).
 - [ ] Definido el plazo de vida de un inquilino y el límite por origen (M-2 de la
       auditoría), derivados del techo de bases del punto anterior.
-- [ ] Los ocho contratos tienen un test nombrado que los verifica.
-- [ ] Corregidos C-1, C-2 y C-3 de la auditoría en este documento.
+- [ ] Los nueve contratos tienen un test nombrado que los verifica.
+- [x] Corregidos C-1, C-2 y C-3 de la auditoría: 8.6 (cerrojo con `finally` y
+      espera acotada), 8.6.1 (el nombre de la base como superficie de inyección)
+      y 8.12 (cómo se prueba, movido al lote A).
 - [ ] Auditoría de diseño hecha con contexto fresco, no por quien lo escribió.
