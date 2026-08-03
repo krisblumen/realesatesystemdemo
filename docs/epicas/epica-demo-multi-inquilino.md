@@ -409,6 +409,26 @@ sería ese.
 El registro —que es por donde uno querría empezar— es el último. Sin A a E, un
 visitante registrado entra a un sistema que se pisa con el vecino.
 
+## 11.1 RFC de la épica
+
+Viven en `docs/rfcdemo/`, con numeración propia: este es un producto distinto del
+que se copió el código. El índice está en `docs/rfcdemo/README.md`.
+
+| RFC | Título | Lote |
+|---|---|---|
+| 01 | Base central y modelo de inquilino | A |
+| 02 | Caso base de pruebas con inquilinos | A |
+| 03 | Colas ancladas a la central | A |
+| 04 | Plantilla versionada | B |
+| 05 | Alta de inquilino | C |
+| 06 | Resolución de inquilino por subdominio | D |
+| 07 | Aislamiento de caché | E |
+| 08 | Aislamiento de archivos | E |
+| 09 | Expiración y borrado | F |
+| 10 | Límites de abuso y plazo de vida | F |
+| 11 | Registro público y entrega de acceso | G |
+| 12 | Padrón del operador | transversal |
+
 ## 12. Matriz de riesgos
 
 | Riesgo | Impacto | Mitigación |

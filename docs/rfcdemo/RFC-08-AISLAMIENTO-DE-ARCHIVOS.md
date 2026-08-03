@@ -1,0 +1,71 @@
+# RFC-08 Aislamiento de archivos
+
+## Objetivo
+
+Que la imagen de un inquilino no sobrescriba la de otro.
+
+## Épica
+
+EPICA-DEMO. Lote E. Depende de RFC-06.
+
+Cierra el contrato C-3 del diseño.
+
+## Responsable
+
+Backend.
+
+## El problema
+
+La librería de medios guarda cada archivo en una ruta derivada del identificador
+de su fila. Con una base por inquilino, **los identificadores arrancan en 1 en
+cada base**.
+
+Dos inquilinos suben su primera imagen. Los dos escriben en `1/`. El disco es uno
+solo. Se pisan.
+
+La base de datos no protege de esto por la misma razón que no protege el caché:
+el disco es otro almacén.
+
+## Alcance
+
+- Generador de rutas propio, con el inquilino adelante.
+- Borrado de los archivos del inquilino junto con su base.
+
+## La ruta
+
+```
+tenants/{slug}/{media_id}/{nombre}
+```
+
+El slug ya viene validado contra formato cerrado (RFC-05), así que no puede
+contener separadores de directorio ni escapar hacia arriba. Aun así el generador
+lo vuelve a validar: es la misma lógica que en RFC-05, la validación va pegada al
+uso.
+
+En el host central no hay inquilino, y no se suben archivos.
+
+## Borrado
+
+Cuando se borra un inquilino (RFC-09) se borra `tenants/{slug}/` completo.
+
+Media huérfana en disco es una fuga con retardo: el inquilino ya no existe, la
+fila ya no está, y los archivos siguen ahí servidos por una ruta adivinable.
+
+El orden importa y está en RFC-09: primero la base, después los archivos. Si se
+borran los archivos primero y el borrado de la base falla, queda un inquilino
+vivo con las imágenes rotas.
+
+## Reglas
+
+1. Ninguna ruta de medios se compone sin el slug.
+2. El generador valida el slug antes de usarlo, aunque ya venga validado.
+3. Un inquilino no puede leer una ruta de otro aunque la adivine. Lo garantiza
+   la autorización existente sobre los controladores de medios, que ya exigen
+   pertenencia; el prefijo evita la colisión, no reemplaza el permiso.
+
+## Definition of Done
+
+- Un test sube la primera imagen en dos inquilinos y verifica que hay dos
+  archivos distintos y cada uno ve el suyo.
+- Un test verifica que borrar un inquilino no deja archivos suyos en disco.
+- Un test verifica que un slug malformado no llega a componer una ruta.

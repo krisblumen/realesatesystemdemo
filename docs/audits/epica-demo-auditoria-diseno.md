@@ -137,6 +137,8 @@ nada de lo que venga después.
 
 ### M-1 — `pg_terminate_backend` no impide reconectar
 
+> **ATENDIDO** en `docs/rfcdemo/RFC-09`.
+
 La sección 8.8 corta las conexiones y después borra. Entre las dos operaciones
 hay una ventana: el navegador del visitante reintenta, se reconecta, y el `DROP
 DATABASE` falla. En un demo con pestañas abiertas eso no es raro, es lo normal.
@@ -146,12 +148,16 @@ correcto es revocar, terminar, borrar.
 
 ### M-2 — El plazo de vida y los límites de abuso no tienen números
 
+> **ATENDIDO** en `docs/rfcdemo/RFC-10`.
+
 El RFC habla de "credenciales temporales" y de "cuántos inquilinos por origen y
 por unidad de tiempo", y el documento de épica no define ninguno de los dos. Sin
 un número, el lote F no se puede implementar ni revisar. Y el plazo determina
 cuántas bases coexisten, que es el límite operativo real del diseño.
 
 ### M-3 — La entrega de credenciales no está diseñada, y es un punto de falla
+
+> **ATENDIDO** en `docs/rfcdemo/RFC-11`.
 
 El flujo dice "el visitante recibe su acceso". Si es por correo y el correo
 falla o cae en spam, el inquilino queda aprovisionado y ocupado, y el visitante
@@ -162,12 +168,16 @@ inquilino si nadie entra nunca.
 
 ### M-4 — El padrón del operador es una frase, no un contrato
 
+> **ATENDIDO** en `docs/rfcdemo/RFC-12`.
+
 "El operador ve el padrón de inquilinos, no el contenido de ninguno" aparece en
 el RFC y no se vuelve a mencionar. No hay definición de dónde vive esa pantalla,
 con qué autenticación, ni cómo se garantiza técnicamente que no pueda abrir el
 contenido de un inquilino.
 
 ### M-5 — Nada verifica la regla de oro 2
+
+> **ATENDIDO** en `docs/rfcdemo/RFC-04`.
 
 "La aplicación jamás abre una conexión contra la plantilla" es la regla de la que
 depende que las altas funcionen, y es la única sin mecanismo que la haga cumplir.
@@ -181,6 +191,8 @@ conexión configurada.
 
 ### Mn-1 — Sobra `->domain()` en el panel
 
+> **ATENDIDO** en `docs/rfcdemo/RFC-06`.
+
 La sección 8.1 propone montar el panel con `->domain()`. **No hace falta.** Las
 rutas que no declaran dominio matchean cualquier host, y el middleware ya
 resuelve el inquilino leyendo el `Host`. Sólo las rutas del registro necesitan
@@ -192,10 +204,14 @@ en toda la generación de URL de Filament, que después hay que resolver con
 
 ### Mn-2 — La sal de `origen_ip_hash` no tiene dueño
 
+> **ATENDIDO** en `docs/rfcdemo/RFC-10`.
+
 Si la sal rota, los límites por origen se pierden en silencio. Falta decir dónde
 vive y que no rota.
 
 ### Mn-3 — `template_version` se guarda y nadie la usa
+
+> **ATENDIDO** en `docs/rfcdemo/RFC-12`.
 
 Se anota en la fila del inquilino "para diagnosticar", pero ningún proceso la
 lee. O se define para qué sirve, o sobra.
