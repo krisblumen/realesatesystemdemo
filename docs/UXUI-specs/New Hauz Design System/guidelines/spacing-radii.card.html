@@ -1,0 +1,25 @@
+<!-- @dsCard group="Spacing" viewport="700x160" name="Corner Radii" subtitle="Buttons 12px · Cards 16px · pill" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 24px; background: var(--surface-card); font-family: var(--font-body); }
+  .row { display: flex; gap: 18px; align-items: flex-end; }
+  .col { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .box { width: 92px; height: 72px; background: var(--nh-navy-50); border: 1.5px solid var(--nh-navy-100); }
+  .t { font-size: 12px; color: var(--text-muted); }
+  .t b { color: var(--text-strong); font-family: var(--font-display); }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="col"><div class="box" style="border-radius:8px"></div><div class="t"><b>sm</b> · 8px</div></div>
+    <div class="col"><div class="box" style="border-radius:12px"></div><div class="t"><b>md</b> · 12px · botón</div></div>
+    <div class="col"><div class="box" style="border-radius:16px"></div><div class="t"><b>lg</b> · 16px · card</div></div>
+    <div class="col"><div class="box" style="border-radius:24px"></div><div class="t"><b>xl</b> · 24px</div></div>
+    <div class="col"><div class="box" style="border-radius:999px"></div><div class="t"><b>pill</b> · tag</div></div>
+  </div>
+</body>
+</html>

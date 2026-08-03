@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NewHauz Admin — Login</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  :root{
+    --slate:#1E293B;
+    --slate-hover:#0F172A;
+    --brand-navy:#091A5B;
+    --brand-orange:#F6A300;
+    --rad-card:16px;
+    --rad-ctrl:12px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--font-body);background:#e9e9ec;}
+
+  /* ---- canvas shell (scrolls; never center an overflowing row) ---- */
+  .canvas{
+    width:max-content;min-width:100%;min-height:100vh;
+    padding:48px;box-sizing:border-box;
+    background:#e9e9ec;
+  }
+  .canvas-head{margin:0 4px 28px;}
+  .canvas-head h1{font-family:var(--font-display);font-weight:700;font-size:24px;color:#111;margin:0;letter-spacing:-.01em;}
+  .canvas-head p{font-family:var(--font-body);font-size:14px;color:#5B5B5B;margin:6px 0 0;}
+
+  .group-label{font-family:var(--font-display);font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5B5B5B;margin:34px 4px 16px;}
+  .row{display:flex;gap:28px;align-items:flex-start;}
+
+  .frame{flex:none;}
+  .frame-cap{font-family:var(--font-display);font-weight:600;font-size:12.5px;color:#475569;margin:0 0 10px 2px;display:flex;align-items:center;gap:8px;}
+  .frame-cap .num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:6px;background:var(--slate);color:#fff;font-size:11px;font-weight:700;}
+  .frame-card{width:440px;height:600px;border-radius:18px;overflow:hidden;box-shadow:0 12px 40px rgba(15,23,42,.14);border:1px solid rgba(0,0,0,.05);}
+
+  /* ---- login screen (the actual mockup) ---- */
+  .screen{position:relative;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px;}
+  .screen.light{background:radial-gradient(circle at 50% 28%, rgba(9,26,91,.09), transparent 58%), linear-gradient(160deg,#F7F7F7 0%,#EAEAEA 100%);}
+  .screen.dark{background:radial-gradient(circle at 50% 28%, rgba(246,163,0,.12), transparent 56%), linear-gradient(160deg,#111111 0%,#2D2D2D 100%);}
+
+  .logo{height:40px;margin-bottom:-20px;position:relative;z-index:2;filter:drop-shadow(0 6px 14px rgba(0,0,0,.12));}
+
+  .card{
+    position:relative;width:360px;padding:38px 34px 32px;border-radius:var(--rad-card);
+    backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
+  }
+  .light .card{background:rgba(255,255,255,.66);border:1px solid rgba(255,255,255,.75);box-shadow:0 18px 50px rgba(15,23,42,.16), inset 0 1px 0 rgba(255,255,255,.7);}
+  .dark .card{background:rgba(28,30,36,.55);border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 50px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08);}
+
+  .card h2{font-family:var(--font-display);font-weight:600;font-size:21px;margin:14px 0 4px;letter-spacing:-.01em;}
+  .light .card h2{color:#1E293B;}
+  .dark .card h2{color:#F8FAFC;}
+  .card .sub{font-family:var(--font-body);font-size:13.5px;margin:0 0 24px;}
+  .light .card .sub{color:#64748B;}
+  .dark .card .sub{color:#94A3B8;}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-family:var(--font-body);font-weight:500;font-size:12.5px;margin-bottom:7px;}
+  .light .field label{color:#475569;}
+  .dark .field label{color:#CBD5E1;}
+
+  .control{position:relative;}
+  .control input{
+    width:100%;height:52px;border-radius:var(--rad-ctrl);padding:0 16px;font-family:var(--font-body);font-size:14.5px;
+    outline:none;transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
+  }
+  .control input::placeholder{color:#94A3B8;}
+  .light .control input{background:#fff;border:1.5px solid #E2E8F0;color:#1E293B;}
+  .dark .control input{background:rgba(17,17,20,.5);border:1.5px solid rgba(255,255,255,.14);color:#F1F5F9;}
+  .control.has-eye input{padding-right:46px;}
+
+  .eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:6px;display:flex;color:#94A3B8;}
+  .eye:hover{color:#64748B;}
+
+  /* focus state */
+  .control input:focus,
+  .control.focus input{border-color:var(--brand-orange);box-shadow:0 0 0 3px rgba(246,163,0,.22);}
+
+  /* error state */
+  .field.error input{border-color:#DC2626;background:rgba(220,38,38,.04);}
+  .field.error input:focus{box-shadow:0 0 0 3px rgba(220,38,38,.18);}
+
+  .meta{display:flex;align-items:center;justify-content:space-between;margin:4px 0 22px;}
+  .remember{display:flex;align-items:center;gap:8px;font-family:var(--font-body);font-size:13px;cursor:pointer;}
+  .light .remember{color:#475569;}
+  .dark .remember{color:#CBD5E1;}
+  .remember input{width:16px;height:16px;accent-color:var(--slate);}
+  .dark .remember input{accent-color:var(--brand-orange);}
+  .forgot{font-family:var(--font-body);font-size:13px;text-decoration:none;transition:color .2s ease;}
+  .light .forgot{color:#64748B;}
+  .dark .forgot{color:#94A3B8;}
+  .forgot:hover{color:var(--brand-navy);}
+  .dark .forgot:hover{color:var(--brand-orange);}
+
+  .btn{
+    width:100%;height:52px;border:none;border-radius:var(--rad-ctrl);background:var(--slate);color:#fff;
+    font-family:var(--font-display);font-weight:600;font-size:15px;letter-spacing:.01em;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    transition:background .2s ease, transform .2s ease, box-shadow .2s ease;
+  }
+  .btn:hover{background:var(--slate-hover);transform:translateY(-1px);box-shadow:0 10px 22px rgba(15,23,42,.22);}
+  .dark .btn{background:#334155;}
+  .dark .btn:hover{background:#1E293B;}
+  .btn[disabled]{cursor:default;opacity:.92;transform:none;box-shadow:none;}
+
+  .spinner{width:17px;height:17px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* alert banners */
+  .alert{display:flex;gap:10px;align-items:flex-start;border-radius:12px;padding:12px 14px;margin-bottom:20px;font-family:var(--font-body);font-size:13px;line-height:1.45;}
+  .alert svg{flex-shrink:0;margin-top:1px;}
+  .alert-error{background:rgba(220,38,38,.09);border:1px solid rgba(220,38,38,.28);color:#B91C1C;}
+  .alert-suspend{background:rgba(246,163,0,.12);border:1px solid rgba(246,163,0,.42);color:#92400E;}
+  .dark .alert-error{background:rgba(220,38,38,.16);border-color:rgba(220,38,38,.4);color:#FCA5A5;}
+  .dark .alert-suspend{background:rgba(246,163,0,.16);border-color:rgba(246,163,0,.5);color:#FCD34D;}
+
+  .foot{margin-top:22px;font-family:var(--font-body);font-size:12px;text-align:center;position:relative;z-index:2;}
+  .light .foot{color:#94A3B8;}
+  .dark .foot{color:#64748B;}
+  .foot b{font-weight:600;color:var(--brand-navy);}
+  .dark .foot b{color:#7C9BE8;}
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="canvas-head">
+    <h1>NewHauz Admin System — Iniciar Sesión</h1>
+    <p>Panel interno · Laravel 13 + Filament v3 · glass minimal, slate sobrio, naranja sólo en foco. Logo flota sobre la tarjeta glass.</p>
+  </div>
+
+  <div class="group-label">Modo Claro</div>
+  <div class="row" id="rowLight"></div>
+
+  <div class="group-label">Modo Oscuro</div>
+  <div class="row" id="rowDark"></div>
+</div>
+
+<script>
+const EYE = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_OFF = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.2A9.5 9.5 0 0 1 12 4c6.5 0 10 7 10 7a13.2 13.2 0 0 1-2.2 3M6.6 6.6A13.3 13.3 0 0 0 2 11s3.5 7 10 7a9.3 9.3 0 0 0 4.6-1.1"/><path d="M14.1 14.1A3 3 0 0 1 9.9 9.9"/><line x1="2" y1="2" x2="22" y2="22"/></svg>';
+const ALERT = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.3 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+
+function screen(o){
+  const dark = o.mode === 'dark';
+  const logo = dark ? '../../assets/logos/newhauz-logo-on-dark.png' : '../../assets/logos/newhauz-logo-color.png';
+  const emailErr = o.error ? ' error' : '';
+  const passErr = o.error ? ' error' : '';
+  const emailVal = (o.error||o.suspended||o.loading) ? 'admin@newhauz.mx' : '';
+  const passDots = (o.error||o.loading) ? '••••••••' : '';
+
+  let banner = '';
+  if(o.error) banner = `<div class="alert alert-error">${ALERT}<span><b>Credenciales incorrectas.</b> Verifica tu correo y contraseña e inténtalo de nuevo.</span></div>`;
+  if(o.suspended) banner = `<div class="alert alert-suspend">${ALERT}<span><b>Tu cuenta ha sido suspendida.</b> Contacta al administrador del sistema.</span></div>`;
+
+  const btn = o.loading
+    ? `<button class="btn" disabled><span class="spinner"></span>Entrando…</button>`
+    : `<button class="btn">Entrar</button>`;
+
+  return `
+  <div class="screen ${dark?'dark':'light'}">
+    <img class="logo" src="${logo}" alt="New Hauz">
+    <div class="card">
+      <h2>Iniciar sesión</h2>
+      <p class="sub">Accede a tu panel de administración</p>
+      ${banner}
+      <div class="field${emailErr}">
+        <label>Correo electrónico</label>
+        <div class="control"><input type="email" value="${emailVal}" placeholder="nombre@newhauz.mx" ${o.suspended?'':''}></div>
+      </div>
+      <div class="field${passErr}">
+        <label>Contraseña</label>
+        <div class="control has-eye${o.focus?' focus':''}">
+          <input type="password" value="${passDots}" placeholder="••••••••">
+          <button class="eye" type="button">${EYE}</button>
+        </div>
+      </div>
+      <div class="meta">
+        <label class="remember"><input type="checkbox"> Recordarme</label>
+        <a class="forgot" href="#">¿Olvidaste tu contraseña?</a>
+      </div>
+      ${btn}
+    </div>
+    <div class="foot">NewHauz Admin System © 2026 <b>By GESIF</b></div>
+  </div>`;
+}
+
+function frame(num, cap, o){
+  return `<div class="frame">
+    <div class="frame-cap"><span class="num">${num}</span>${cap}</div>
+    <div class="frame-card">${screen(o)}</div>
+  </div>`;
+}
+
+document.getElementById('rowLight').innerHTML =
+  frame(1,'Por defecto',{mode:'light'}) +
+  frame(2,'Input con foco (anillo naranja)',{mode:'light',focus:true}) +
+  frame(3,'Error de credenciales',{mode:'light',error:true}) +
+  frame(4,'Cuenta suspendida',{mode:'light',suspended:true}) +
+  frame(5,'Botón cargando',{mode:'light',loading:true});
+
+document.getElementById('rowDark').innerHTML =
+  frame(6,'Por defecto (oscuro)',{mode:'dark'}) +
+  frame(7,'Foco + error (oscuro)',{mode:'dark',focus:true,error:true});
+
+/* interactivity: password show/hide + real focus rings */
+document.querySelectorAll('.eye').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const inp=b.parentElement.querySelector('input');
+    if(inp.type==='password'){inp.type='text';b.innerHTML=EYE_OFF;}
+    else{inp.type='password';b.innerHTML=EYE;}
+  });
+});
+</script>
+</body>
+</html>

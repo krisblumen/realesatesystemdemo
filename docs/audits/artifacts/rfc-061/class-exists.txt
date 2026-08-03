@@ -1,0 +1,3 @@
+App\Filament\Pages\AgentDashboard:true
+App\Filament\Widgets\AgentZonesWidget:true
+App\Filament\Widgets\ZonesOverviewWidget:true

@@ -1,0 +1,26 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Conversion / CTA" subtitle="Orange CTA, hover state, text-on-orange" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 20px; background: var(--surface-card); font-family: var(--font-body); }
+  .row { display: flex; gap: 14px; align-items: stretch; }
+  .sw { flex: 1; border-radius: var(--radius-md); padding: 14px; color: #fff; display: flex; flex-direction: column; justify-content: space-between; min-height: 88px; }
+  .name { font-family: var(--font-display); font-weight: 700; font-size: 13px; }
+  .hex { font-size: 12px; opacity: .85; letter-spacing: 0.02em; text-transform: uppercase; }
+  .btn { align-self: flex-start; height: 44px; padding: 0 22px; border-radius: var(--radius-md); border: none; background: var(--cta-bg); color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: .04em; display: inline-flex; align-items: center; }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="sw" style="background:#F6A300"><div class="name">CTA Principal</div><div class="hex">#F6A300</div></div>
+    <div class="sw" style="background:#D98C00"><div class="name">CTA Hover</div><div class="hex">#D98C00</div></div>
+    <div class="sw" style="background:var(--surface-muted);color:var(--text-body);align-items:flex-start;justify-content:center;gap:10px">
+      <button class="btn">Ver Propiedades</button>
+      <div class="hex" style="opacity:.7">Texto CTA · #FFFFFF</div>
+    </div>
+  </div>
+</body>
+</html>

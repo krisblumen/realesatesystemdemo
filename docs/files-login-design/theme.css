@@ -1,0 +1,108 @@
+/* ============================================================
+   New Hauz — Admin Theme (Filament v3)
+   Portado del design system de Claude Design (login.html + tokens).
+   Tono sobrio: gris/blanco dominante; navy y naranja solo como acentos.
+
+   IMPORTANTE: este archivo reemplaza el contenido que genera
+   `php artisan make:filament-theme`. Conserva las DOS primeras líneas
+   (@import del vendor y @config) si tu versión las genera distintas.
+   ============================================================ */
+
+@import '/vendor/filament/filament/resources/css/theme.css';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700;800&display=swap');
+
+@config 'tailwind.config.js';
+
+:root {
+    --nh-navy:   #091A5B;
+    --nh-orange: #F6A300;
+    --nh-slate:  #1E293B;
+}
+
+/* ====== Tipografía: Montserrat en títulos, Inter en cuerpo (->font('Inter')) ====== */
+h1, h2, h3, h4,
+.fi-header-heading,
+.fi-section-header-heading,
+.fi-modal-heading,
+.fi-simple-header-heading {
+    font-family: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.01em;
+}
+
+/* ====== Fondo de la página de login (simple layout) ====== */
+.fi-simple-layout {
+    background:
+        radial-gradient(circle at 50% 28%, rgba(9, 26, 91, .09), transparent 58%),
+        linear-gradient(160deg, #F7F7F7 0%, #EAEAEA 100%);
+}
+.dark .fi-simple-layout {
+    background:
+        radial-gradient(circle at 50% 28%, rgba(246, 163, 0, .12), transparent 56%),
+        linear-gradient(160deg, #111111 0%, #2D2D2D 100%);
+}
+
+/* ====== Tarjeta glass estilo iOS 18 ====== */
+.fi-simple-main {
+    max-width: 23rem;                 /* ~360px, como el mockup (responsive) */
+    border-radius: 16px;
+    background-color: rgba(255, 255, 255, .66);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, .75);
+    box-shadow: 0 18px 50px rgba(15, 23, 42, .16), inset 0 1px 0 rgba(255, 255, 255, .7);
+}
+.dark .fi-simple-main {
+    background-color: rgba(28, 30, 36, .55);
+    border-color: rgba(255, 255, 255, .12);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+
+/* ====== Logo pequeño flotando sobre la tarjeta ======
+   El solape (margin-bottom negativo) imita el mockup. Si tu versión de
+   Filament coloca el logo dentro del card, ajusta o elimina el margen. */
+.fi-simple-layout .fi-logo {
+    height: 2.5rem;                   /* ~40px */
+    margin-bottom: -1.25rem;
+    position: relative;
+    z-index: 10;
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .12));
+}
+
+/* ====== Inputs: radio 12px + foco naranja (único acento naranja en reposo) ====== */
+.fi-input-wrp {
+    border-radius: 12px;
+}
+.fi-input-wrp:focus-within {
+    box-shadow: 0 0 0 3px rgba(246, 163, 0, .22);
+    border-color: var(--nh-orange);
+}
+
+/* ====== Botón primario (slate sobrio) + hover sutil 200ms ====== */
+.fi-btn {
+    border-radius: 12px;
+    transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+.fi-btn:hover {
+    transform: translateY(-1px);
+}
+
+/* ====== Pie de página debajo de la tarjeta ====== */
+.nh-auth-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    font-size: 12px;
+    color: #94A3B8;
+}
+.nh-auth-footer b {
+    font-weight: 600;
+    color: var(--nh-navy);
+}
+.dark .nh-auth-footer b {
+    color: #7C9BE8;
+}
+
+/* ====== Elevación suave de secciones/tarjetas internas ====== */
+.fi-section {
+    transition: box-shadow .2s ease;
+}

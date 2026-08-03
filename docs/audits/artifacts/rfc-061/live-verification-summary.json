@@ -1,0 +1,43 @@
+{
+  "agent_redirect_zones": {
+    "url": "http://127.0.0.1:8001/admin/mi-zona",
+    "expected": "/admin/mi-zona",
+    "result": "passed",
+    "evidence": ["agent-redirect-zones.json", "agent-redirect-zones.png"],
+    "dom_excerpt": "Mi Zona / Mis zonas asignadas / Zona Norte Audit — Querétaro / Zona Sur Audit — Corregidora"
+  },
+  "agent_empty_state": {
+    "url": "http://127.0.0.1:8001/admin/mi-zona",
+    "expected": "empty-state message",
+    "result": "passed",
+    "evidence": ["agent-empty-zones.json", "agent-empty-zones.png"],
+    "dom_excerpt": "Aún no tienes zonas asignadas. Contacta al administrador."
+  },
+  "owner_dashboard": {
+    "url": "http://127.0.0.1:8001/admin",
+    "expected": "ZonesOverviewWidget visible",
+    "result": "passed",
+    "evidence": ["owner-dashboard.json", "owner-dashboard.png"],
+    "dom_excerpt": "Zonas totales 3 / Zonas activas 2 / Agentes asignados 2"
+  },
+  "admin_dashboard": {
+    "url": "http://127.0.0.1:8001/admin",
+    "expected": "ZonesOverviewWidget visible",
+    "result": "passed",
+    "evidence": ["admin-dashboard.json", "admin-dashboard.png", "admin-check.log"],
+    "dom_excerpt": "Zonas totales 3 / Zonas activas 2 / Agentes asignados 2"
+  },
+  "owner_direct_agent_dashboard": {
+    "url": "http://127.0.0.1:8001/admin/mi-zona",
+    "expected": "403 Forbidden",
+    "result": "passed",
+    "evidence": ["owner-direct-agent-dashboard.json", "owner-direct-agent-dashboard.png", "direct-check.log"]
+  },
+  "admin_direct_agent_dashboard": {
+    "url": "http://127.0.0.1:8001/admin/mi-zona",
+    "expected": "403 Forbidden",
+    "result": "passed",
+    "evidence": ["admin-direct-agent-dashboard.json", "admin-direct-agent-dashboard.png", "direct-check.log"]
+  },
+  "note": "browser-results.json contains an intermediate throttled attempt for admin; final passing admin evidence is admin-dashboard.json and admin-check.log after cache/rate-limit clear."
+}

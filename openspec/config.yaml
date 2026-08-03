@@ -1,0 +1,67 @@
+schema: spec-driven
+version: "1.0"
+project: newhauz
+initialized: 2026-06-22
+
+context: |
+  Stack: Laravel 13 / PHP 8.3+, Filament 3.x admin panel, Vite 8, Tailwind CSS v4, vanilla JS
+  Database: PostgreSQL + PostGIS via clickbar/laravel-magellan ^2.2
+  Testing: PHPUnit 12, test DB = pgsql inmo_test (NOT SQLite — PostGIS-capable)
+  Static analysis: Larastan level 5 (larastan/larastan ^3.10)
+  Style: PSR-12, Laravel Pint (4-space indent)
+  Architecture: Laravel MVC + Filament Resources + Service layer (app/Services/)
+  Domain: Real estate — properties, zones (polygons), geographic catalog (Country/State/Municipality)
+  Permissions: spatie/laravel-permission ^8.0
+  Media: spatie/laravel-medialibrary ^11.23
+  Git: develop → feature/rfc-NNN-name; PRs target develop; conventional commits
+
+testing:
+  strict_tdd: true
+  test_command: "composer test"
+  alt_command: "php artisan test"
+  framework: PHPUnit 12
+  db_connection: pgsql
+  db_database: inmo_test
+  layers:
+    unit: true
+    integration: true
+    e2e: false
+  coverage:
+    available: false
+    note: "No --coverage flag or coverage driver configured in phpunit.xml"
+  quality:
+    linter: "./vendor/bin/pint"
+    type_checker: "./vendor/bin/phpstan analyse"
+    formatter: "./vendor/bin/pint"
+  constraints:
+    - "PostGIS geometry functions require live PostgreSQL + inmo_test DB — not runnable in pure in-memory mode"
+    - "No Dusk/E2E suite detected"
+    - "No JS test runner detected (Vitest/Jest)"
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Flag any change touching PostGIS geometry as high-risk
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+  design:
+    - Include sequence diagrams for complex flows
+    - Document architecture decisions with rationale
+    - Flag PostGIS / Magellan geometry constraints
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+  apply:
+    - Follow existing code patterns (Filament Resources, Service layer)
+    - Run Pint before committing PHP changes
+    tdd: true
+    test_command: "composer test"
+  verify:
+    test_command: "composer test"
+    build_command: "npm run build"
+    coverage_threshold: 0
+    static_analysis: "./vendor/bin/phpstan analyse"
+  archive:
+    - Warn before merging destructive deltas
+    - Verify Pint and PHPStan pass before archiving

@@ -1,0 +1,11 @@
+app/Filament/Pages/AgentDashboard.php
+app/Filament/Pages/Auth/Login.php
+app/Filament/Widgets/AgentZonesWidget.php
+app/Filament/Widgets/ZonesOverviewWidget.php
+docs/rfc/RFC-061-zonas-dashboard.md
+public/css/filament/admin/theme.css
+resources/views/filament/pages/agent-dashboard.blade.php
+resources/views/filament/widgets/agent-zones.blade.php
+tests/Feature/Auth/AdminLoginTest.php
+tests/Feature/Dashboard/AgentDashboardTest.php
+tests/Feature/Dashboard/ZonesWidgetsTest.php

@@ -1,0 +1,220 @@
+/* Inter y Montserrat visten el panel. Las otras cuatro son SÓLO para la vista
+   previa del tema: sin ellas el preview mostraría Caveat dibujada en Montserrat,
+   y una vista previa que miente es peor que no tenerla. Arial y Georgia no hacen
+   falta acá — ya están en el sistema, que es toda su gracia.
+
+   Si se agrega una familia a ThemeContract::FONTS hay que sumarla también acá y
+   correr `npm run build:filament`. El test lo verifica. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700;800&family=Playfair+Display:wght@400;700&family=Lora:wght@400;700&family=Space+Grotesk:wght@400;700&family=Caveat:wght@400;700&display=swap');
+@import '../../../../vendor/filament/filament/resources/css/base.css';
+@config './tailwind.config.js';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@tailwind variants;
+
+:root { --nh-navy:#091A5B; --nh-orange:#F6A300; --nh-slate:#1E293B; }
+
+h1,h2,h3,h4,
+.fi-header-heading,.fi-section-header-heading,.fi-modal-heading,.fi-simple-header-heading{
+  font-family:'Montserrat',ui-sans-serif,system-ui,sans-serif; letter-spacing:-0.01em;
+}
+.fi-simple-layout{
+  background:radial-gradient(circle at 50% 28%,rgba(9,26,91,.09),transparent 58%),
+             linear-gradient(160deg,#F7F7F7 0%,#EAEAEA 100%);
+}
+.dark .fi-simple-layout{
+  background:radial-gradient(circle at 50% 28%,rgba(246,163,0,.12),transparent 56%),
+             linear-gradient(160deg,#111111 0%,#2D2D2D 100%);
+}
+.fi-simple-main{
+  position:relative;
+  max-width:23rem; border-radius:16px;
+  background-color:rgba(255,255,255,.66);
+  backdrop-filter:blur(20px) saturate(180%); -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.75);
+  box-shadow:0 18px 50px rgba(15,23,42,.16), inset 0 1px 0 rgba(255,255,255,.7);
+}
+.dark .fi-simple-main{
+  background-color:rgba(28,30,36,.55); border-color:rgba(255,255,255,.12);
+  box-shadow:0 18px 50px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.fi-simple-layout .fi-logo{
+  position:absolute; left:50%; top:0;
+  transform:translate(-50%, calc(-100% - 0.75rem));
+  margin:0; z-index:20; width:auto; height:7rem !important;
+  filter:drop-shadow(0 14px 28px rgba(0,0,0,.22));
+}
+.fi-input-wrp{ border-radius:12px; }
+.fi-input-wrp:focus-within{ box-shadow:0 0 0 3px rgba(246,163,0,.22); border-color:var(--nh-orange); }
+.fi-btn{ border-radius:12px; transition:transform .2s ease, box-shadow .2s ease, background-color .2s ease; }
+.fi-btn:hover{ transform:translateY(-1px); }
+.fi-section{ transition:box-shadow .2s ease; }
+
+.nh-auth-footer{ margin-top:1.5rem; text-align:center; font-family:'Inter',ui-sans-serif,system-ui,sans-serif; font-size:12px; color:#94A3B8; }
+.nh-auth-footer b{ font-weight:600; color:var(--nh-navy); }
+.dark .nh-auth-footer b{ color:#7C9BE8; }
+
+.dark .fi-fo-field-wrp-error-message{ color:#FCA5A5; }
+
+/* Inmuebles, Propietarios, Leads, Proyectos, Contratos, Zonas, y los grupos
+   Lonas (lotes, solicitudes, evidencias) y Configuracion (caracteristicas,
+   tipos de proyecto, tipos de servicio): tabla en desktop, tarjetas en movil
+   (< lg). Scoped por clase fi-resource-* de cada uno (ver selector :is()). */
+@media (max-width: 1023px){
+  :is(.fi-resource-properties,.fi-resource-property-owners,.fi-resource-leads,.fi-resource-projects,.fi-resource-contrato-intermediacions,.fi-resource-zones,.fi-resource-lona-batches,.fi-resource-lona-requests,.fi-resource-lona-evidences,.fi-resource-features,.fi-resource-project-types,.fi-resource-service-types,.fi-resource-users) .fi-ta-table thead{ display:none; }
+  :is(.fi-resource-properties,.fi-resource-property-owners,.fi-resource-leads,.fi-resource-projects,.fi-resource-contrato-intermediacions,.fi-resource-zones,.fi-resource-lona-batches,.fi-resource-lona-requests,.fi-resource-lona-evidences,.fi-resource-features,.fi-resource-project-types,.fi-resource-service-types,.fi-resource-users) .fi-ta-table,
+  :is(.fi-resource-properties,.fi-resource-property-owners,.fi-resource-leads,.fi-resource-projects,.fi-resource-contrato-intermediacions,.fi-resource-zones,.fi-resource-lona-batches,.fi-resource-lona-requests,.fi-resource-lona-evidences,.fi-resource-features,.fi-resource-project-types,.fi-resource-service-types,.fi-resource-users) .fi-ta-table tbody{ display:block; width:100%; }
+  :is(.fi-resource-properties,.fi-resource-property-owners,.fi-resource-leads,.fi-resource-projects,.fi-resource-contrato-intermediacions,.fi-resource-zones,.fi-resource-lona-batches,.fi-resource-lona-requests,.fi-resource-lona-evidences,.fi-resource-features,.fi-resource-project-types,.fi-resource-service-types,.fi-resource-users) .fi-ta-table tbody .fi-ta-row{
+    display:flex; flex-direction:column; align-items:flex-start; gap:.3rem;
+    padding:.85rem 1rem; margin-bottom:.75rem;
+    border:1px solid rgba(var(--gray-200),1); border-radius:14px;
+    background:rgba(255,255,255,.85);
+    box-shadow:0 4px 14px rgba(15,23,42,.06);
+  }
+  .dark :is(.fi-resource-properties,.fi-resource-property-owners,.fi-resource-leads,.fi-resource-projects,.fi-resource-contrato-intermediacions,.fi-resource-zones,.fi-resource-lona-batches,.fi-resource-lona-requests,.fi-resource-lona-evidences,.fi-resource-features,.fi-resource-project-types,.fi-resource-service-types,.fi-resource-users) .fi-ta-table tbody .fi-ta-row{
+    border-color:rgba(255,255,255,.10); background:rgba(28,30,36,.55);
+    box-shadow:0 4px 14px rgba(0,0,0,.35);
+  }
+  :is(.fi-resource-properties,.fi-resource-property-owners,.fi-resource-leads,.fi-resource-projects,.fi-resource-contrato-intermediacions,.fi-resource-zones,.fi-resource-lona-batches,.fi-resource-lona-requests,.fi-resource-lona-evidences,.fi-resource-features,.fi-resource-project-types,.fi-resource-service-types,.fi-resource-users) .fi-ta-table tbody .fi-ta-row .fi-ta-cell{
+    display:flex; width:100%; padding:0; min-height:0;
+  }
+  /* aplastar el padding vertical de los wrappers de celda (py-3/py-4)
+     sin tocar los badges, que usan py-1 */
+  :is(.fi-resource-properties,.fi-resource-property-owners,.fi-resource-leads,.fi-resource-projects,.fi-resource-contrato-intermediacions,.fi-resource-zones,.fi-resource-lona-batches,.fi-resource-lona-requests,.fi-resource-lona-evidences,.fi-resource-features,.fi-resource-project-types,.fi-resource-service-types,.fi-resource-users) .fi-ta-table tbody .fi-ta-row .fi-ta-cell .fi-ta-col-wrp{ min-height:0; width:100%; }
+  :is(.fi-resource-properties,.fi-resource-property-owners,.fi-resource-leads,.fi-resource-projects,.fi-resource-contrato-intermediacions,.fi-resource-zones,.fi-resource-lona-batches,.fi-resource-lona-requests,.fi-resource-lona-evidences,.fi-resource-features,.fi-resource-project-types,.fi-resource-service-types,.fi-resource-users) .fi-ta-table tbody .fi-ta-row .fi-ta-cell [class*="py-4"],
+  :is(.fi-resource-properties,.fi-resource-property-owners,.fi-resource-leads,.fi-resource-projects,.fi-resource-contrato-intermediacions,.fi-resource-zones,.fi-resource-lona-batches,.fi-resource-lona-requests,.fi-resource-lona-evidences,.fi-resource-features,.fi-resource-project-types,.fi-resource-service-types,.fi-resource-users) .fi-ta-table tbody .fi-ta-row .fi-ta-cell [class*="py-3"]{
+    padding-top:.1rem; padding-bottom:.1rem;
+  }
+  /* titulo destacado */
+  :is(.fi-resource-properties,.fi-resource-property-owners,.fi-resource-leads,.fi-resource-projects,.fi-resource-contrato-intermediacions,.fi-resource-zones,.fi-resource-lona-batches,.fi-resource-lona-requests,.fi-resource-lona-evidences,.fi-resource-features,.fi-resource-project-types,.fi-resource-service-types,.fi-resource-users) .fi-ta-table tbody .fi-ta-row .fi-ta-cell:nth-child(2) .fi-ta-text{
+    font-weight:600; font-size:.95rem;
+  }
+  /* la celda de acciones que ocupe todo el ancho y alinee a la izquierda */
+  :is(.fi-resource-properties,.fi-resource-property-owners,.fi-resource-leads,.fi-resource-projects,.fi-resource-contrato-intermediacions,.fi-resource-zones,.fi-resource-lona-batches,.fi-resource-lona-requests,.fi-resource-lona-evidences,.fi-resource-features,.fi-resource-project-types,.fi-resource-service-types,.fi-resource-users) .fi-ta-table tbody .fi-ta-row .fi-ta-actions{
+    width:100%; justify-content:flex-start; flex-wrap:wrap; gap:.25rem;
+    padding-top:.5rem; border-top:1px solid rgba(var(--gray-100),1);
+  }
+  .dark :is(.fi-resource-properties,.fi-resource-property-owners,.fi-resource-leads,.fi-resource-projects,.fi-resource-contrato-intermediacions,.fi-resource-zones,.fi-resource-lona-batches,.fi-resource-lona-requests,.fi-resource-lona-evidences,.fi-resource-features,.fi-resource-project-types,.fi-resource-service-types,.fi-resource-users) .fi-ta-table tbody .fi-ta-row .fi-ta-actions{
+    border-top-color:rgba(255,255,255,.08);
+  }
+}
+
+/* Notificacion de exito (guardado): vidrio verde translucido (glassmorphism),
+   texto e icono en blanco. Scoped a .fi-status-success para no tocar error/warning. */
+.fi-no-notification.fi-status-success{
+  background-color:rgba(31,138,76,.72) !important;
+  backdrop-filter:blur(14px) saturate(160%);
+  -webkit-backdrop-filter:blur(14px) saturate(160%);
+  --tw-ring-color:rgba(255,255,255,.35) !important;
+  box-shadow:0 12px 34px rgba(15,23,42,.22), inset 0 1px 0 rgba(255,255,255,.28) !important;
+}
+.dark .fi-no-notification.fi-status-success{
+  background-color:rgba(31,138,76,.62) !important;
+}
+.fi-no-notification.fi-status-success *{
+  color:#fff !important;
+}
+.fi-no-notification.fi-status-success svg{
+  color:#fff !important;
+}
+
+/* Sidebar (menu principal) en desktop: fondo un poco mas oscuro que el
+   contenido y acento blanco en la seccion seleccionada. */
+@media (min-width: 1024px){
+  .fi-sidebar{
+    background-color:#eff2fa !important;
+    border-right:1px solid rgba(15,23,42,.06);
+  }
+  .dark .fi-sidebar{
+    background-color:rgba(255,255,255,.035) !important;
+    border-right-color:rgba(255,255,255,.06);
+  }
+  .fi-sidebar-item.fi-sidebar-item-active > .fi-sidebar-item-button{
+    background-color:#ffffff !important;
+    box-shadow:0 1px 4px rgba(15,23,42,.12);
+  }
+  .dark .fi-sidebar-item.fi-sidebar-item-active > .fi-sidebar-item-button{
+    background-color:rgba(255,255,255,.14) !important;
+    box-shadow:none;
+  }
+}
+
+/* Badge de navegacion (ej. Leads sin asignar, mails nuevos) estilo iOS:
+   circulo rojo solido y numero blanco, en vez del pill suave por defecto
+   de Filament. Scoped a fi-sidebar-item-button, fi-topbar-mail-btn y
+   nh-mobile-leads-badge para no tocar badges de tablas/formularios. */
+.fi-sidebar-item-button .fi-badge,
+.fi-topbar-mail-btn .fi-badge,
+.nh-mobile-leads-badge{
+  background-color:#FF3B30 !important;
+  color:#fff !important;
+  border-radius:9999px;
+  box-shadow:none;
+  min-width:1.25rem;
+  height:1.25rem;
+  padding:0 .4rem;
+  font-weight:700;
+  font-size:.7rem;
+  line-height:1.25rem;
+}
+
+/* El indicador de leads pendientes vive en el sidebar, que en movil queda
+   oculto atras del boton de hamburguesa -- se replica ahi para que siga
+   visible sin tener que abrir el menu. */
+.nh-mobile-leads-badge{
+  position:absolute;
+  top:-.2rem;
+  right:-.2rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+}
+
+/* EXPERIMENTAL: galeria de fotos (Proyectos/Inmuebles) en 4 columnas en vez
+   de las 3 por defecto de Filament, para probar si el problema de recorte
+   se relaciona con cuantas filas hacen falta. Sacar si no ayuda. */
+@media (min-width: 1024px){
+  .filepond--root[data-style-panel-layout='grid'] .filepond--item{
+    width:calc(25% - 0.5rem) !important;
+  }
+}
+
+/* Leads nuevos (status sin cambios desde su creacion): fila resaltada para
+   que no se pierdan en listas largas. Con !important porque en movil la
+   fila se redibuja como tarjeta (ver regla .fi-resource-leads .fi-ta-row
+   mas arriba) y esa regla ya fija su propio background. */
+.nh-lead-row-new{
+  background-color:rgba(246,163,0,.10) !important;
+}
+.dark .nh-lead-row-new{
+  background-color:rgba(246,163,0,.16) !important;
+}
+
+/* Capturas de pantalla del manual de Ayuda (shortcode {{captura: ...}}).
+   Se enmarcan para que se distingan del fondo del articulo. */
+.nh-help-shot img{
+  display:block;
+  width:100%;
+  height:auto;
+  border:1px solid rgba(var(--gray-200),1);
+  border-radius:10px;
+  box-shadow:0 2px 10px rgba(15,23,42,.06);
+}
+.dark .nh-help-shot img{
+  border-color:rgba(255,255,255,.10);
+  box-shadow:0 2px 10px rgba(0,0,0,.35);
+}
+
+/* Sidebar (menu principal) en movil: fondo vidrio translucido (glassmorphism). */
+@media (max-width: 1023px){
+  .fi-sidebar{
+    background-color:rgba(255,255,255,.72) !important;
+    backdrop-filter:blur(18px) saturate(170%);
+    -webkit-backdrop-filter:blur(18px) saturate(170%);
+  }
+  .dark .fi-sidebar{
+    background-color:rgba(17,24,39,.70) !important;
+  }
+}

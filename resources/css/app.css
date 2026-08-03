@@ -1,0 +1,374 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views';
+
+/*
+ * New Hauz — Design tokens mapeados a Tailwind v4.
+ * Fuente: design-reference/_ds (Navy + Orange, Montserrat + Inter).
+ * Marca premium, corporativa, minimalista (inmobiliaria de lujo, Querétaro).
+ */
+/*
+ * Puente de tema runtime (Épica 12, §16.5).
+ *
+ * `@theme inline` hace que Tailwind genere utilities cuyo valor se resuelve en
+ * el navegador contra las `--nh-*` que el layout público inyecta en `:root`.
+ * Sin este puente, declarar las variables no cambiaría nada: los componentes
+ * seguirían resolviendo constantes compiladas.
+ *
+ * El fallback de cada var() reproduce el token actual, así un sitio sin tema
+ * configurado se ve exactamente igual que antes.
+ *
+ * Alcance de v1: solo roles de marca (primario, acento, sus colores de texto,
+ * fondo, texto, radios y las dos tipografías). Los tonos decorativos y de
+ * estado siguen fijos a propósito.
+ */
+@theme inline {
+    --color-brand-primary: var(--nh-primary, #091a5b);
+    --color-on-brand-primary: var(--nh-on-primary, #ffffff);
+    --color-brand-accent: var(--nh-accent, #f6a300);
+    --color-on-brand-accent: var(--nh-on-accent, #111111);
+    --color-site-background: var(--nh-bg, #f7f7f7);
+    --color-site-text: var(--nh-text, #111111);
+
+    --font-brand-heading: var(--nh-font-heading, 'Montserrat'), ui-sans-serif, system-ui, sans-serif;
+    --font-brand-body: var(--nh-font-body, 'Inter'), ui-sans-serif, system-ui, sans-serif;
+    /* El ANTETÍTULO tiene familia propia. Antes `.eyebrow` apuntaba a
+       `--font-display`, que es el token fijo del sitio y no el del tema: elegir
+       otra tipografía de títulos no lo tocaba, y el owner veía a medias el
+       cambio que había pedido. */
+    --font-brand-eyebrow: var(--nh-font-eyebrow, 'Montserrat'), ui-sans-serif, system-ui, sans-serif;
+
+    /* Acento sobre superficie primaria: degrada a on-primary si no es legible. */
+    --color-accent-on-brand-primary: var(--nh-accent-on-primary, #f6a300);
+
+    /*
+     * Color de marca como TINTA sobre el fondo base (títulos, eyebrows, nav
+     * activo, enlaces). Garantizado por el servidor: usa el color de marca si
+     * es legible sobre el fondo y, si no, degrada al color de texto. `primary`
+     * y `accent` siguen siendo superficies; estos son su rol de foreground.
+     */
+    --color-brand-primary-ink: var(--nh-primary-ink, #091a5b);
+    --color-brand-accent-ink: var(--nh-accent-ink, #c77e00);
+
+    /* Anillo de foco: garantizado >= 3:1 contra el fondo por el servidor. */
+    --color-brand-focus: var(--nh-focus, #f6a300);
+
+    /*
+     * Variantes de los dos colores de marca: dos más oscuras y dos más claras.
+     *
+     * Se DERIVAN con `color-mix` de la misma variable que el cliente configura,
+     * no son valores fijos. Así, cuando cambia su acento o su primario, las diez
+     * variantes se recalculan solas y ninguna queda fuera de su paleta — que es
+     * exactamente lo que se busca al no ofrecer un selector de color abierto.
+     *
+     * Mezclar con negro y blanco puros da una escala predecible y suficiente
+     * para un borde; se evitó a propósito una escala perceptual (OKLCH) porque
+     * pediría precalcular en el servidor y perdería el «sigue al tema».
+     */
+    --color-brand-primary-d2: color-mix(in srgb, var(--nh-primary, #091a5b) 55%, #000000);
+    --color-brand-primary-d1: color-mix(in srgb, var(--nh-primary, #091a5b) 78%, #000000);
+    --color-brand-primary-l1: color-mix(in srgb, var(--nh-primary, #091a5b) 55%, #ffffff);
+    --color-brand-primary-l2: color-mix(in srgb, var(--nh-primary, #091a5b) 25%, #ffffff);
+
+    --color-brand-accent-d2: color-mix(in srgb, var(--nh-accent, #f6a300) 55%, #000000);
+    --color-brand-accent-d1: color-mix(in srgb, var(--nh-accent, #f6a300) 78%, #000000);
+    --color-brand-accent-l1: color-mix(in srgb, var(--nh-accent, #f6a300) 55%, #ffffff);
+    --color-brand-accent-l2: color-mix(in srgb, var(--nh-accent, #f6a300) 25%, #ffffff);
+
+    --radius-brand-md: var(--nh-radius-md, 12px);
+    --radius-brand-lg: var(--nh-radius-lg, 16px);
+    --radius-brand-xl: var(--nh-radius-xl, 24px);
+}
+
+@theme {
+    /* ---- Tipografía ---- */
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+    --font-display: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+
+    /* ---- Marca: Navy ---- */
+    --color-navy: #091a5b;
+    --color-navy-50: #eef1f8;
+    --color-navy-100: #dee2f0;
+    --color-navy-500: #3b4da6;
+    --color-navy-600: #233488;
+    --color-navy-700: #14246e;
+    --color-navy-800: #091a5b;
+    --color-navy-900: #050f38;
+
+    /* ---- Marca: Orange (CTA / conversión) ---- */
+    --color-orange: #f6a300;
+    --color-orange-50: #fff7e8;
+    --color-orange-100: #fde9c9;
+    --color-orange-400: #ffb829;
+    --color-orange-500: #f6a300;
+    --color-orange-600: #c77e00;
+    --color-orange-hover: #d98c00;
+
+    /* ---- Neutros ---- */
+    --color-ink: #111111;
+    --color-graphite: #2d2d2d;
+    --color-stone: #5b5b5b;
+    --color-mist: #c9c9c9;
+    --color-cloud: #eaeaea;
+    --color-fog: #f2f2f2;
+    --color-canvas: #f7f7f7;
+
+    /**
+     * WhatsApp. Los ÚNICOS colores del sistema que NO se derivan del tema, y a
+     * propósito: no son un tono de la marca del cliente, son la firma de un
+     * canal ajeno. Que el verde sea siempre ese mismo verde es justamente lo que
+     * hace que se reconozca de un vistazo, así que dejarlo seguir al tema le
+     * quitaría lo único que aporta.
+     *
+     * Van en este bloque y no en el `@theme inline` de arriba porque ahí las
+     * variables se INLINEAN en las utilidades y no se emiten: `--shadow-whatsapp`
+     * necesita leerlas con `var()`, y allá habrían quedado indefinidas.
+     */
+    --color-whatsapp: #25d366;
+    --color-on-whatsapp: #ffffff;
+
+    /* ---- Estado ---- */
+    --color-success: #1f8a4c;
+    --color-warning: #b8860b;
+    --color-danger: #c0392b;
+
+    /* ---- Sombras premium (tinte navy) ---- */
+    --shadow-xs: 0 1px 2px rgba(9, 26, 91, 0.06);
+    --shadow-sm: 0 2px 8px rgba(9, 26, 91, 0.06);
+    --shadow-md: 0 8px 24px rgba(9, 26, 91, 0.08);
+    --shadow-lg: 0 16px 40px rgba(9, 26, 91, 0.12);
+    --shadow-xl: 0 28px 64px rgba(9, 26, 91, 0.16);
+    /*
+     * El resplandor del CTA principal. DOS capas: un halo sin desplazamiento
+     * que rodea al botón —el resplandor propiamente dicho— y una sombra suave
+     * hacia abajo que lo despega del fondo. Con una sola quedaba una sombra
+     * común, no un brillo.
+     *
+     * El color se DERIVA de `--nh-accent` en vez de ser un hexadecimal fijo:
+     * estaba clavado en el ámbar por defecto, así que un cliente con otro acento
+     * tenía botones que brillaban de un color que no era el suyo.
+     */
+    --shadow-cta:
+        0 0 24px color-mix(in srgb, var(--nh-accent, #f6a300) 38%, transparent),
+        0 8px 20px color-mix(in srgb, var(--nh-accent, #f6a300) 28%, transparent);
+
+    /* El mismo gesto para WhatsApp, con su verde: un botón que abre otro canal
+       no debería brillar del color de la marca del sitio. */
+    --shadow-whatsapp:
+        0 0 24px color-mix(in srgb, var(--color-whatsapp) 40%, transparent),
+        0 8px 20px color-mix(in srgb, var(--color-whatsapp) 30%, transparent);
+
+    /* ---- Radios ---- */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+
+    /* ---- Escala tipográfica (display=Montserrat, body=Inter) ---- */
+    --text-display-xl: 4rem; /* 64 hero */
+    --text-display-lg: 3rem; /* 48 */
+    --text-h1: 2.5rem; /* 40 */
+    --text-h2: 2rem; /* 32 */
+    --text-h3: 1.5rem; /* 24 */
+    --text-h4: 1.25rem; /* 20 */
+
+    /* ---- Layout ---- */
+    --container-content: 1200px;
+
+    /* ---- Easing ---- */
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Encabezados: Montserrat con tracking ajustado (per base.css del DS). */
+@layer base {
+    h1, h2, h3, h4, h5 {
+        font-family: var(--font-display);
+        color: var(--color-navy);
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+    }
+}
+
+/**
+ * Brillo de marca: un degradado radial en el color del acento, del 20% de alpha
+ * a 0%, que se apaga hacia el resto de la tarjeta.
+ *
+ * SU CENTRO NO ESTÁ EN LA ESQUINA sino metido un tercio hacia adentro (67% 33%).
+ * Naciendo exactamente en el vértice, la mitad del degradado caía fuera de la
+ * tarjeta y lo que se veía era apenas el borde de la mancha.
+ *
+ * Va en una capa aparte —un `<span>` absoluto dentro de la tarjeta— y no como
+ * otro fondo, porque la tarjeta ya usa `background-image` para su degradado de
+ * oscurecimiento y las dos se pisarían.
+ *
+ * Es una utilidad y no una clase arbitraria de Tailwind por legibilidad: el
+ * equivalente en línea sería un `bg-[radial-gradient(...)]` con `color-mix`
+ * anidado y guiones bajos donde van los espacios, ilegible en el blade. Acá,
+ * además, el color se lee de `--nh-accent` en runtime, así que sigue al tema del
+ * cliente sin recompilar.
+ *
+ * EL `@supports` NO ES DECORATIVO. Sin él, el compilador genera solo un
+ * respaldo para navegadores sin `color-mix` reemplazando la mezcla por su
+ * primer color — es decir, el acento a opacidad COMPLETA. Eso no es un brillo
+ * degradado: es una mancha sólida sobre la tarjeta, peor que no tener nada.
+ * Declarado adentro, el respaldo no se emite y esos navegadores simplemente ven
+ * la tarjeta sin brillo, que para una decoración es exactamente lo correcto.
+ */
+@utility brand-glow {
+    @supports (color: color-mix(in srgb, red, red)) {
+        background-image: radial-gradient(
+            ellipse 65% 110% at 67% 33%,
+            color-mix(in srgb, var(--nh-accent, #f6a300) 20%, transparent) 0%,
+            transparent 70%
+        );
+    }
+}
+
+/**
+ * El mismo brillo, un tono más claro, para las tarjetas cuyo fondo YA ES el
+ * acento. Ahí el brillo normal es acento sobre acento y no se ve: no es que
+ * quede sutil, es que directamente no está.
+ *
+ * El aclarado se hace con la misma mezcla que usan las variantes de la paleta,
+ * así que sigue siendo el acento del cliente y no un amarillo inventado.
+ */
+@utility brand-glow-light {
+    @supports (color: color-mix(in srgb, red, red)) {
+        background-image: radial-gradient(
+            ellipse 65% 110% at 67% 33%,
+            color-mix(in srgb, color-mix(in srgb, var(--nh-accent, #f6a300) 45%, #ffffff) 20%, transparent) 0%,
+            transparent 70%
+        );
+    }
+}
+
+/* ==========================================================================
+   Aliados — la tira de logotipos en bucle
+   ==========================================================================
+   Sin una línea de JavaScript: el sitio se sirve sin `unsafe-inline`, y un
+   carrusel con script sería lo único de la página que obligaría a relajar esa
+   política por un adorno.
+
+   La pista lleva la lista DOS VECES y se desplaza el ancho de UNA copia: al
+   terminar, la segunda está donde arrancó la primera y el corte no se ve. Nada
+   del contenido llega al CSS — la duración es fija, así que más aliados avanzan
+   más rápido, no más lento.
+
+   EL DESPLAZAMIENTO NO ES -50%, y la diferencia importa. Con N tarjetas por
+   copia, la pista mide 2N tarjetas y 2N-1 huecos, así que su mitad se queda
+   corta por medio hueco: una copia completa son N tarjetas y N huecos. Medido
+   con 8 aliados: la pista daba 3688 px, el -50% desplazaba 1844 y la vuelta
+   real eran 1856 — un salto de 12 px cada vuelta, chico pero visible. El medio
+   hueco se suma a mano.
+
+   Eso ata este valor al `gap-6` (1.5rem) de la vista: si cambia la separación,
+   acá va su mitad.
+
+   Se pausa al pasar el mouse: si no, leer un logo que se está yendo obliga a
+   perseguirlo.
+   ========================================================================== */
+@keyframes nh-partners-scroll {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(calc(-50% - 0.75rem));
+    }
+}
+
+.nh-partners-track {
+    animation: nh-partners-scroll 40s linear infinite;
+}
+
+.nh-partners-track:hover {
+    animation-play-state: paused;
+}
+
+/* Quien pide menos movimiento no debería perder contenido: la pista se detiene
+   y su contenedor pasa a poder desplazarse a mano (`motion-reduce:overflow-x-auto`
+   en la vista). Sin eso vería cinco logos y el resto sería inalcanzable. */
+@media (prefers-reduced-motion: reduce) {
+    .nh-partners-track {
+        animation: none;
+    }
+}
+
+/* Eyebrow / overline: etiqueta en mayúsculas con tracking (patrón de marca).
+
+   El peso sale de una variable y no de un número fijo porque es el DEFAULT del
+   sitio: lo configura el owner una vez y lo heredan los antetítulos de todas las
+   secciones. Una sección que quiera otro peso le pone encima su clase. */
+@utility eyebrow {
+    font-family: var(--font-brand-eyebrow);
+    font-size: 0.75rem;
+    font-weight: var(--nh-weight-eyebrow, 600);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* El peso HEREDADO del título.
+
+   Existe para poder decir «lo que diga la configuración del sitio» con una
+   clase, igual que `font-bold` dice 700: el título no tiene una utility propia
+   donde apoyarse, así que sin esto una sección que no elige peso tendría que no
+   llevar clase alguna.
+
+   El ANTETÍTULO no necesita su gemela: `eyebrow` ya lee la variable, y es la
+   misma utility que usan los antetítulos de las páginas que no pasan por el
+   CMS — una clase aparte los habría podido desincronizar. */
+@utility font-weight-heading {
+    font-weight: var(--nh-weight-heading, 700);
+}
+
+/* ==========================================================================
+   Hero — cross-fade del carousel (Épica 12.1 §10)
+   ==========================================================================
+   Todo estático: ni un valor del payload llega al CSS. El índice de cada slide
+   elige una clase `nh-hero-delay-N` de un set fijo (las slides están topeadas
+   en 6) y la cantidad elige la duración del ciclo. Nada se genera con datos, así
+   que la página funciona bajo una CSP sin `unsafe-inline`.
+
+   Cada slide es visible durante 1/n del ciclo y cruza con la siguiente: la que
+   sale se desvanece mientras la que entra aparece, sin un hueco donde se vea
+   solo el overlay. Slot fijo de 6s por slide. */
+
+.nh-hero-slide {
+    opacity: 0;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+/* Duración del ciclo = n × 6s, y ventana visible = 1/n con 3% de cruce. */
+.nh-hero-slides--2 .nh-hero-slide { animation-name: nh-hero-fade-2; animation-duration: 12s; }
+.nh-hero-slides--3 .nh-hero-slide { animation-name: nh-hero-fade-3; animation-duration: 18s; }
+.nh-hero-slides--4 .nh-hero-slide { animation-name: nh-hero-fade-4; animation-duration: 24s; }
+.nh-hero-slides--5 .nh-hero-slide { animation-name: nh-hero-fade-5; animation-duration: 30s; }
+.nh-hero-slides--6 .nh-hero-slide { animation-name: nh-hero-fade-6; animation-duration: 36s; }
+
+/* Una sola slide no rota: se queda fija y visible. */
+.nh-hero-slides--1 .nh-hero-slide { opacity: 1; animation: none; }
+
+@keyframes nh-hero-fade-2 { 0% { opacity: 0 } 3%, 50% { opacity: 1 } 53%, 100% { opacity: 0 } }
+@keyframes nh-hero-fade-3 { 0% { opacity: 0 } 3%, 33.33% { opacity: 1 } 36.33%, 100% { opacity: 0 } }
+@keyframes nh-hero-fade-4 { 0% { opacity: 0 } 3%, 25% { opacity: 1 } 28%, 100% { opacity: 0 } }
+@keyframes nh-hero-fade-5 { 0% { opacity: 0 } 2%, 20% { opacity: 1 } 23%, 100% { opacity: 0 } }
+@keyframes nh-hero-fade-6 { 0% { opacity: 0 } 2%, 16.66% { opacity: 1 } 19.66%, 100% { opacity: 0 } }
+
+/* Set FIJO de retardos: el índice elige, nunca se interpola un valor. */
+.nh-hero-delay-0 { animation-delay: 0s; }
+.nh-hero-delay-1 { animation-delay: 6s; }
+.nh-hero-delay-2 { animation-delay: 12s; }
+.nh-hero-delay-3 { animation-delay: 18s; }
+.nh-hero-delay-4 { animation-delay: 24s; }
+.nh-hero-delay-5 { animation-delay: 30s; }
+
+/* Pausa: por botón, hover o focus dentro del hero. */
+.nh-hero-slides.is-paused .nh-hero-slide { animation-play-state: paused; }
+
+/* Sin movimiento: primera slide estática, sin temporizador ni animación. */
+@media (prefers-reduced-motion: reduce) {
+    .nh-hero-slide { animation: none !important; opacity: 0; }
+    .nh-hero-slide.nh-hero-delay-0 { opacity: 1; }
+}

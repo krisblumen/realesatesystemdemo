@@ -1,0 +1,37 @@
+/* New Hauz — Spacing, radii, sizing
+ * 4px base grid. Component sizes from the UX/UI guide (Componentes).
+ */
+
+:root {
+  /* spacing scale (4px base) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --sp-20: 80px;
+  --sp-24: 96px;
+  --sp-32: 128px;
+
+  /* section rhythm */
+  --section-pad-y: 96px;
+  --container-max: 1200px;
+  --container-pad: 24px;
+
+  /* radii — buttons 12px, cards 16px (per guide) */
+  --radius-sm: 8px;
+  --radius-md: 12px;   /* buttons, inputs */
+  --radius-lg: 16px;   /* cards */
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  /* control heights — buttons 52px, forms 56px (per guide) */
+  --control-h-button: 52px;
+  --control-h-input: 56px;
+  --control-h-sm: 40px;
+}

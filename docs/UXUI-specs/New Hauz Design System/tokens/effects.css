@@ -1,0 +1,28 @@
+/* New Hauz — Shadows, motion, overlays
+ * Soft, premium elevation. Motion: 200ms buttons, 300–500ms scroll reveals.
+ */
+
+:root {
+  /* shadows — soft, low-spread, navy-tinted for a premium feel */
+  --shadow-xs: 0 1px 2px rgba(9, 26, 91, 0.06);
+  --shadow-sm: 0 2px 8px rgba(9, 26, 91, 0.06);
+  --shadow-md: 0 8px 24px rgba(9, 26, 91, 0.08);
+  --shadow-lg: 0 16px 40px rgba(9, 26, 91, 0.12);    /* card hover elevation */
+  --shadow-xl: 0 28px 64px rgba(9, 26, 91, 0.16);
+  --shadow-cta: 0 8px 20px rgba(246, 163, 0, 0.28);  /* orange CTA glow */
+
+  /* focus ring */
+  --ring-focus: 0 0 0 3px rgba(246, 163, 0, 0.30);
+
+  /* motion */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1); /* @kind other */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* @kind other */
+  --dur-fast: 150ms; /* @kind other */
+  --dur-base: 200ms; /* @kind other */
+  --dur-slow: 350ms; /* @kind other */
+  --dur-slower: 500ms; /* @kind other */
+
+  /* hero / image overlays */
+  --overlay-scrim: linear-gradient(180deg, rgba(5,15,56,0) 0%, rgba(5,15,56,0.75) 100%); /* @kind color */
+  --overlay-flat: rgba(5, 15, 56, 0.60);
+}

@@ -1,0 +1,74 @@
+/* New Hauz — Color system
+ * Luxury Corporate Real Estate. Navy + Orange on a clean light base.
+ * Source: docs/GUIA-UX-UI-newhauz.md (Paleta de Color)
+ */
+
+:root {
+  /* ---- Brand primaries ---- */
+  --nh-navy: #091A5B;          /* Azul Corporativo — authority, trust */
+  --nh-orange: #F6A300;        /* Naranja Corporativo — conversion, energy */
+  --nh-orange-hover: #D98C00;  /* CTA hover / pressed */
+  --nh-black: #111111;         /* Negro Premium */
+  --nh-white: #FFFFFF;
+
+  /* ---- Navy scale (derived for surfaces, borders, states) ---- */
+  --nh-navy-900: #050F38;
+  --nh-navy-800: #091A5B;
+  --nh-navy-700: #14246E;
+  --nh-navy-600: #233488;
+  --nh-navy-500: #3B4DA6;
+  --nh-navy-100: #DEE2F0;
+  --nh-navy-50:  #EEF1F8;
+
+  /* ---- Orange scale ---- */
+  --nh-orange-600: #C77E00;
+  --nh-orange-500: #F6A300;
+  --nh-orange-400: #FFB829;
+  --nh-orange-100: #FDE9C9;
+  --nh-orange-50:  #FFF7E8;
+
+  /* ---- Neutrals (Gris) ---- */
+  --nh-gray-900: #111111;  /* Negro Premium */
+  --nh-gray-800: #2D2D2D;  /* Gris Oscuro */
+  --nh-gray-600: #5B5B5B;  /* Gris Medio */
+  --nh-gray-300: #C9C9C9;
+  --nh-gray-200: #EAEAEA;  /* Gris Claro */
+  --nh-gray-100: #F2F2F2;
+  --nh-bg-light: #F7F7F7;  /* Fondo Claro */
+
+  /* ---- Semantic / status ---- */
+  --nh-success: #1F8A4C;
+  --nh-success-bg: #E6F4EC;
+  --nh-warning: #B8860B;
+  --nh-warning-bg: #FCF3DC;
+  --nh-danger: #C0392B;
+  --nh-danger-bg: #FBE9E7;
+  --nh-info: #233488;
+  --nh-info-bg: #EEF1F8;
+
+  /* ---- Semantic aliases (use these in components) ---- */
+  --surface-page: var(--nh-bg-light);
+  --surface-card: var(--nh-white);
+  --surface-dark: var(--nh-navy-900);     /* premium dark sections */
+  --surface-muted: var(--nh-gray-100);
+
+  --text-strong: var(--nh-navy);          /* headlines */
+  --text-body: var(--nh-gray-800);        /* paragraphs */
+  --text-muted: var(--nh-gray-600);       /* meta, captions */
+  --text-on-dark: var(--nh-white);
+  --text-on-orange: var(--nh-white);
+
+  --border-subtle: var(--nh-gray-200);
+  --border-strong: var(--nh-gray-300);
+  --border-focus: var(--nh-orange);
+
+  --accent: var(--nh-orange);
+  --accent-hover: var(--nh-orange-hover);
+
+  --cta-bg: var(--nh-orange);
+  --cta-bg-hover: var(--nh-orange-hover);
+  --cta-text: var(--nh-white);
+
+  /* overlay used over hero photography */
+  --overlay-hero: rgba(5, 15, 56, 0.60);
+}

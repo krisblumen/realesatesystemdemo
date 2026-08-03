@@ -1,0 +1,12 @@
+{
+    "owner": "owner.audit@newhauz.test",
+    "admin": "admin.audit@newhauz.test",
+    "agent": "agente.audit@newhauz.test",
+    "empty_agent": "agente.empty@newhauz.test",
+    "password": "password",
+    "zones": [
+        "Zona Norte Audit",
+        "Zona Sur Audit",
+        "Zona Inactiva Audit"
+    ]
+}

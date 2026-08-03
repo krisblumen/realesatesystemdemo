@@ -1,0 +1,12 @@
+HTTP/1.1 200 OK
+Host: 127.0.0.1:8001
+Connection: close
+X-Powered-By: PHP/8.3.14
+Cache-Control: max-age=0, must-revalidate, no-cache, no-store, private
+Date: Fri, 19 Jun 2026 05:32:18 GMT
+Content-Type: text/html; charset=utf-8
+Pragma: no-cache
+Expires: Fri, 01 Jan 1990 00:00:00 GMT
+Set-Cookie: XSRF-TOKEN=eyJpdiI6ImI2VzFaZ3pDQ2I3cERweFYvMlhBcmc9PSIsInZhbHVlIjoiRFFDMDFselFpQXVhci9FbFJmQjdrVGRYWm5QcDJxenJEVkR0WjExcXdLdUhqV01scS95ZXQvMVVsODluOEdxR0xLTkVwS05VeE84S2pETmwvZmNBaDlCeUkzbFhyUG5KRmVKanVXL2loUCszWlRkTTRMbWU5NXN3YWpjT1JnMlYiLCJtYWMiOiI3M2MyOWIwM2ZlMWI2NGJlZmIyZDNiMTc5ODk4NWU2YWFjZjQzYTU1NzgzMDliNmU0MDQ5MWM4Njc2YjZiYmMyIiwidGFnIjoiIn0%3D; expires=Fri, 19 Jun 2026 07:32:18 GMT; Max-Age=7200; path=/; samesite=lax
+Set-Cookie: laravel-session=eyJpdiI6IjJaeEFON0NpQ3FKcVJ3ZTM4Yk10S0E9PSIsInZhbHVlIjoiLzc2M0ZBYkNzLzA0QTR2c2c4VTFEWHFUN0IzWlVxbHhIZmF0ZVVTNmdoem5qRlg0OW9OWnJoRjAzVk9vN3pQMHZSKy9JUldlbm4xeGR1RVo0UmxBaDBUTm9aSGhGTkIyNmUxcHhaZDBQajlFWmtySmtScU9oQ2VXakVjVjlyc24iLCJtYWMiOiI5MjRkN2UxODMzZTEwYWI1NzE5ZmY1MTg5Zjc0NWVlMTc5NDE4ODhmYjA3MDI3ODEyOTdhMmNiNjkyMTg0MzdjIiwidGFnIjoiIn0%3D; expires=Fri, 19 Jun 2026 07:32:18 GMT; Max-Age=7200; path=/; httponly; samesite=lax
+
