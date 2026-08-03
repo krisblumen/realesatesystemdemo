@@ -118,9 +118,14 @@ rutas y toda generación de URL, y el panel de Filament se monta con
 `Route::domain()` y `->domain()` en el panel envuelven lo que ya existe.
 
 **El costo, dicho de frente**: hace falta DNS comodín y certificado comodín. En
-un VPS con certbot y validación DNS-01 es trabajo de una vez. **Si el hosting no
-puede emitir certificados comodín, esta decisión se cae y hay que volver al
-prefijo de ruta.** Es lo primero que hay que confirmar.
+un VPS con certbot y validación DNS-01 es trabajo de una vez.
+
+**Confirmado con el proveedor**: Hostinger emite certificados comodín únicamente
+en VPS. Los planes Web, Cloud y Agency dan SSL DV gratuito por dominio o
+subdominio individual, no comodín. La decisión se sostiene **sobre VPS**.
+
+Ver 8.11: el certificado resulta ser la menor de las tres razones por las que
+este diseño exige VPS.
 
 ### 8.2 Orden de resolución (contrato C-1)
 
@@ -234,6 +239,32 @@ Estados, municipios, códigos postales y polígonos son catálogo compartido y s
 copian con la plantilla. Se acepta la duplicación a cambio de no partir el
 modelo: `postal_code_areas` pesa 3.8 MB y se replica por inquilino.
 
+### 8.11 Requisitos de infraestructura (contrato C-8)
+
+Este diseño **no corre en hosting compartido**, y el certificado comodín es la
+menor de las tres razones. Las tres son requisitos, no preferencias:
+
+| Requisito | Por qué | Qué pasa si falta |
+|---|---|---|
+| Rol de Postgres con `CREATEDB` y `pg_terminate_backend` | El sistema crea una base en cada alta y la borra al expirar | No hay aprovisionamiento posible; el diseño entero cae |
+| Proceso largo para la cola (`queue:work`) más cron | El alta va en cola para que el visitante no espere; la expiración corre sola | El alta vuelve al request y el primer pico la rompe; nada expira |
+| Certificado comodín y DNS comodín | Un subdominio por inquilino | Se cae 8.1 y hay que volver a prefijo de ruta |
+
+En hosting compartido las bases se crean desde el panel de control, con un tope
+y sin privilegio para la aplicación; y los procesos largos no se sostienen. Los
+dos primeros requisitos son independientes del certificado: **aunque el
+proveedor ofreciera comodín en compartido, este diseño seguiría necesitando
+VPS.**
+
+Queda por confirmar en el VPS, antes del lote A:
+
+- Que el rol de la aplicación —o un rol aparte dedicado al aprovisionamiento—
+  tenga `CREATEDB`. Ver C-2 de la auditoría: **no debe ser el mismo rol con el
+  que la aplicación atiende peticiones.**
+- Cuántas bases de datos soporta la instancia antes de degradarse. Ese número es
+  el techo real de inquilinos simultáneos, y define el plazo de vida (M-2 de la
+  auditoría), no al revés.
+
 ## 9. Contratos que la implementación debe cerrar
 
 | # | Contrato | Dónde se verifica |
@@ -245,6 +276,7 @@ modelo: `postal_code_areas` pesa 3.8 MB y se replica por inquilino.
 | C-5 | El alta está serializada | Test de alta concurrente |
 | C-6 | La plantilla se versiona, no se migra en su lugar | Comando + test del cambio de versión |
 | C-7 | El borrado corta conexiones antes del `DROP` | Test de borrado con sesión abierta |
+| C-8 | El rol que crea bases no es el rol de las peticiones | Revisión de despliegue + verificación al arrancar |
 
 ## 10. Matriz de tests
 
@@ -282,7 +314,7 @@ visitante registrado entra a un sistema que se pisa con el vecino.
 
 | Riesgo | Impacto | Mitigación |
 |---|---|---|
-| El hosting no emite certificados comodín | La decisión 8.1 se cae | Confirmarlo **antes** del lote D |
+| Se despliega en hosting compartido | El diseño no corre: ni crea bases, ni sostiene la cola | Resuelto: **VPS obligatorio** (8.11) |
 | Un trabajo deja la conexión apuntando al inquilino anterior | Escritura en la base equivocada, sin error | C-4 con test explícito |
 | Alguien mueve el caché a Redis y se pierde el aislamiento | Fuga entre inquilinos | Prefijo de clave desde el día uno (8.3) |
 | Cantidad de bases: cada inquilino es una base completa | Límite operativo de Postgres y de disco | Expiración agresiva; medir cuántas soporta el servidor antes de abrir |
@@ -303,8 +335,15 @@ visitante registrado entra a un sistema que se pisa con el vecino.
 
 ## 14. Definition of Done del diseño
 
-- [ ] Confirmado que el hosting emite certificado comodín, o tomada la decisión
-      alternativa de prefijo de ruta.
+- [x] Confirmado que el hosting emite certificado comodín. Hostinger lo hace
+      **sólo en VPS**; los planes compartidos no. Decisión 8.1 sostenida sobre
+      VPS, y 8.11 documenta que el VPS haría falta igual sin el certificado.
 - [ ] Confirmada la versión de Postgres de producción y anotada en despliegue.
-- [ ] Los siete contratos tienen un test nombrado que los verifica.
+      Sabido: 16.14. Falta anotarlo en `docs/deployment/`.
+- [ ] Confirmado en el VPS: rol con `CREATEDB` separado del rol de peticiones, y
+      cuántas bases soporta la instancia (C-8).
+- [ ] Definido el plazo de vida de un inquilino y el límite por origen (M-2 de la
+      auditoría), derivados del techo de bases del punto anterior.
+- [ ] Los ocho contratos tienen un test nombrado que los verifica.
+- [ ] Corregidos C-1, C-2 y C-3 de la auditoría en este documento.
 - [ ] Auditoría de diseño hecha con contexto fresco, no por quien lo escribió.
