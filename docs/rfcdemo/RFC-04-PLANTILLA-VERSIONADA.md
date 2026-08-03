@@ -40,8 +40,22 @@ El esquema completo del inquilino, más el catálogo compartido: estados,
 municipios, códigos postales, polígonos, tipos de servicio, y las seis páginas
 del CMS ya sembradas.
 
-**No contiene** las migraciones de la central (RFC-01), ni usuarios, ni datos de
-nadie.
+**No contiene** las migraciones de la central (RFC-01) ni usuarios.
+
+Ojo con esto último: `DatabaseSeeder` **sí** crea usuarios —termina llamando a
+`OwnerSeeder` y `AgentSeeder`, con correos fijos y contraseña conocida— así que
+no sirve para la plantilla. Hace falta un sembrador propio con la lista
+enumerada. Verificado corriéndolo; detalle en
+`docs/epicas/epica-demo-lotes-b-c-diseno.md`.
+
+**Sí contiene contenido de muestra**: inmuebles, clientes y leads. Un inquilino
+que nace vacío es un panel vacío, y la persona invitada entró a ver funcionar el
+sistema, no a cargarlo. Como viaja en la plantilla, cuesta 0 s por alta.
+
+**Bloqueante conocido**: `DemoDataSeeder` está roto. Falla en
+`DemoDataSeeder.php:38` porque `Zone.polygon` se castea a `MultiPolygon` y el
+sembrador le pasa un `Polygon`; deja 5 usuarios, cero inmuebles y cero clientes.
+Arreglarlo es requisito de este RFC, no trabajo aparte.
 
 ## Nadie se conecta a la plantilla
 

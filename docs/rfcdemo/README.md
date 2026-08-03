@@ -10,6 +10,7 @@ Documentos de referencia:
 - `docs/epicas/epica-demo-multi-inquilino.md` — el diseño técnico consolidado.
 - `docs/audits/epica-demo-auditoria-diseno.md` — la auditoría de diseño.
 - `docs/epicas/epica-demo-lote-a-diseno.md` — diseño de detalle del lote A.
+- `docs/epicas/epica-demo-lotes-b-c-diseno.md` — diseño de detalle de los lotes B y C.
 - `docs/deployment/DEMO-MULTI-INQUILINO.md` — requisitos de infraestructura.
 
 ## Dos fases
