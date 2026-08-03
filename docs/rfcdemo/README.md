@@ -9,6 +9,8 @@ Documentos de referencia:
 - `docs/rfc/EPICA-DEMO-MULTI-INQUILINO.md` — la épica a nivel producto.
 - `docs/epicas/epica-demo-multi-inquilino.md` — el diseño técnico consolidado.
 - `docs/audits/epica-demo-auditoria-diseno.md` — la auditoría de diseño.
+- `docs/epicas/epica-demo-lote-a-diseno.md` — diseño de detalle del lote A.
+- `docs/deployment/DEMO-MULTI-INQUILINO.md` — requisitos de infraestructura.
 
 ## Dos fases
 

@@ -83,6 +83,17 @@ Un slug que no corresponde a ningún inquilino activo devuelve la misma respuest
 que uno expirado: no se distingue entre "no existe" y "venció". Distinguirlos
 permitiría enumerar inquilinos.
 
+## El valor de la conexión antes de resolver
+
+No es nulo. **Postgres, con nombre de base vacío, conecta a una base con el
+nombre del usuario**: una consulta anterior a la resolución no fallaría, escribiría
+en otro lado.
+
+La conexión del inquilino arranca apuntando a un nombre deliberadamente
+inexistente (`demo_sin_resolver`), para que cualquier consulta previa muera con
+«database does not exist». Convierte una regla de disciplina en algo que el motor
+hace cumplir solo. Detalle en `docs/epicas/epica-demo-lote-a-diseno.md`.
+
 ## Reglas
 
 1. Ningún controlador resuelve el inquilino por su cuenta.

@@ -45,6 +45,7 @@ explícita. Nunca por herencia de la conexión ambiente.
 | `template_version` | string | Con qué plantilla nació |
 | `expira_en` | timestamp | |
 | `borrado_en` | timestamp nulo | |
+| `motivo_falla` | text nulo | Por qué falló el alta o el borrado. La pide RFC-12: sin ella el padrón no tiene qué mostrar |
 | `created_at`, `updated_at` | timestamp | |
 
 `database` se guarda y no se recalcula. Si mañana cambia la forma de nombrar las
