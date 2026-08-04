@@ -225,6 +225,47 @@ class BorradoDeInquilinoTest extends TestCase
         $this->assertSame(-1, $this->limiteDe($tenant->database));
     }
 
+    public function test_outside_the_testing_environment_the_probe_prefix_is_refused(): void
+    {
+        // T-1 de la reauditoría: el guard existía y NINGÚN test caía si alguien
+        // lo revertía. Un contrato sin test es un contrato abierto en CI.
+        //
+        // El prefijo de pruebas vale sólo en `testing`. Aceptarlo siempre
+        // ampliaría en producción la lista de bases que la última red deja
+        // borrar: una fila central mal cargada con ese prefijo pasaría el
+        // control aunque no sea una base de inquilino.
+        $tenant = $this->inquilino('conprefpru');
+
+        app()->detectEnvironment(fn (): string => 'production');
+
+        try {
+            $this->borrador()->borrar($tenant);
+            $this->fail('Fuera de testing, el prefijo de pruebas no puede pasar la red.');
+        } catch (DomainException $e) {
+            $this->assertStringContainsString('prefijo', $e->getMessage());
+        } finally {
+            app()->detectEnvironment(fn (): string => 'testing');
+        }
+    }
+
+    public function test_aborting_a_stalled_deletion_has_an_operable_command(): void
+    {
+        // M-2 de la reauditoría: `abortar()` existía como método y no había
+        // camino para usarlo. Si el borrado muere entre cerrar la puerta y el
+        // DROP, la base queda viva e inalcanzable — el padrón muestra un
+        // inquilino sano que no abre, que es el peor estado porque no parece un
+        // error.
+        $tenant = $this->inquilino('atascado', TenantEstado::Activo);
+
+        $this->borrador()->cerrarLaPuerta($tenant);
+        $this->assertSame(0, $this->limiteDe($tenant->database));
+
+        $this->artisan('demo:abortar-borrado', ['--slug' => $tenant->slug])->assertSuccessful();
+
+        $this->assertSame(-1, $this->limiteDe($tenant->database));
+        $this->assertSame(TenantEstado::Activo, $tenant->fresh()->estado, 'Abortar no cambia el estado.');
+    }
+
     public function test_the_deletion_refuses_to_name_the_central_or_a_template(): void
     {
         // La última red. Un borrado que pudiera nombrar la central se llevaría

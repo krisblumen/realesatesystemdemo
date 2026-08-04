@@ -70,7 +70,23 @@ desaparece con él.
 - Reintentar un borrado fallido.
 - Cerrar el registro temporalmente, sin desplegar.
 
-Todas quedan registradas con quién y cuándo. Ninguna abre contenido.
+Ninguna abre contenido.
+
+**Alcance en fase 1, decidido al implementar.** Existen como comandos:
+`demo:expirar --slug` vence hoy, `demo:borrar --slug` reintenta y
+`demo:abortar-borrado --slug` deshace un cierre de puerta. Falta cerrar las
+invitaciones, y **no hay registro de quién hizo qué**.
+
+Ese registro se difiere a fase 2 A PROPÓSITO, no por olvido. En fase 1 el único
+camino es la consola del servidor y quien opera es la misma persona que invita:
+«quién» ya está en los accesos del servidor, y una tabla de auditoría que
+siempre dice el mismo nombre no informa nada — sólo da sensación de control.
+Cuando el padrón sea una pantalla web con más de un operador, el registro
+empieza a significar algo y entra junto con ella.
+
+**Y hasta entonces, este RFC no debe prometerlo.** Un contrato que el código no
+cumple no es una deuda: es una afirmación falsa, y alguien la va a leer como
+garantía.
 
 ## Reglas
 

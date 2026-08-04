@@ -203,8 +203,12 @@ No muestra nada de adentro de un inquilino, y **no hay «entrar como»**. Un dem
 es exactamente el lugar donde esa función se ve mal: el producto que se está
 mostrando promete que los datos de un cliente son de ese cliente.
 
-Acciones: vencer antes de tiempo, reintentar un borrado, cerrar las invitaciones.
-Todas quedan registradas. Ninguna abre contenido.
+Acciones: vencer antes de tiempo, reintentar un borrado, abortar un borrado ya
+empezado, cerrar las invitaciones. Ninguna abre contenido.
+
+El registro de quién hizo qué queda en fase 2, junto con la pantalla web. El
+motivo está en RFC-12: con un solo operador y un solo camino —la consola del
+servidor— una tabla que siempre dice el mismo nombre no informa nada.
 
 ---
 

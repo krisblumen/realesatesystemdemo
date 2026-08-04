@@ -36,4 +36,7 @@ Schedule::command('contratos:retencion')->dailyAt('02:00');
 */
 
 Schedule::command('demo:expirar')->hourly();
-Schedule::command('demo:borrar')->dailyAt('03:30');
+// `withoutOverlapping()` porque el borrado puede tardar y alguien puede lanzar
+// un reintento manual cerca de la hora: dos procesos sobre el mismo inquilino
+// hacen que los contadores de falla se pisen.
+Schedule::command('demo:borrar')->dailyAt('03:30')->withoutOverlapping();
