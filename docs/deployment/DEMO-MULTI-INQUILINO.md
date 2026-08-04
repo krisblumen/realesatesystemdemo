@@ -87,8 +87,15 @@ Dos roles distintos, y no es opcional:
 
 | Rol | Privilegios | Lo usa |
 |---|---|---|
-| `demo_app` | Sin `CREATEDB`. `CONNECTION LIMIT` puesto | La aplicación, en cada petición |
+| `demo_app` | **NO superusuario.** Sin `CREATEDB`. `CONNECTION LIMIT` puesto | La aplicación, en cada petición |
 | `demo_provisioner` | `CREATEDB`, terminar sesiones | Sólo el comando de invitación y el borrado, desde consola |
+
+**`demo_app` no puede ser superusuario, y no es un detalle de higiene.**
+`CONNECTION LIMIT` —el de la base y el del rol— **no aplica a superusuarios**.
+Si `demo_app` lo fuera, los dos topes que protegen a la producción vecina no
+protegerían nada, y el cierre de puerta previo a borrar un inquilino tampoco:
+el borrado fallaría contra cualquiera que dejó una pestaña abierta. Se descubrió
+al probarlo, porque como `postgres` el mecanismo parecía no funcionar.
 
 **Propiedad y permisos de la base clonada (hallazgo M-1 de la auditoría).**
 Separar los roles no alcanza: hay que decir quién queda como dueño de la base
@@ -138,7 +145,8 @@ Confiar sólo en la dirección del proxy. CloudPanel corre en el mismo host.
 - [ ] Rol `demo_provisioner` con `CREATEDB`, separado de `demo_app`.
 - [ ] Propiedad y permisos: `demo_app` es dueño de las bases de inquilino y
       puede leer y escribir sin tener `CREATEDB` (M-1).
-- [ ] `CONNECTION LIMIT` puesto en `demo_app`.
+- [ ] `CONNECTION LIMIT` puesto en `demo_app`, y `demo_app` **no** es
+      superusuario (si lo fuera, el tope no aplicaría).
 - [ ] Base central creada y migrada.
 - [ ] Plantilla construida, y **ninguna** conexión de la aplicación apuntándole.
 - [ ] Cola corriendo y cron activo.

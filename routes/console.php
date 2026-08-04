@@ -22,3 +22,18 @@ Schedule::command('frontend:media:reconcile')->everyFifteenMinutes()->withoutOve
 Schedule::command('contratos:expirar')->hourly()->withoutOverlapping();
 Schedule::command('contratos:vencer')->dailyAt('01:00');
 Schedule::command('contratos:retencion')->dailyAt('02:00');
+
+/*
+|--------------------------------------------------------------------------
+| Ciclo de vida de los inquilinos del demo (EPICA-DEMO, RFC-09)
+|--------------------------------------------------------------------------
+|
+| Dos tareas y no una, por lo mismo que son dos comandos: marcar vencido es
+| barato, inmediato y confiable; borrar es caro, irreversible y puede fallar.
+| Con tareas separadas, el corte de acceso ocurre aunque el borrado esté
+| fallando, y entre una y otra queda la ventana para atender un reclamo.
+|
+*/
+
+Schedule::command('demo:expirar')->hourly();
+Schedule::command('demo:borrar')->dailyAt('03:30');
