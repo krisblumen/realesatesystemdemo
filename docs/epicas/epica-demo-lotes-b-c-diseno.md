@@ -93,12 +93,34 @@ sirviendo altas.
 Pasos:
 
 1. Crear `demo_template_v{N+1}` vacía.
-2. Migrar, apuntando a ella.
-3. Sembrar con el sembrador de plantilla.
-4. **Verificar** antes de darla por buena: que existan las 6 páginas del CMS, que
-   PostGIS responda, que haya códigos postales y zonas, y que **la tabla de
-   usuarios esté vacía**.
-5. Informar el resultado, incluido el peso.
+2. Migrar **con una conexión propia y `--database` explícito**, no apuntando la
+   conexión por defecto.
+
+   > **Hallazgo de implementación.** Mutar `pgsql` con `Config::set` y purgar
+   > NO alcanza: en la CLI el registro de las migraciones fue a la plantilla y
+   > el DDL de algunas no, dejando 46 migraciones anotadas como corridas y la
+   > tabla `permissions` sin crear. La plantilla nacía rota diciendo estar
+   > completa. Y el test NO lo detectó: dentro del proceso de pruebas la
+   > conexión se resolvía limpia. Se encontró corriendo el comando de verdad.
+   >
+   > Corolario para los lotes que siguen: **cualquier cosa que cambie de base a
+   > mitad de proceso usa un nombre de conexión propio.** Reapuntar la por
+   > defecto es ambiguo y la ambigüedad no falla, escribe en otro lado.
+3. Sembrar con el sembrador de plantilla, con la misma conexión explícita.
+4. **Una migración fallida aborta.** Seguir al sembrado después de un fallo
+   produce el error confuso —«relation permissions does not exist»— en vez del
+   que importa.
+5. **Verificar** antes de darla por buena: que existan las 6 páginas del CMS, que
+   PostGIS responda, que haya códigos postales, zonas e inmuebles, y que **no
+   haya ningún usuario con rol `owner`**.
+
+   > **Corrección al diseño, hallada al implementar.** Acá decía «la tabla de
+   > usuarios vacía», y contradecía la propia decisión de incluir contenido de
+   > muestra: `DemoDataSeeder` crea cinco agentes, y esos agentes SON contenido
+   > —sin ellos el demo no puede mostrar el trabajo por agente ni la asignación
+   > de inmuebles—. Lo que no puede viajar en la plantilla es el `owner`, que es
+   > la cuenta que cada inquilino recibe única y con contraseña generada.
+6. Informar el resultado.
 
 El paso 4 no es ceremonia. Una plantilla mal sembrada no falla al construirse:
 falla más tarde, en cada inquilino que nazca de ella, y en un lugar que no

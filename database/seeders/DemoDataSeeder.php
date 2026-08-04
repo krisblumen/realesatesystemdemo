@@ -27,20 +27,26 @@ class DemoDataSeeder extends Seeder
             ->active()
             ->create();
 
-        // 4 zonas con polígono válido (sin la columna eliminada "municipality").
-        $polygons = [
-            'SRID=4326;POLYGON((-100.40 20.60, -100.30 20.60, -100.30 20.70, -100.40 20.70, -100.40 20.60))',
-            'SRID=4326;POLYGON((-100.45 20.55, -100.38 20.55, -100.38 20.62, -100.45 20.62, -100.45 20.55))',
-            'SRID=4326;POLYGON((-100.32 20.58, -100.25 20.58, -100.25 20.66, -100.32 20.66, -100.32 20.58))',
-            'SRID=4326;POLYGON((-100.50 20.50, -100.42 20.50, -100.42 20.58, -100.50 20.58, -100.50 20.50))',
-        ];
+        // Las zonas NO se fabrican acá: se usan las que ya sembró ZoneSeeder.
+        //
+        // Antes este sembrador creaba cuatro zonas propias y MORÍA en la primera
+        // —`Zone.polygon` se castea a MultiPolygon y acá se pasaba un Polygon—
+        // dejando 5 usuarios y cero inmuebles. Quedó viejo cuando cambió el
+        // modelo geográfico.
+        //
+        // El arreglo no es envolver los polígonos. Es dejar de fabricar zonas
+        // que la aplicación nunca fabricaría: las de ZoneSeeder llevan municipio
+        // y código postal, como las que salen del panel. Una zona de muestra que
+        // no se parece a una real hace que el demo enseñe algo que no existe —y
+        // ya nos pasó que una factory así dejara pasar un bug a producción con
+        // la suite en verde.
+        $zones = Zone::query()->where('status', ZoneStatus::Active)->get();
 
-        $zones = collect($polygons)->map(fn (string $ewkt, int $i): Zone => Zone::create([
-            'name' => 'Zona Demo '.($i + 1),
-            'description' => 'Zona de prueba '.($i + 1),
-            'status' => ZoneStatus::Active,
-            'polygon' => $ewkt,
-        ]));
+        if ($zones->isEmpty()) {
+            $this->command?->error('No hay zonas activas. Corré ZoneSeeder antes que este sembrador.');
+
+            return;
+        }
 
         // 10 propietarios repartidos entre los agentes (2 por agente).
         $ownersByAgent = [];
@@ -65,6 +71,6 @@ class DemoDataSeeder extends Seeder
             ]);
         }
 
-        $this->command?->info('Demo: 5 agentes, 4 zonas, 10 propietarios, 20 inmuebles.');
+        $this->command?->info('Demo: 5 agentes, '.$zones->count().' zona(s) existentes, 10 propietarios, 20 inmuebles.');
     }
 }
