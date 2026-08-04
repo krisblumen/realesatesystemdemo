@@ -60,6 +60,19 @@ mismo origen no recicle inquilinos sin límite (RFC-10).
 Se conserva el `origen_hash`, no el origen. El correo se conserva sólo el tiempo
 que haga falta para el límite de abuso, y después se vacía.
 
+## Abortar un borrado ya empezado
+
+El paso 1 se puede deshacer, y hace falta un camino explícito para hacerlo. Si
+el operador cierra la puerta y después aborta —por un reclamo del inquilino, por
+ejemplo— la base queda con `CONNECTION LIMIT 0` y **nadie puede entrar aunque el
+inquilino se reactive**.
+
+No es el camino feliz, pero es el que deja el sistema en un estado que parece
+sano y no lo está: el padrón muestra el inquilino, y el inquilino no abre.
+
+Contrato: la acción de abortar restaura el límite de conexiones al valor normal,
+y el padrón (RFC-12) la ofrece junto a «reintentar borrado».
+
 ## Reintentos
 
 El borrado es reintentable: cada paso comprueba si ya está hecho antes de
@@ -83,4 +96,6 @@ su motivo de falla. No se reintenta para siempre en silencio.
   la fila.
 - Un test verifica que un borrado interrumpido a mitad se puede reintentar y
   termina bien.
+- Un test verifica que abortar tras cerrar la puerta deja la base **conectable**
+  otra vez.
 - Un test verifica que el borrado no puede nombrar la central ni una plantilla.

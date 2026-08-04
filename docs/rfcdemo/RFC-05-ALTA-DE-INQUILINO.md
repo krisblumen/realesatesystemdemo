@@ -95,7 +95,10 @@ La contraseña se genera, no se pide. Su entrega es RFC-11.
 
 ## Reglas
 
-1. Ninguna parte del alta corre en el request. Todo va en cola.
+1. Ninguna parte del alta corre en una petición web. **En fase 1 la ejecuta el
+   comando de invitación, de forma síncrona**, para poder imprimir el acceso al
+   terminar; en fase 2, el registro público la encola. Despachar un trabajo en
+   fase 1 rompería justamente la entrega inmediata que RFC-13 busca.
 2. La copia es lo único serializado.
 3. El rol de aprovisionamiento no atiende peticiones nunca.
 

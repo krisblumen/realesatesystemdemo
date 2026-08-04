@@ -162,7 +162,8 @@ error de implementación, no una alternativa.
 aprovisionando → activo | fallido
 activo         → expirado
 expirado       → borrado
-fallido        → (terminal)
+fallido        → (terminal para el ciclo, PERO entra al barrido de limpieza:
+                  si murió después de CREATE DATABASE hay una base a medias)
 borrado        → (terminal)
 ```
 

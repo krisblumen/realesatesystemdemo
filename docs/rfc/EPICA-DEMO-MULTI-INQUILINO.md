@@ -56,7 +56,11 @@ como invitaciones se emitan, cada una convencida de que el sistema es suyo.
 ## Alcance
 
 - Aprovisionamiento de un inquilino aislado por invitación.
-- Aislamiento total: datos, archivos, caché y sesión.
+- Aislamiento de datos, caché y sesión, y **separación** de archivos en disco.
+  Ojo con la palabra: los archivos se separan para que dos inquilinos no se
+  pisen, **no para que uno no pueda leer los del otro**. La media publicada se
+  sirve por el servidor web sin pasar por la sesión, y eso está aceptado como
+  límite conocido en RFC-14.
 - Entorno cerrado: el sitio del inquilino exige su sesión.
 - Expiración y borrado del inquilino vencido.
 - Padrón central para el operador.
@@ -114,7 +118,8 @@ técnico cierra una por una:
 
 - **Caché**: las claves actuales no llevan inquilino.
 - **Archivos**: la librería de medios numera desde 1 en cada base, así que dos
-  inquilinos generan la misma ruta en disco.
+  inquilinos generan la misma ruta en disco. Se resuelve la **colisión**; la
+  confidencialidad de la media publicada queda fuera y aceptada (RFC-14).
 - **Sesión**: se resolvería antes de saber quién es el inquilino.
 
 Y una cuarta superficie que no es de aislamiento sino de convivencia: **el demo

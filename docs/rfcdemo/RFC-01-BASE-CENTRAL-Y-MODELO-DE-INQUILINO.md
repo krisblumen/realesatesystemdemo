@@ -62,9 +62,14 @@ Guardar un dato personal que nadie usa es guardarlo por nada.
 |---|---|---|
 | `aprovisionando` | La fila existe, la base no todavía | `activo`, `fallido` |
 | `activo` | En uso, dentro de plazo | `expirado` |
-| `fallido` | El alta no terminó | terminal |
+| `fallido` | El alta no terminó | terminal para el ciclo, **no para la limpieza** |
 | `expirado` | Venció; no se puede entrar | `borrado` |
 | `borrado` | Base y archivos eliminados | terminal |
+
+**`fallido` entra al barrido de bases a medias.** Si el alta murió después de
+`CREATE DATABASE`, hay una base viva sin dueño. Una limpieza que filtre sólo
+`expirado` la deja ahí ocupando conexiones y disco. La comprobación es por
+existencia física de la base, no por estado.
 
 Las transiciones pasan por un único método del modelo. Un `estado` asignado a
 mano en cualquier otro lugar es un error de implementación, no una alternativa.

@@ -3,7 +3,11 @@
 ## Objetivo
 
 Dar de alta un inquilino invitando a alguien, con un comando, sin registro
-público ni infraestructura de cola.
+público y **sin cola para el alta**.
+
+Sin cola *para el alta*, no sin cola: el worker y el cron siguen haciendo falta
+para la expiración y el borrado (RFC-09) y para los trabajos de fondo que el
+sistema ya tiene.
 
 ## Épica
 

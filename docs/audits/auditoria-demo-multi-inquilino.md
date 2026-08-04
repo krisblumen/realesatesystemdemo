@@ -1,5 +1,11 @@
 # Auditoría de diseño — DEMO multi-inquilino
 
+> ⚠️ **DOCUMENTO SUPERADO.** El estado vigente de cada hallazgo está en
+> `docs/audits/reauditoria-demo-multi-inquilino.md`. Lo que sigue se conserva
+> como registro de la primera pasada: su alcance, su veredicto («no está listo»)
+> y el desarrollo de C-1 a C-4 describen la situación de ese momento, **no la
+> actual**. No reabrir un hallazgo desde acá sin mirar antes la reauditoría.
+
 **Proyecto:** realestatesystemDemo  
 **Fecha:** 2026-08-03  
 **Auditor:** Codex  

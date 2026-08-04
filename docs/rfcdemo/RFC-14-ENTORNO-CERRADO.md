@@ -2,7 +2,13 @@
 
 ## Objetivo
 
-Que el inquilino vea su sitio completo y funcionando, y que no lo vea nadie más.
+Que el inquilino vea su sitio completo y funcionando, y que **nadie de afuera
+pueda navegarlo**.
+
+Dicho con precisión, porque la diferencia importa: se cierra el sitio, no cada
+byte. Las imágenes publicadas se sirven por el servidor web sin pasar por la
+sesión, y eso está aceptado más abajo como límite conocido. Prometer «no lo ve
+nadie» sería falso.
 
 ## Épica
 
