@@ -130,7 +130,7 @@ Vive sólo en la central.
 | `estado` | string(20) | índice. Ver abajo |
 | `email` | string(180) | |
 | `origen_hash` | string(64) nulo | **Fase 2.** En fase 1 queda vacío |
-| `template_version` | string(20) | Con qué plantilla nació |
+| `template_version` | string(64) | Con qué plantilla nació. 64 porque es un nombre de base, y un identificador de Postgres llega a 63 bytes |
 | `expira_en` | timestamp | índice, para la tarea de expiración |
 | `borrado_en` | timestamp nulo | |
 | `motivo_falla` | text nulo | Por qué falló el alta o el borrado |

@@ -77,4 +77,17 @@ return [
 
     'dias_de_vida' => (int) env('TENANCY_DIAS_DE_VIDA', 30),
 
+    /*
+    |---------------------------------------------------------------------------
+    | Dominio base
+    |---------------------------------------------------------------------------
+    |
+    | Cada inquilino vive en `{slug}.{dominio_base}`. La resolución por
+    | subdominio llega con el lote D; acá se usa para armar la dirección que
+    | imprime la invitación.
+    |
+    */
+
+    'dominio_base' => env('TENANCY_DOMINIO_BASE', 'demo.localhost'),
+
 ];

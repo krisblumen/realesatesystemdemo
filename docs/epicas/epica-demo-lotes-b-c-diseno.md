@@ -194,12 +194,28 @@ abre y se cierra alrededor del DDL, y un cerrojo de sesión se iría con ella.
 | 3. Tomar cerrojo | `fallido`, `motivo_falla` explica que no se pudo serializar |
 | 4. `CREATE DATABASE ... TEMPLATE` | `fallido`. No hay base que limpiar |
 | 5. Soltar cerrojo (`finally`) | — |
-| 6. Crear el `owner` del inquilino | `fallido` **y hay base a medias**: la limpieza la borra |
+| 6a. Verificar que la copia sirva | `fallido`, base borrada. **Paso agregado al implementar**: ver abajo |
+| 6b. Crear el `owner` del inquilino | `fallido` **y hay base a medias**: la limpieza la borra |
 | 7. Fijar `expira_en` y pasar a `activo` | `fallido`, con base a medias |
 | 8. Imprimir el acceso | Ya está `activo`. La contraseña **no se puede reimprimir**: está hasheada. Se regenera con un comando aparte |
 
 El paso 6 es el primero que deja basura. De ahí que el estado `fallido` no sea
 terminal para la limpieza: hay que mirar si la base existe.
+
+## 9.1 Verificar la copia, mirando al inquilino y no a la plantilla
+
+**Paso descubierto al implementar, con un caso real.** La plantilla vigente por
+defecto estaba sólo migrada, sin sembrar. El alta terminaba «bien», el inquilino
+entraba a un panel con cero inmuebles y cero clientes, y nadie se quejaba: un
+demo que nace vacío no se nota hasta que la persona invitada ya se fue.
+
+La plantilla **no se puede inspeccionar**: abrirle una conexión es exactamente lo
+que rompe la copia siguiente. Pero el inquilino recién creado es una copia
+idéntica y ya estamos conectados a él, así que ahí la verificación sale gratis.
+
+Se comprueba que tenga las seis páginas, roles, zonas, inmuebles y códigos
+postales. Si falta algo, el alta falla con un mensaje que **señala a la
+plantilla** y dice qué comando corregirla — no al alta, que hizo su trabajo.
 
 ## 10. El `owner` del inquilino
 

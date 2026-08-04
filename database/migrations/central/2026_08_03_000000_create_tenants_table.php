@@ -41,7 +41,11 @@ return new class extends Migration
             // guardar un dato personal que nadie usa es guardarlo por nada.
             $table->string('origen_hash', 64)->nullable();
 
-            $table->string('template_version', 20);
+            // 64 y no 20: guarda un NOMBRE DE BASE DE DATOS, y en Postgres un
+            // identificador llega a 63 bytes. Con 20, un nombre de plantilla
+            // largo hacía fallar el insert, abortaba la transacción, y el
+            // siguiente error señalaba a otro lado.
+            $table->string('template_version', 64);
 
             // Indexado porque la tarea de expiración barre por acá.
             $table->timestamp('expira_en')->index();
