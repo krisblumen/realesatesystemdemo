@@ -47,6 +47,10 @@ Que hace, en orden:
 4. Crear el usuario `owner` del inquilino con contraseña generada.
 5. Marcar `activo` e **imprimir el acceso en la consola**: dirección, usuario y
    contraseña.
+6. Imprimir el **aviso de contenido**: no subir al demo nada que no pueda ser
+   público. La media publicada se sirve por el servidor web sin pasar por la
+   sesión, y eso está aceptado como límite conocido (RFC-14). Quien invita tiene
+   que trasladarlo a quien recibe la invitación.
 
 Quien invita entrega esas credenciales por donde quiera. No hace falta correo, y
 por lo tanto no hay un correo que pueda perderse — que era el punto de falla que
