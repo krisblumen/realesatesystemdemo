@@ -56,6 +56,12 @@ return new class extends Migration
             // mostrar cuando algo sale mal.
             $table->text('motivo_falla')->nullable();
 
+            // Cuántas veces se intentó borrar sin lograrlo. Con sólo el motivo,
+            // el operador no puede distinguir «falló recién una vez» de «lleva
+            // tres noches fallando y necesita intervención» — y el cron sigue
+            // reintentando en silencio, que es justo lo que RFC-09 no quiere.
+            $table->unsignedSmallInteger('intentos_de_borrado')->default(0);
+
             $table->timestamps();
         });
     }

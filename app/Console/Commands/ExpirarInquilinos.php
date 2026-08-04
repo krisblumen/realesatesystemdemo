@@ -18,15 +18,22 @@ use Illuminate\Console\Command;
  */
 class ExpirarInquilinos extends Command
 {
-    protected $signature = 'demo:expirar';
+    protected $signature = 'demo:expirar {--slug= : Vencer AHORA este inquilino, sin esperar su fecha}';
 
     protected $description = 'Marca como expirados los inquilinos que pasaron su fecha';
 
     public function handle(): int
     {
+        // Con `--slug` es una acción del operador —«cortá este demo hoy»— y no
+        // el barrido por fecha. Sin ella, atender un pedido así termina siendo
+        // un UPDATE a mano en la base central, sin rastro de nada.
         $vencidos = Tenant::query()
             ->where('estado', TenantEstado::Activo->value)
-            ->where('expira_en', '<=', now())
+            ->when(
+                $this->option('slug'),
+                fn ($q) => $q->where('slug', $this->option('slug')),
+                fn ($q) => $q->where('expira_en', '<=', now()),
+            )
             ->get();
 
         foreach ($vencidos as $tenant) {

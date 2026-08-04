@@ -118,9 +118,13 @@ class BorraInquilinos
         // Los prefijos salen de configuración y no de un literal: el de pruebas
         // es distinto del de producción A PROPÓSITO, para que un barrido de
         // tests jamás pueda rozar una base real.
+        //
+        // Y EL DE PRUEBAS SÓLO VALE EN EL ENTORNO DE PRUEBAS. Aceptarlo siempre
+        // ampliaba en producción la lista de bases que la última red deja
+        // borrar: una fila mal cargada con ese prefijo habría pasado el control.
         $prefijos = array_filter([
             (string) Config::get('tenancy.prefijo_inquilino'),
-            (string) Config::get('tenancy.prefijo_pruebas'),
+            app()->environment('testing') ? (string) Config::get('tenancy.prefijo_pruebas') : null,
         ]);
 
         foreach ($prefijos as $prefijo) {

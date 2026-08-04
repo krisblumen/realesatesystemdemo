@@ -39,7 +39,10 @@ class BorrarInquilinos extends Command
                 // No se reintenta para siempre en silencio: queda anotado para
                 // que el padrón lo muestre y alguien decida.
                 $fallidos++;
-                $tenant->forceFill(['motivo_falla' => mb_substr($e->getMessage(), 0, 2000)])->save();
+                $tenant->forceFill([
+                    'motivo_falla' => mb_substr($e->getMessage(), 0, 2000),
+                    'intentos_de_borrado' => $tenant->intentos_de_borrado + 1,
+                ])->save();
                 $this->components->error("No se pudo borrar {$tenant->slug}: ".$e->getMessage());
             }
         }

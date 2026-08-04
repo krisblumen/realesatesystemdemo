@@ -162,6 +162,40 @@ class BorradoDeInquilinoTest extends TestCase
         }
     }
 
+    public function test_the_door_is_closed_befor_e_sessions_are_terminated(): void
+    {
+        // EL CONTRATO QUE EL DISEÑO LLAMA NO NEGOCIABLE, probado como orden.
+        //
+        // La carrera real —un navegador que reconecta entre `pg_terminate_backend`
+        // y el DROP— no se puede reproducir dentro del proceso. Pero el orden SÍ
+        // se puede observar, y el orden es justamente lo que la cierra.
+        //
+        // El test anterior («una sesión abierta no impide el borrado») parecía
+        // cubrir esto y NO lo cubría: seguía verde con el cierre de puerta
+        // quitado. Lo destapó la auditoría de implementación.
+        $tenant = $this->inquilino('ordencorr');
+
+        DB::connection('maintenance')->flushQueryLog();
+        DB::connection('maintenance')->enableQueryLog();
+
+        $this->borrador()->borrar($tenant);
+
+        $sentencias = collect(DB::connection('maintenance')->getQueryLog())
+            ->pluck('query')
+            ->values();
+
+        $cierre = $sentencias->search(fn (string $q): bool => str_contains($q, 'CONNECTION LIMIT 0'));
+        $mata = $sentencias->search(fn (string $q): bool => str_contains($q, 'pg_terminate_backend'));
+        $borra = $sentencias->search(fn (string $q): bool => str_contains($q, 'DROP DATABASE'));
+
+        $this->assertNotFalse($cierre, 'Falta cerrar la puerta: sin eso queda la ventana para reconectar.');
+        $this->assertNotFalse($mata);
+        $this->assertNotFalse($borra);
+
+        $this->assertLessThan($mata, $cierre, 'Cerrar la puerta va ANTES de terminar sesiones.');
+        $this->assertLessThan($borra, $mata, 'Terminar sesiones va ANTES del DROP.');
+    }
+
     public function test_a_half_finished_deletion_can_be_retried(): void
     {
         // Un borrado a medias no puede quedar en un estado que sólo se arregle a

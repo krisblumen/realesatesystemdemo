@@ -40,13 +40,15 @@ class PadronDeInquilinos extends Command
         }
 
         $this->table(
-            ['Slug', 'Estado', 'Nació', 'Vence', 'Plantilla', 'Motivo de falla'],
+            ['Slug', 'Estado', 'Nació', 'Vence', 'Plantilla', 'Intentos', 'Motivo de falla'],
             $inquilinos->map(fn (Tenant $t): array => [
                 $t->slug,
                 $t->estado->value,
                 $t->created_at?->format('Y-m-d'),
                 $t->expira_en?->format('Y-m-d'),
                 $t->template_version,
+                // Distingue «falló recién» de «lleva noches fallando».
+                $t->intentos_de_borrado > 0 ? (string) $t->intentos_de_borrado : '',
                 // El correo NO se muestra: no hace falta para operar y es el
                 // único dato personal del padrón.
                 $t->motivo_falla === null ? '' : mb_substr($t->motivo_falla, 0, 60),
