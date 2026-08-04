@@ -162,7 +162,7 @@ class BorradoDeInquilinoTest extends TestCase
         }
     }
 
-    public function test_the_door_is_closed_befor_e_sessions_are_terminated(): void
+    public function test_the_door_is_closed_first_then_sessions_are_terminated_then_the_drop(): void
     {
         // EL CONTRATO QUE EL DISEÑO LLAMA NO NEGOCIABLE, probado como orden.
         //
