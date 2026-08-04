@@ -1,11 +1,14 @@
 <?php
 
+use App\Http\Middleware\CierraElDemo;
 use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\ResolveTenant;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\StartSession;
 
 return Application::configure(basePath: dirname(__DIR__))
     // Application::configure() habilita el auto-discovery de listeners por
@@ -30,6 +33,25 @@ return Application::configure(basePath: dirname(__DIR__))
             AuthenticatesRequests::class,
             EnsureUserIsActive::class,
         );
+
+        // El inquilino se resuelve ANTES de que arranque la sesión, y no es
+        // preferencia: la sesión se guarda en base de datos, así que arrancarla
+        // antes de saber a qué base conectarse la leería de la equivocada.
+        //
+        // Va en la lista de prioridad y no sólo al principio del grupo `web`
+        // porque el orden dentro del grupo no garantiza nada frente a un
+        // paquete que se registre después.
+        $middleware->prependToPriorityList(
+            StartSession::class,
+            ResolveTenant::class,
+        );
+
+        $middleware->prependToGroup('web', ResolveTenant::class);
+
+        // El cierre va al FINAL del grupo: necesita la ruta ya resuelta para
+        // saber si es una de las excepciones, y el usuario ya autenticado para
+        // saber si hay sesión.
+        $middleware->appendToGroup('web', CierraElDemo::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

@@ -52,6 +52,7 @@ use App\Services\Frontend\FrontendSettingsService;
 use App\Services\Frontend\Media\PromotableMediaOwners;
 use App\Services\Frontend\Media\ServiceMediaReference;
 use App\Services\Frontend\PublishedMediaReference;
+use App\Tenancy\InquilinoActual;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -72,6 +73,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // El inquilino de la petición: SINGLETON, si no el middleware lo fija
+        // en una instancia y quien lo consulta lee otra vacía. Es el único
+        // punto por el que se pregunta de quién es la petición.
+        $this->app->singleton(InquilinoActual::class);
+
         // Frontend kernel (Épica 12): singletons so the per-request generation
         // memo is shared, and contract bindings for the read/write sides.
         $this->app->singleton(FrontendCacheGeneration::class);
