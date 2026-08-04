@@ -1,200 +1,110 @@
 # Reauditoría de diseño — DEMO multi-inquilino
 
-**Proyecto:** realestatesystemDemo  
-**Fecha:** 2026-08-03  
-**Auditor:** Codex  
-**Documento base:** `docs/audits/auditoria-demo-multi-inquilino.md`  
-**Documentos re-auditados:** `docs/rfc/EPICA-DEMO-MULTI-INQUILINO.md`, `docs/epicas/epica-demo-multi-inquilino.md`, lotes A–F, `docs/rfcdemo/`, `docs/deployment/DEMO-MULTI-INQUILINO.md`  
-**Alcance:** verificar si las correcciones posteriores a la auditoría cerraron los hallazgos y si introdujeron contradicciones nuevas.
-
-## Estado de los hallazgos (respuesta del equipo)
-
-| Hallazgo | Estado |
-|---|---|
-| C-1 Los documentos altos prometían cierre fuerte | **Corregido por la opción A.** El alcance de la épica ya no dice «aislamiento total» de archivos sino **separación**, y el objetivo de RFC-14 dice «nadie de afuera puede navegarlo» en vez de «no lo ve nadie» |
-| M-1 RFC-05 con «todo va en cola» | Corregido: en fase 1 la ejecuta el comando, síncrona |
-| M-2 `fallido` sin nota en RFC-01 y lote A | Corregido en los dos |
-| M-3 La auditoría anterior contradictoria | Corregido: lleva aviso de documento superado |
-| Mn-1 RFC-13 abría con «sin infraestructura de cola» | Corregido en el objetivo |
-| Mn-2 `CONNECTION LIMIT 0` sin camino de vuelta | Corregido: abortar restaura el límite, con su test |
-
-**Respuestas a las preguntas pendientes**
-
-1. **Media pública**: decisión de fase 1, no definitiva. RFC-14 dice que se
-   revisa si el demo se abre al público.
-2. **El aviso en la invitación**: sí, es un paso del comando (RFC-13, paso 6),
-   no una nota al operador. La reauditoría tiene razón en que depender de que
-   alguien se acuerde no es protección.
-3. **La auditoría anterior**: se conserva como histórico con aviso arriba. No se
-   reescribe: el rastro de qué se encontró y cuándo vale más que un documento
-   prolijo.
-4. **Rollback de `CONNECTION LIMIT 0`**: sí, con test y como acción del padrón.
+**Proyecto:** realestatesystemDemo
+**Fecha:** 2026-08-03
+**Alcance:** reauditar el diseño después de los commits de corrección hasta `16ba41b`, contra documentación, código real y `vendor/`.
+**Resultado:** reporte vigente; reemplaza el veredicto anterior de este mismo archivo.
 
 ## Evidencia verificada en código real
 
-- `.env.testing` fue corregido en el árbol de trabajo: `DB_DATABASE=demo_test` y `DB_PASSWORD=` (`.env.testing:36-41`). El diff local cambia desde `inmo_test`/`hobbit` hacia `demo_test`/vacío.
-- `phpunit.xml` también fija `DB_DATABASE=demo_test` para `artisan test` (`phpunit.xml:29-30`).
-- La auditoría anterior quedó desactualizada: todavía dice que `.env.testing` apunta a `inmo_test` (`docs/audits/auditoria-demo-multi-inquilino.md:7,34-35`) y mantiene veredicto de no listo por críticos ya corregidos (`docs/audits/auditoria-demo-multi-inquilino.md:55-61`).
-- RFC-08 ya corrigió la pieza de Spatie: habla de `path_generator`, no `url_generator` (`docs/rfcdemo/RFC-08-AISLAMIENTO-DE-ARCHIVOS.md:29-35`).
-- RFC-09, el consolidado y Lote F convergen en el orden de borrado `CONNECTION LIMIT 0` → terminar sesiones → borrar DB → borrar archivos (`docs/rfcdemo/RFC-09-EXPIRACION-Y-BORRADO.md:36-53`; `docs/epicas/epica-demo-multi-inquilino.md:295-306`; `docs/epicas/epica-demo-lotes-d-e-f-diseno.md:166-183`).
-- RFC-14 acepta por escrito que la media publicada no está cerrada y se sirve por `/storage` sin pasar por Laravel (`docs/rfcdemo/RFC-14-ENTORNO-CERRADO.md:86-112`).
+- `.env.testing` usa la base correcta de tests: `DB_DATABASE=demo_test` y `DB_PASSWORD=` (`.env.testing:36-41`). `phpunit.xml` también fuerza `DB_DATABASE=demo_test` (`phpunit.xml:29-30`).
+- `pgrep -fl "artisan test"` no pudo listar procesos en este entorno: `sysmon request failed with error: sysmond service not found`. No se corrió la suite.
+- La app confía en todos los proxies: `trustProxies(at: '*')` (`bootstrap/app.php:24-27`). Laravel incluye `HEADER_X_FORWARDED_HOST` entre los encabezados confiados (`vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php:22-27`). El diseño ya lo trata como requisito de despliegue, no como tarea olvidada (`docs/deployment/DEMO-MULTI-INQUILINO.md:110-126`, `:145`).
+- El orden de middleware se puede controlar: la app ya usa `prependToPriorityList` (`bootstrap/app.php:29-32`) y Laravel expone ese mecanismo (`vendor/laravel/framework/src/Illuminate/Foundation/Configuration/Middleware.php:425`).
+- Sesión, caché y cola permiten fijar conexión: `SESSION_CONNECTION` (`config/session.php:76`), `DB_CACHE_CONNECTION` (`config/cache.php:42-46`) y `DB_QUEUE_CONNECTION` (`config/queue.php:38-44`).
+- Las claves actuales del frontend siguen sin inquilino: `FrontendPageContentService.php:46`, `FrontendSettingsService.php:54`, `FrontendServicesService.php:51`, `FrontendThemeService.php:48`, `FrontendNavigationService.php:51`.
+- Media Library escribe en `public` por defecto (`config/media-library.php:36`) y permite reemplazar `path_generator` / `custom_path_generators` (`config/media-library.php:144`, `:154`).
+- `RefreshDatabase` puede acotarse por conexión mediante `$connectionsToTransact` (`vendor/laravel/framework/src/Illuminate/Foundation/Testing/RefreshDatabase.php:174-178`).
+- El glob de migraciones no es recursivo: `Migrator::getMigrationFiles()` usa `$path.'/*_*.php'` (`vendor/laravel/framework/src/Illuminate/Database/Migrations/Migrator.php:578-582`).
+- Filament expone `Panel::domain()` (`vendor/filament/filament/src/Panel/Concerns/HasRoutes.php:50`), pero el diseño decide no usarlo para no duplicar la frontera de subdominio (`docs/epicas/epica-demo-multi-inquilino.md:129-136`).
+- Hay 28 modelos en `app/Models`; los modelos existentes no fijan `$connection`, por lo que seguirán la conexión por defecto cuando el tenant la cambie. Los cuatro `scopeVisibleTo` actuales están en `Property`, `Lead`, `PropertyOwner` y `ContratoIntermediacion`.
+- La media publicada quedó aceptada como pública por diseño: el alcance alto habla de **separación** de archivos, no confidencialidad (`docs/rfc/EPICA-DEMO-MULTI-INQUILINO.md:56-64`), y RFC-14 explicita que `/storage` no pasa por Laravel ni sesión (`docs/rfcdemo/RFC-14-ENTORNO-CERRADO.md:92-118`).
+- RFC-05 ya no ordena cola en fase 1: la regla dice que el comando de invitación ejecuta el alta síncrona y que fase 2 la encola (`docs/rfcdemo/RFC-05-ALTA-DE-INQUILINO.md:96-103`). RFC-13 mantiene la misma decisión (`docs/rfcdemo/RFC-13-INVITACION.md:1-10`, `:45-57`).
+- `fallido` quedó modelado como terminal para el ciclo, pero no para la limpieza: RFC alto (`docs/rfc/EPICA-DEMO-MULTI-INQUILINO.md:92-100`), RFC-01 (`docs/rfcdemo/RFC-01-BASE-CENTRAL-Y-MODELO-DE-INQUILINO.md:59-75`) y Lote C (`docs/epicas/epica-demo-lotes-b-c-diseno.md:172-180`).
+- El rollback de `CONNECTION LIMIT 0` ya tiene contrato y test: abortar debe restaurar el límite normal (`docs/rfcdemo/RFC-09-EXPIRACION-Y-BORRADO.md:63-75`, `:97-100`).
 
 ## Veredicto
 
-⚠️ **Casi listo, pero todavía no lo marcaría como listo para implementar.**
+✅ **El diseño está listo para implementar, con deuda menor de documentación de índice.**
 
-La mayoría de los hallazgos anteriores fueron corregidos de verdad: `.env.testing`, borrado, `path_generator`, contraseña, tope duro, nombres de bases y `Panel::domain()` quedaron mejor. Bien ahí: eso no fue maquillaje.
+Los bloqueantes de la reauditoría anterior fueron corregidos de verdad, no maquillados: la media pública está asumida como tradeoff, el alta de fase 1 es síncrona, `fallido` entra al barrido de bases a medias, el borrado tiene rollback explícito, y `.env.testing` ya no apunta a `inmo_test`.
 
-Pero la corrección de media pública cambió el contrato del producto: el demo ya no es “cerrado” en sentido fuerte. Eso puede ser aceptable, pero entonces hay que propagarlo al objetivo y al alcance alto. Si no, el diseño le dice al operador “nadie de afuera ve nada” mientras otra sección dice “si tiene la URL de una imagen, la abre”. Esa contradicción sí puede producir fuga real de datos de prueba.
-
----
+Lo que queda no cambia la arquitectura ni bloquea implementación. Pero hay que limpiarlo porque un repo con señales cruzadas obliga al próximo implementador a hacer arqueología. Y eso, en una épica de aislamiento, es pedirle disciplina humana a un sistema que justamente dice que la disciplina no alcanza.
 
 ## Estado de hallazgos anteriores
 
-| Hallazgo anterior | Estado reauditoría | Evidencia |
+| Hallazgo anterior | Estado actual | Evidencia |
 |---|---|---|
-| C-1 `.env.testing` a `inmo_test` | **Cerrado en worktree** | `.env.testing:36-41` ahora usa `demo_test`. Falta confirmar commit. |
-| C-2 `fallido` con dos contratos | **Cerrado en lo alto; queda ambigüedad menor** | Épica principal aclara “terminal para el ciclo, no para limpieza” (`docs/rfc/EPICA-DEMO-MULTI-INQUILINO.md:90-96`); RFC-05/Lote C explican base a medias. RFC-01 y Lote A siguen abreviados. |
-| C-3 órdenes de borrado | **Cerrado** | Orden único en RFC-09, consolidado y Lote F. |
-| C-4 media publicada no cerrada | **Aceptado, pero mal propagado** | RFC-14 lo acepta; épica/RFC-14 objetivo todavía prometen cierre fuerte. Nuevo C-1 abajo. |
-| M-1 ownership/grants | **Suficientemente cerrado para diseño** | Deployment define roles, ownership y verificación antes de activar (`docs/deployment/DEMO-MULTI-INQUILINO.md:84-103`, `:135-145`). |
-| M-2 nombres de bases | **Cerrado** | Lote A separa `demo_db`, `demo_central`, `demo_template_vN`, `demo_t_{slug}`, `demo_test` (`docs/epicas/epica-demo-lote-a-diseno.md:48-62`). |
-| M-3 cola vs invitación | **Parcial** | RFC-13 aclara worker/cron, pero RFC-05 todavía dice “todo va en cola”. Nuevo M-1 abajo. |
-| M-4 tope duro fase 1 | **Cerrado** | RFC-13 exige respetar tope duro desde fase 1 (`docs/rfcdemo/RFC-13-INVITACION.md:109-117`). |
-| M-5 reimprimir contraseña | **Cerrado** | Lote C dice que no se puede reimprimir y se regenera aparte (`docs/epicas/epica-demo-lotes-b-c-diseno.md:166-180`). |
-| M-6 `Panel::domain()` | **Cerrado** | Consolidado indica no declarar dominio en Filament (`docs/epicas/epica-demo-multi-inquilino.md:129-136`). |
-| M-7 `path_generator` | **Cerrado** | RFC-08 explicita `path_generator` y por qué `url_generator` no alcanza. |
-| Mn-1 registro central fase 1 | **Cerrado en RFC-14; revisar RFC-06 si se toca** | RFC-14 dice que host central no tiene página anónima (`docs/rfcdemo/RFC-14-ENTORNO-CERRADO.md:71-75`). |
-| Mn-2 50 vs 48 tablas | **Sin bloqueo** | Ya no lo usaría como señal de completitud. Importan páginas, PostGIS, GIST, usuarios vacíos. |
-
----
+| `.env.testing` apuntaba a `inmo_test` | **Cerrado** | `.env.testing:36-41`; `phpunit.xml:29-30`. |
+| Documentos altos prometían cierre fuerte de archivos | **Cerrado por opción A** | `docs/rfc/EPICA-DEMO-MULTI-INQUILINO.md:56-64`; `docs/rfcdemo/RFC-14-ENTORNO-CERRADO.md:92-118`. |
+| RFC-05 decía que fase 1 iba por cola | **Cerrado** | `docs/rfcdemo/RFC-05-ALTA-DE-INQUILINO.md:96-103`. |
+| `fallido` parecía terminal absoluto | **Cerrado** | `docs/rfcdemo/RFC-01-BASE-CENTRAL-Y-MODELO-DE-INQUILINO.md:59-75`; `docs/epicas/epica-demo-lotes-b-c-diseno.md:172-180`. |
+| Auditoría anterior confundía estado histórico con estado vigente | **Cerrado** | `docs/audits/auditoria-demo-multi-inquilino.md:3-7` marca el documento como superado. |
+| RFC-13 sugería que no hacía falta cola/worker | **Cerrado** | `docs/rfcdemo/RFC-13-INVITACION.md:5-10`, `:30-33`. |
+| `CONNECTION LIMIT 0` no tenía camino de vuelta | **Cerrado** | `docs/rfcdemo/RFC-09-EXPIRACION-Y-BORRADO.md:63-75`, `:97-100`. |
 
 ## Hallazgos críticos
 
-### C-1 — El diseño acepta media pública, pero los objetivos altos siguen prometiendo entorno cerrado fuerte
+No quedan hallazgos críticos abiertos.
 
-**Qué está mal:** RFC-14 ahora acepta que la media publicada no está cerrada. Eso es una decisión válida si se asume el tradeoff. El problema es que los documentos altos todavía prometen “aislamiento total” y “que no lo vea nadie más”, sin matizar que los bytes publicados quedan fuera de esa promesa.
-
-**Evidencia:**
-
-- `docs/rfc/EPICA-DEMO-MULTI-INQUILINO.md:56-60`: alcance incluye “Aislamiento total: datos, archivos, caché y sesión” y “Entorno cerrado”.
-- `docs/rfcdemo/RFC-14-ENTORNO-CERRADO.md:3-23`: objetivo dice que el sitio “no lo vea nadie más” y que completo exige sesión.
-- `docs/rfcdemo/RFC-14-ENTORNO-CERRADO.md:86-112`: limita el cierre al HTML, acepta que `/storage` se sirve sin Laravel y advierte que quien tenga URL de imagen publicada entra.
-- `docs/rfcdemo/RFC-13-INVITACION.md:41-53`: la invitación imprime aviso de no subir contenido que no pueda ser público.
-
-**Escenario concreto de falla:** el owner lee la épica o el RFC-14 inicial, interpreta que “aislamiento total de archivos” significa confidencialidad, e invita a un prospecto sin repetir verbalmente la advertencia. El prospecto sube fotos reales de un inmueble de cliente. Luego copia una URL desde el HTML o la comparte en una captura; una persona sin sesión abre `/storage/tenants/{slug}/.../foto.webp`. El servidor web sirve la imagen. El sistema actuó como RFC-14 dice, pero contra la promesa del objetivo alto.
-
-**Corrección segura:** elegir una sola verdad y propagarla arriba:
-
-- Opción A: cambiar objetivo/alcance a “HTML cerrado; media publicada no confidencial”.
-- Opción B: hacer media publicada privada por controlador en el demo.
-
-No hace falta rediseñar si se elige A, pero sí hay que dejar de llamarlo “aislamiento total de archivos” sin matiz. ACÁ está la trampa: no es un bug técnico, es una promesa falsa en el contrato.
-
----
+Lo crítico era que el diseño prometiera una cosa y ejecutara otra: tests contra base prohibida, media “cerrada” servida por `/storage`, alta síncrona documentada como cola, limpieza incapaz de recoger `fallido`. Esa capa ya está alineada.
 
 ## Hallazgos medios
 
-### M-1 — RFC-05 todavía dice “todo va en cola”, aunque fase 1 es comando de consola
+No quedan hallazgos medios abiertos.
 
-**Qué está mal:** RFC-13 y la nota inicial de RFC-05 dicen que en fase 1 el alta la dispara un comando, sin cola para el alta. Pero las reglas de RFC-05 conservan “Todo va en cola”. Quedó una frase vieja en una sección normativa.
-
-**Evidencia:**
-
-- `docs/rfcdemo/RFC-13-INVITACION.md:23-29`: se elimina la cola para el alta, pero worker/cron siguen para expiración/borrado.
-- `docs/rfcdemo/RFC-05-ALTA-DE-INQUILINO.md:19-22`: en fase 1 la sección 3 la ejecuta el comando en vez de un trabajo en cola.
-- `docs/rfcdemo/RFC-05-ALTA-DE-INQUILINO.md:96-100`: regla 1 todavía dice “Ninguna parte del alta corre en el request. Todo va en cola.”
-
-**Escenario concreto de falla:** se implementa `php artisan demo:invitar` para crear la fila y despachar un job, porque RFC-05 regla 1 lo ordena. El comando ya no puede imprimir credenciales al final de forma confiable: el alta ocurre después, en otro proceso. El usuario que invita recibe una salida incompleta o un “pendiente”, justo lo que RFC-13 quería evitar.
-
-**Corrección segura:** cambiar regla 1 a algo como: “En fase 1 ninguna parte del alta corre en request web; el comando la ejecuta síncrona. En fase 2, el registro público encola.”
-
-### M-2 — La excepción de limpieza para `fallido` no quedó en todos los documentos normativos
-
-**Qué está mal:** la épica principal y Lote C ya corrigen bien que `fallido` puede tener base a medias. Pero RFC-01 y Lote A todavía muestran `fallido` como terminal sin aclarar “terminal para ciclo, no para limpieza”. Esto es más leve que antes, pero sigue siendo una fuente de error porque esos archivos definen modelo/estado.
-
-**Evidencia:**
-
-- Corregido arriba: `docs/rfc/EPICA-DEMO-MULTI-INQUILINO.md:90-96`.
-- Corregido en alta: `docs/epicas/epica-demo-lotes-b-c-diseno.md:166-180`.
-- Aún abreviado: `docs/rfcdemo/RFC-01-BASE-CENTRAL-Y-MODELO-DE-INQUILINO.md:59-70` dice `fallido` terminal sin nota de limpieza.
-- Aún abreviado: `docs/epicas/epica-demo-lote-a-diseno.md:157-170` muestra `fallido → terminal` sin nota.
-
-**Escenario concreto de falla:** quien implementa el enum/servicio de estados toma RFC-01/Lote A como fuente y trata `fallido` como “no hacer nada más”. Luego el comando falla después de crear la DB, deja `fallido` y la limpieza programada filtra sólo `expirado`, no `fallido`. La base a medias queda viva.
-
-**Corrección segura:** agregar la misma nota en RFC-01 y Lote A: `fallido` no transiciona para usuarios, pero sí entra al barrido de bases a medias.
-
-### M-3 — La auditoría anterior quedó internamente contradictoria y puede confundir la implementación
-
-**Qué está mal:** el documento de auditoría anterior empieza con una tabla que marca hallazgos corregidos, pero conserva evidencia, veredicto y hallazgos viejos como si siguieran abiertos.
-
-**Evidencia:**
-
-- Tabla de estado dice que C-2/C-3 están corregidos (`docs/audits/auditoria-demo-multi-inquilino.md:13-25`).
-- El alcance todavía dice que no se ejecutó suite porque `.env.testing` apunta a `inmo_test` (`docs/audits/auditoria-demo-multi-inquilino.md:7`), pero el archivo actual ya usa `demo_test` (`.env.testing:36-41`).
-- El veredicto conserva “No está listo” por contradicciones que la propia tabla marca corregidas (`docs/audits/auditoria-demo-multi-inquilino.md:55-61`).
-- La sección de hallazgos sigue desarrollando C-1/C-2/C-3 como abiertos (`docs/audits/auditoria-demo-multi-inquilino.md:86-129`).
-
-**Escenario concreto de falla:** el próximo agente abre `docs/audits/auditoria-demo-multi-inquilino.md`, no lee la tabla inicial con suficiente cuidado o busca por “C-2”, y vuelve a corregir un problema ya cerrado. Peor: puede bloquear implementación diciendo “no listo” por razones vencidas.
-
-**Corrección segura:** no reescribir historia, pero sí agregar arriba un bloque inequívoco: “Documento superado por `docs/audits/reauditoria-demo-multi-inquilino.md`; ver estado vigente allí”.
-
----
+La decisión de aceptar media publicada pública es incómoda, pero ahora está escrita como contrato. No es una vulnerabilidad accidental: es un límite conocido, con aviso obligatorio en el comando de invitación (`docs/rfcdemo/RFC-13-INVITACION.md:52-57`) y revisión si el demo se abre (`docs/rfcdemo/RFC-14-ENTORNO-CERRADO.md:117-118`).
 
 ## Hallazgos menores
 
-### Mn-1 — RFC-13 todavía abre con “sin infraestructura de cola” y recién después lo matiza
+### Mn-1 — El índice de RFC todavía dice que falta la auditoría de diseño fresca
+
+**Qué está mal:** `docs/rfcdemo/README.md` conserva una señal operativa vieja: dice que falta la auditoría con contexto fresco, aunque ya existe la auditoría inicial, la reauditoría, y este reporte deja el gate listo para implementar.
 
 **Evidencia:**
 
-- `docs/rfcdemo/RFC-13-INVITACION.md:3-6`: objetivo dice “sin registro público ni infraestructura de cola”.
-- `docs/rfcdemo/RFC-13-INVITACION.md:26-29`: aclara que es sin cola para el alta, pero worker/cron siguen haciendo falta.
+- `docs/rfcdemo/README.md:89-94`: “Falta la auditoría de diseño con contexto fresco”.
+- `docs/audits/auditoria-demo-multi-inquilino.md:3-7`: la primera auditoría ya está marcada como superada por esta reauditoría.
+- `docs/audits/reauditoria-demo-multi-inquilino.md`: este documento es el estado vigente.
 
-**Escenario concreto de falla:** alguien lee sólo el objetivo/índice del RFC y arma checklist de despliegue fase 1 sin worker/cron. El borrado/expiración no corre. Es similar a M-1, pero en RFC-13 ya está aclarado cuatro líneas después; por eso queda menor.
+**Escenario concreto de falla:** el implementador empieza por `docs/rfcdemo/README.md`, lee “falta la auditoría”, y frena el lote A o dispara otra auditoría innecesaria. No rompe producción, pero sí rompe el flujo de implementación y puede reabrir discusiones ya cerradas.
 
-### Mn-2 — `CONNECTION LIMIT 0` necesita prueba explícita de restauración si el borrado se aborta
+**Corrección segura:** cambiar esa línea por “Auditoría fresca completada; estado vigente en `docs/audits/reauditoria-demo-multi-inquilino.md`”.
+
+### Mn-2 — La auditoría autocontenida de la épica sigue diciendo que falta una pasada fresca
+
+**Qué está mal:** `docs/audits/epica-demo-auditoria-diseno.md` fue útil como autoauditoría, pero su advertencia inicial quedó vieja después de la auditoría independiente.
 
 **Evidencia:**
 
-- RFC-09 dice que `CONNECTION LIMIT 0` “se deshace igual de fácil si el borrado se aborta” (`docs/rfcdemo/RFC-09-EXPIRACION-Y-BORRADO.md:36-40`).
-- La matriz de tests prueba borrar con sesión abierta y reintentar borrado interrumpido (`docs/rfcdemo/RFC-09-EXPIRACION-Y-BORRADO.md:79-84`), pero no nombra restaurar el límite si se decide abortar y no borrar.
+- `docs/audits/epica-demo-auditoria-diseno.md:1-6`: dice que falta una pasada con contexto fresco.
+- `docs/rfcdemo/README.md:11`: el índice enlaza esa auditoría como documento de referencia.
 
-**Escenario concreto de falla:** un operador aborta manualmente un borrado por reclamo del usuario después de cerrar la puerta, pero antes de `DROP`. La base queda con `CONNECTION LIMIT 0`; aunque se reactive el tenant, nadie puede conectarse. No es el camino feliz, pero el propio RFC dice que se puede deshacer.
+**Escenario concreto de falla:** alguien abre el documento enlazado desde el índice, ve “falta una pasada con contexto fresco” y concluye que el diseño todavía no pasó el gate, aunque la reauditoría vigente sí lo pasó.
 
-**Corrección segura:** agregar un test o procedimiento de rollback operativo para “cerré puerta pero no borré”.
-
----
+**Corrección segura:** agregar un aviso arriba, igual que en la primera auditoría externa: “Documento histórico; la pasada fresca vigente está en `docs/audits/reauditoria-demo-multi-inquilino.md`”.
 
 ## Sobreingeniería detectada
 
-- **No veo sobreingeniería nueva.** Las correcciones simplificaron: `path_generator` correcto, no `Panel::domain()`, borrado con un único orden, comando de invitación más directo.
-- El único costo consciente es aceptar media pública para no servir imágenes por PHP. Es un tradeoff de performance/simpleza, no sobreingeniería. El problema es de contrato, no de exceso técnico.
+No veo sobreingeniería nueva.
+
+Las decisiones que parecen pesadas —base por inquilino, conexión central, `TenantTestCase`, prefijo de media, prefijo de caché aunque la DB ya aísle— responden a riesgos reales y verificados. La única pieza que puede parecer excesiva, mantener `path_generator` de media aunque el sitio esté cerrado, no es seguridad extra: evita colisión física de archivos porque los IDs de media se repiten por base.
 
 ## Riesgos de implementación
 
-1. Implementar alta por cola en fase 1 por la regla vieja de RFC-05 rompe la entrega inmediata de credenciales.
-2. Implementar limpieza sólo para `expirado` deja bases a medias de tenants `fallido`.
-3. Seguir la auditoría anterior sin leer esta reauditoría puede reabrir problemas cerrados o bloquear por evidencia obsoleta.
-4. Si el aviso de media pública no aparece en la invitación real, el diseño depende de que el operador “se acuerde”. Y ya sabemos: disciplina humana no es protección.
+1. **`trustProxies(at: '*')` no puede llegar al primer invitado.** El diseño lo documenta como requisito de despliegue, pero sigue siendo código real hoy (`bootstrap/app.php:27`). Si el origen queda alcanzable sin CloudPanel, `X-Forwarded-Host` puede elegir tenant.
+2. **La suite no se corrió en esta reauditoría.** Además, `pgrep` no pudo verificar procesos concurrentes en este entorno. Antes de ejecutar suite real hay que resolver esa verificación o hacerla fuera del sandbox.
+3. **La separación de roles debe probarse antes de marcar tenants activos.** El contrato de despliegue exige que `demo_provisioner` cree y transfiera ownership a `demo_app` (`docs/deployment/DEMO-MULTI-INQUILINO.md:84-103`). Si se implementa “rápido” con un solo rol, se destruye la protección del DDL.
+4. **Los trabajos de cola deben restaurar conexión al terminar.** El diseño lo sabe (`docs/epicas/epica-demo-multi-inquilino.md:186-196`), pero es una de esas fallas que no explota: escribe en la base equivocada.
 
 ## Riesgos de seguridad
 
-1. El mayor riesgo residual es comunicacional: la media publicada es pública por decisión, pero los documentos altos todavía suenan a confidencialidad total.
-2. `trustProxies(at: '*')` sigue siendo un bloqueo de despliegue antes del primer invitado; el diseño lo tiene documentado, pero hay que verificarlo en servidor real.
-3. `demo_app`/`demo_provisioner` está mejor diseñado; falta validarlo en implementación con una comprobación real antes de marcar tenant `activo`.
-
-## Lo que está bien resuelto
-
-- `.env.testing` ya no apunta a `inmo_test` en el árbol de trabajo.
-- El orden de borrado quedó unificado.
-- La decisión de no usar `Panel::domain()` está mejor que la anterior: evita una segunda fuente de verdad.
-- `path_generator` quedó identificado como la pieza correcta para evitar colisión física.
-- La contraseña ya no se promete reimprimir: se regenera.
-- El tope duro rige desde fase 1, que era lo correcto.
+1. **La media publicada es pública.** Ya no es hallazgo porque está aceptado, pero sigue siendo el riesgo más fácil de explicar mal. La invitación debe imprimir el aviso; no alcanza con que el operador “se acuerde”.
+2. **Host spoofing si se confía cualquier proxy.** El diseño lo tiene bien ubicado como hardening de despliegue. Hay que verificar firewall/proxy real antes del primer tenant.
+3. **DDL con nombres interpolados.** El diseño tiene las defensas correctas: slug generado por servidor, regex cerrada, prefijo fijo, quoting y rol separado. La implementación no puede recortar ninguna.
 
 ## Preguntas pendientes
 
-1. ¿La media publicada pública es una decisión definitiva de producto o sólo una concesión temporal del demo cerrado?
-2. ¿La invitación real va a imprimir el aviso de media pública en un texto suficientemente visible para que no dependa del operador?
-3. ¿Se va a limpiar la auditoría anterior o se va a dejar como histórico superado por esta reauditoría?
-4. ¿`CONNECTION LIMIT 0` tendrá comando de rollback operativo cuando se aborte un borrado?
+No quedan preguntas bloqueantes para empezar el lote A.
+
+La única decisión de producto que conviene no olvidar es futura: si el demo pasa de invitación a público, RFC-14 ya dice que se revisa la decisión de media pública (`docs/rfcdemo/RFC-14-ENTORNO-CERRADO.md:117-118`).

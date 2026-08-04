@@ -90,8 +90,9 @@ ciegas.
 
 - Los números de RFC-10 dependen de medir el VPS. En fase 1 el plazo lo fija
   quien invita (RFC-13).
-- Falta la auditoría de diseño con contexto fresco. El prompt está listo en
-  `docs/epicas/epica-demo-prompts.md`, fase 2.
+- ~~Falta la auditoría de diseño con contexto fresco.~~ **Hecha, y con dos
+  pasadas.** Estado vigente en `docs/audits/reauditoria-demo-multi-inquilino.md`:
+  listo para implementar. La primera pasada queda como histórico superado.
 - ~~A revisar: si hace falta el certificado comodín.~~ **Resuelto**: el VPS ya
   existe y la frontera sigue siendo el subdominio, así que el comodín se emite
   con certbot y validación DNS-01. Se evaluó un solo host con el inquilino en la

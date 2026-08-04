@@ -1,5 +1,11 @@
 # Auditoría de diseño — Épica DEMO Demo público multi-inquilino
 
+> ⚠️ **DOCUMENTO HISTÓRICO.** Esta fue la autoauditoría, escrita por quien hizo
+> el diseño. La pasada con contexto fresco que pedía **ya se hizo**, con dos
+> rondas; el estado vigente está en
+> `docs/audits/reauditoria-demo-multi-inquilino.md`, y su veredicto es listo para
+> implementar. No concluir desde acá que falta un gate.
+
 > **Limitación de esta auditoría, dicha por delante**: la escribió quien escribió
 > el diseño. Sirve para los defectos que se encuentran releyendo con intención de
 > romper, y ya encontró tres críticos. No sirve para los puntos ciegos
