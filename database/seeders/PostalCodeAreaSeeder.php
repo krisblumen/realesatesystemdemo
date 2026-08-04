@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Carga los polígonos de áreas por código postal (Querétaro).
- * Fuente: exportado desde inmo_db via pg_dump tras correr geo:import-postal-codes.
+ * Fuente: exportado con pg_dump desde la base del proyecto de origen, tras
+ * correr geo:import-postal-codes. El nombre de aquella base no aplica en este
+ * repositorio; los datos ya viajan en el archivo .sql de este directorio.
  *
  * Uso: php artisan db:seed --class=PostalCodeAreaSeeder
  */

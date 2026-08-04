@@ -11,7 +11,7 @@ use App\Models\Zone;
 use Illuminate\Database\Seeder;
 
 /**
- * Datos ficticios para pruebas en el panel (inmo_db).
+ * Datos ficticios para pruebas en el panel (demo_db).
  * Crea agentes, zonas, propietarios e inmuebles de demostración.
  *
  * Uso: php artisan db:seed --class=DemoDataSeeder

@@ -17,7 +17,7 @@ services:
       DB_CONNECTION: pgsql
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_DATABASE: inmo_db
+      DB_DATABASE: demo_db
       DB_USERNAME: postgres
       DB_PASSWORD: ${DB_PASSWORD:-}
 
@@ -40,14 +40,14 @@ services:
     ports:
       - "5433:5432"
     environment:
-      POSTGRES_DB: inmo_db
+      POSTGRES_DB: demo_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d inmo_db"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d demo_db"]
       interval: 5s
       timeout: 5s
       retries: 5
