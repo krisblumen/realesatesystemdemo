@@ -35,13 +35,15 @@ de que sea imposible.
 
 ## El orden del borrado
 
-1. **Revocar `CONNECT`** sobre la base.
+1. **Cerrar la puerta**: `ALTER DATABASE ... CONNECTION LIMIT 0`. Una sola
+   sentencia, sin enumerar roles, y se deshace igual de fácil si el borrado se
+   aborta.
 2. **Terminar** las sesiones vivas.
 3. **Borrar** la base.
 4. **Borrar** `tenants/{slug}/` del disco.
 5. Marcar `borrado`, conservando la fila.
 
-**El paso 1 es la corrección de M-1.** Terminar las sesiones sin revocar antes
+**El paso 1 es la corrección de M-1.** Terminar las sesiones sin cerrar antes
 deja una ventana: el navegador del visitante reintenta, se reconecta, y el
 borrado de la base falla. En un demo con pestañas abiertas eso no es raro, es lo
 normal.

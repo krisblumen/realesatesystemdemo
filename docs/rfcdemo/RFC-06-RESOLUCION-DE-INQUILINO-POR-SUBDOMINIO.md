@@ -76,7 +76,8 @@ comportamiento.
 
 ## El host central
 
-El host sin slug sirve el registro (RFC-11) y el padrón del operador (RFC-12). Ahí
+El host sin slug sirve el padrón del operador (RFC-12) y, **sólo en fase 2**, el
+registro (RFC-11). En fase 1 no tiene ninguna página anónima. Ahí
 la conexión por defecto **es** la central y no se resuelve ningún inquilino.
 
 Un slug que no corresponde a ningún inquilino activo devuelve la misma respuesta

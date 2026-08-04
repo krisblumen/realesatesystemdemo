@@ -90,8 +90,20 @@ Dos roles distintos, y no es opcional:
 | `demo_app` | Sin `CREATEDB`. `CONNECTION LIMIT` puesto | La aplicación, en cada petición |
 | `demo_provisioner` | `CREATEDB`, terminar sesiones | Sólo el comando de invitación y el borrado, desde consola |
 
-El motivo está en RFC-05: el nombre de una base se interpola en DDL porque
-Postgres no acepta parámetros para identificadores. Si el rol que ejecuta esa
+**Propiedad y permisos de la base clonada (hallazgo M-1 de la auditoría).**
+Separar los roles no alcanza: hay que decir quién queda como dueño de la base
+nueva y con qué permisos entra `demo_app`. Si no se define, el alta termina
+bien y **el primer request del inquilino falla por permisos** — y la salida
+apurada sería darle `CREATEDB` a `demo_app`, que rompe justamente la separación
+que protege el DDL.
+
+Contrato: `demo_provisioner` crea la base y **le transfiere la propiedad a
+`demo_app`** en el mismo paso del alta. La plantilla se construye ya con esa
+propiedad, así que la copia la hereda. Verificar en el alta que `demo_app` puede
+leer y escribir antes de marcar `activo`.
+
+El motivo de separar los roles está en RFC-05: el nombre de una base se
+interpola en DDL porque Postgres no acepta parámetros para identificadores. Si el rol que ejecuta esa
 sentencia fuera el mismo que atiende peticiones, un error de validación dejaría
 de ser «un inquilino ve a otro» y pasaría a ser «se pierden todos».
 
@@ -124,6 +136,8 @@ Confiar sólo en la dirección del proxy. CloudPanel corre en el mismo host.
 
 - [ ] PostgreSQL 16 con PostGIS en el VPS.
 - [ ] Rol `demo_provisioner` con `CREATEDB`, separado de `demo_app`.
+- [ ] Propiedad y permisos: `demo_app` es dueño de las bases de inquilino y
+      puede leer y escribir sin tener `CREATEDB` (M-1).
 - [ ] `CONNECTION LIMIT` puesto en `demo_app`.
 - [ ] Base central creada y migrada.
 - [ ] Plantilla construida, y **ninguna** conexión de la aplicación apuntándole.

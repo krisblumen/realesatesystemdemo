@@ -45,6 +45,22 @@ el aislamiento ocurre por debajo.
 | `central` | fija, `demo_central` | El modelo `Tenant`, la cola, y el host central |
 | `maintenance` | fija, `postgres` | Sólo DDL. Nunca dentro de una petición |
 
+**Los nombres, sin ambigüedad** (hallazgo M-2 de la auditoría). Hoy el repo usa
+`demo_db` para desarrollo de un solo inquilino y `demo_test` para la suite. Al
+entrar la multi-inquilinidad:
+
+| Nombre | Qué es | Cuándo |
+|---|---|---|
+| `demo_db` | La base de desarrollo actual, de un solo inquilino | **Deja de usarse.** Sirve de origen para construir la primera plantilla |
+| `demo_central` | El padrón, la cola y las sesiones del host central | Nueva |
+| `demo_template_vN` | La plantilla vigente | Nueva |
+| `demo_t_{slug}` | Un inquilino | Una por alta |
+| `demo_test` | La suite | Se mantiene |
+
+No conviven `demo_db` y `demo_central` como si fueran lo mismo: son cosas
+distintas y la confusión hace que el alta escriba en una base y el resolver lea
+de otra.
+
 `maintenance` existe por una razón concreta: `CREATE DATABASE` no corre dentro de
 una transacción, y necesita una conexión que no esté apuntando a la base que se
 va a crear ni a una envuelta por un test.

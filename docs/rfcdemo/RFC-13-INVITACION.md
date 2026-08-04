@@ -23,8 +23,10 @@ un plumazo tres cosas que existían sólo porque cualquiera podía registrarse.
 - **Los límites de abuso** (RFC-10). La invitación es el límite. Y desaparece la
   necesidad de guardar un hash del origen de la petición: menos código y un dato
   personal menos que retener.
-- **La cola** para el alta. Nadie está esperando en una pantalla: el alta la
-  dispara un humano desde la consola y puede tardar lo que tarde.
+- **La cola para el alta**, y sólo para el alta. Nadie está esperando en una
+  pantalla: la dispara un humano desde la consola y puede tardar lo que tarde.
+  **El worker y el cron siguen haciendo falta igual**, para la expiración y el
+  borrado (RFC-09) y para los trabajos de fondo que el sistema ya tiene.
 - **La serialización estricta** del alta. Dos invitaciones simultáneas no ocurren
   cuando quien invita es una persona escribiendo un comando.
 
@@ -105,6 +107,10 @@ esos se juntan.
 1. El comando no corre desde la web. Es de consola.
 2. Imprime la contraseña una sola vez.
 3. Rechaza invitar si ya hay un inquilino activo con ese correo.
+4. **Respeta el tope duro de inquilinos activos** (RFC-10). Ese tope rige desde
+   fase 1: no protege contra un ataque público, protege contra una operación
+   humana masiva —invitar 80 correos con un bucle— que llenaría la instancia
+   igual.
 
 ## Definition of Done
 

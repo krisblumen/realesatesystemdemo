@@ -28,7 +28,10 @@ el disco es otro almacén.
 
 ## Alcance
 
-- Generador de rutas propio, con el inquilino adelante.
+- **`path_generator`** propio, con el inquilino adelante. Es esa pieza y no
+  `url_generator`: la que decide dónde se ESCRIBE el archivo es `path_generator`
+  (`config/media-library.php:144`). Cambiar sólo `url_generator` haría que las
+  URL se vean distintas y el disco colisione igual.
 - Borrado de los archivos del inquilino junto con su base.
 
 ## La ruta

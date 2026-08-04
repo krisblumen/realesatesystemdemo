@@ -174,7 +174,7 @@ abre y se cierra alrededor del DDL, y un cerrojo de sesión se iría con ella.
 | 5. Soltar cerrojo (`finally`) | — |
 | 6. Crear el `owner` del inquilino | `fallido` **y hay base a medias**: la limpieza la borra |
 | 7. Fijar `expira_en` y pasar a `activo` | `fallido`, con base a medias |
-| 8. Imprimir el acceso | Ya está `activo`; el acceso se puede reimprimir |
+| 8. Imprimir el acceso | Ya está `activo`. La contraseña **no se puede reimprimir**: está hasheada. Se regenera con un comando aparte |
 
 El paso 6 es el primero que deja basura. De ahí que el estado `fallido` no sea
 terminal para la limpieza: hay que mirar si la base existe.

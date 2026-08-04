@@ -91,7 +91,7 @@ el producto y no pudo, con un inquilino aprovisionado ocupando lugar.
 |---|---|---|
 | `aprovisionando` | El registro existe, la base todavía no | → `activo` o `fallido` |
 | `activo` | En uso, dentro de su plazo | → `expirado` |
-| `fallido` | El alta no terminó; no hay base que borrar | terminal |
+| `fallido` | El alta no terminó. **Puede haber base a medias**: la limpieza siempre comprueba si existe | terminal para el ciclo, **no para la limpieza** |
 | `expirado` | Venció el plazo; ya no se puede entrar | → `borrado` |
 | `borrado` | Base y archivos eliminados; queda sólo el rastro | terminal |
 

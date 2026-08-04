@@ -43,9 +43,13 @@ Todo lo que sigue se comprobó en este árbol, no se supone.
 - **Hay 18 consultas crudas en `app/`**, y las que tocan datos de inquilino son
   dos (`leads`, `frontend_services`). El resto es geografía, que es catálogo
   compartido. El código pasa por Eloquent casi siempre.
-- **Copiar una plantilla cuesta 0.2 s** y el resultado llega completo: 50
-  tablas, PostGIS 3.6 operativo (`ST_Centroid` verificado), los índices GIST de
-  `zones` y `postal_code_areas`, y las 6 páginas del CMS ya sembradas.
+- **Copiar una plantilla cuesta 0.2 s** y el resultado llega completo: 48 tablas
+  más 2 vistas de PostGIS —`information_schema.tables` cuenta 50, `BASE TABLE`
+  cuenta 48—, PostGIS 3.6 operativo (`ST_Centroid` verificado), los índices GIST
+  de `zones` y `postal_code_areas`, y las 6 páginas del CMS ya sembradas.
+  **El conteo de tablas no sirve como señal de completitud**: lo que hay que
+  verificar es PostGIS, las páginas, los permisos y que la tabla de usuarios esté
+  vacía.
 - **Postgres rechaza copiar una plantilla con conexiones encima.** Verificado:
   `ERROR: source database "demo_template" is being accessed by other users`.
   La documentación de 16 y de 18 lo declara igual. Producción corre 16.14;
@@ -124,8 +128,12 @@ antes de que corra un solo middleware, así que rompe el ciclo.
 
 **Por qué subdominio y no prefijo de ruta.** El prefijo obliga a tocar todas las
 rutas y toda generación de URL, y el panel de Filament se monta con
-`->path('admin')`, que es estático. Con subdominio no se toca ninguna ruta:
-`Route::domain()` y `->domain()` en el panel envuelven lo que ya existe.
+`->path('admin')`, que es estático. Con subdominio no se toca ninguna ruta.
+
+**No se declara el dominio en el panel de Filament.** Existe `Panel::domain()`,
+pero el middleware ya resuelve leyendo el `Host`, y declararlo introduciría un
+parámetro `{tenant}` en toda la generación de URL de Filament. Sería una segunda
+fuente de verdad para la misma frontera. Ver RFC-06.
 
 **El costo, dicho de frente**: hace falta DNS comodín y certificado comodín. En
 un VPS con certbot y validación DNS-01 es trabajo de una vez.
@@ -288,11 +296,15 @@ inquilino, con su propio comando y su propio informe.
 
 Una tarea programada marca `expirado` lo vencido. Otra borra:
 
-1. `pg_terminate_backend` sobre las sesiones vivas de esa base. Sin esto,
-   `DROP DATABASE` falla contra cualquiera que dejó una pestaña abierta.
-2. `DROP DATABASE`.
-3. Borrar `tenants/{slug}/` del disco.
-4. Marcar `borrado`, conservando la fila.
+1. **Cerrar la puerta**: `ALTER DATABASE ... CONNECTION LIMIT 0`.
+2. **Terminar** las sesiones vivas.
+3. `DROP DATABASE`.
+4. Borrar `tenants/{slug}/` del disco.
+5. Marcar `borrado`, conservando la fila.
+
+El paso 1 no es opcional y es el único orden vigente: sin él queda una ventana
+entre terminar y borrar por la que el navegador reconecta y el `DROP` falla.
+Contrato único en RFC-09 y en el diseño del lote F.
 
 Borrar en ese orden importa: si se borran los archivos primero y el `DROP` falla,
 queda un inquilino vivo con las imágenes rotas.
