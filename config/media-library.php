@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\Frontend\RutaDeMediosPorInquilino;
 use Spatie\ImageOptimizer\Optimizers\Avifenc;
 use Spatie\ImageOptimizer\Optimizers\Cwebp;
 use Spatie\ImageOptimizer\Optimizers\Gifsicle;
@@ -23,7 +24,6 @@ use Spatie\MediaLibrary\ResponsiveImages\TinyPlaceholderGenerator\Blurred;
 use Spatie\MediaLibrary\ResponsiveImages\WidthCalculator\FileSizeOptimizedWidthCalculator;
 use Spatie\MediaLibrary\Support\FileNamer\DefaultFileNamer;
 use Spatie\MediaLibrary\Support\FileRemover\DefaultFileRemover;
-use Spatie\MediaLibrary\Support\PathGenerator\DefaultPathGenerator;
 use Spatie\MediaLibrary\Support\UrlGenerator\DefaultUrlGenerator;
 use Spatie\MediaLibraryPro\Models\TemporaryUpload;
 
@@ -141,7 +141,12 @@ return [
     /*
      * The class that contains the strategy for determining a media file's path.
      */
-    'path_generator' => DefaultPathGenerator::class,
+    /*
+     * Antepone el inquilino a la ruta física. La librería numera desde 1 en cada
+     * base, así que sin esto la PRIMERA imagen de dos inquilinos distintos se
+     * escribe en la misma carpeta del mismo disco.
+     */
+    'path_generator' => RutaDeMediosPorInquilino::class,
 
     /*
      * The class that contains the strategy for determining how to remove files.

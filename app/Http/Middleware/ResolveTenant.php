@@ -7,6 +7,7 @@ use App\Models\Tenant;
 use App\Tenancy\InquilinoActual;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
@@ -84,6 +85,31 @@ class ResolveTenant
     /**
      * Extrae el slug de un host que YA se sabe del dominio del demo.
      */
+    /**
+     * Prefija TODAS las claves de caché con el inquilino.
+     *
+     * Se hace con el prefijo del almacén y no componiendo cada clave a mano por
+     * dos razones. La primera es que los cinco servicios del frontend arman su
+     * clave por su cuenta, con `sprintf` inline: cinco lugares son cinco
+     * oportunidades de olvidarse, y el sexto que alguien escriba el año que
+     * viene no se va a acordar de ninguno. La segunda es que así quedan
+     * cubiertas también las claves que no son del frontend.
+     *
+     * Hoy es redundante —el caché usa la conexión por defecto, así que su tabla
+     * ya vive en la base del inquilino— y va igual. El día que alguien lo mueva
+     * a Redis por rendimiento, el aislamiento por base se evapora de golpe y el
+     * prefijo es lo único que queda en pie. Sin él, esa migración le sirve la
+     * home de un inquilino a otro y nadie lo nota hasta que un prospecto lo ve.
+     */
+    private function prefijarElCache(Tenant $tenant): void
+    {
+        Config::set('cache.prefix', 't_'.$tenant->slug.'_');
+
+        // El almacén ya resuelto conserva el prefijo viejo: hay que soltarlo
+        // para que el siguiente se construya con el nuevo.
+        Cache::forgetDriver(Config::get('cache.default'));
+    }
+
     private function slugDelHost(string $host): string
     {
         $base = (string) Config::get('tenancy.dominio_base');
@@ -112,6 +138,8 @@ class ResolveTenant
         Config::set('database.connections.pgsql.database', $tenant->database);
         DB::purge('pgsql');
         Config::set('database.default', 'pgsql');
+
+        $this->prefijarElCache($tenant);
 
         app(InquilinoActual::class)->fijar($tenant);
     }
