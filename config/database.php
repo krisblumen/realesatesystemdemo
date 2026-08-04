@@ -99,6 +99,63 @@ return [
             'sslmode' => env('DB_SSLMODE', 'prefer'),
         ],
 
+        /*
+        | LA CONEXIÓN DEL INQUILINO es `pgsql`, la de arriba.
+        |
+        | El diseño la llama `tenant`; acá conserva su nombre porque renombrarla
+        | tocaría phpunit.xml, .env y docker-compose sin cambiar una sola
+        | conducta. Lo que importa es que sea LA CONEXIÓN POR DEFECTO: así los
+        | modelos existentes no se tocan y el aislamiento ocurre por debajo de
+        | ellos. Apuntar su `database` en cada petición llega con el middleware
+        | del lote D.
+        |
+        | Las dos que siguen son nuevas y NO son por defecto nunca.
+        */
+
+        /*
+        | El padrón de inquilinos, la cola y las sesiones del host central.
+        |
+        | No puede seguir el movimiento de la conexión por defecto: es la que
+        | dice A QUÉ inquilino apuntar, así que tiene que estar disponible antes
+        | de resolverlo y seguir disponible después. Todo lo que viva acá se
+        | consulta nombrando esta conexión de forma explícita.
+        */
+        'central' => [
+            'driver' => 'pgsql',
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '5432'),
+            'database' => env('DB_CENTRAL_DATABASE', 'demo_central'),
+            'username' => env('DB_USERNAME', 'postgres'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => env('DB_CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'public',
+            'sslmode' => env('DB_SSLMODE', 'prefer'),
+        ],
+
+        /*
+        | Sólo DDL: crear y borrar bases. Nunca dentro de una petición.
+        |
+        | Apunta a `postgres` —una base que siempre existe y que nunca es la que
+        | se está creando o borrando— porque `CREATE DATABASE` no puede correr
+        | sobre sí misma ni dentro de una transacción. En los tests eso además
+        | la mantiene fuera de la transacción que envuelve cada caso.
+        */
+        'maintenance' => [
+            'driver' => 'pgsql',
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '5432'),
+            'database' => 'postgres',
+            'username' => env('DB_USERNAME', 'postgres'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => env('DB_CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'public',
+            'sslmode' => env('DB_SSLMODE', 'prefer'),
+        ],
+
         'sqlsrv' => [
             'driver' => 'sqlsrv',
             'url' => env('DB_URL'),

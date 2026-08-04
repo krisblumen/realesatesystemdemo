@@ -37,7 +37,12 @@ return [
 
         'database' => [
             'driver' => 'database',
-            'connection' => env('DB_QUEUE_CONNECTION'),
+            // Fijada a la central, y no heredada de la conexión por defecto:
+            // un worker no tiene Host con el que resolver un inquilino, y el
+            // trabajo que crea la base de un inquilino corre cuando esa base
+            // todavía no existe. La cola no podría vivir adentro aunque
+            // quisiéramos.
+            'connection' => env('DB_QUEUE_CONNECTION', 'central'),
             'table' => env('DB_QUEUE_TABLE', 'jobs'),
             'queue' => env('DB_QUEUE', 'default'),
             'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
