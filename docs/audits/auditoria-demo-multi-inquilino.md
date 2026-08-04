@@ -6,6 +6,29 @@
 **Documentos auditados:** `docs/rfc/EPICA-DEMO-MULTI-INQUILINO.md`, `docs/epicas/epica-demo-multi-inquilino.md`, lotes A–F, `docs/rfcdemo/`, `docs/deployment/DEMO-MULTI-INQUILINO.md`  
 **Alcance:** diseño y premisas técnicas. Se leyó código real y `vendor/`. No se ejecutó la suite porque `.env.testing` todavía apunta a `inmo_test`.
 
+## Estado de los hallazgos (respuesta del equipo)
+
+| Hallazgo | Estado |
+|---|---|
+| C-1 `.env.testing` a `inmo_test` | **Pendiente del owner**: fuera de los permisos de archivo de Claude. Es el más urgente |
+| C-2 `fallido` con dos contratos | Corregido: terminal para el ciclo, no para la limpieza |
+| C-3 Tres órdenes de borrado | Corregido: contrato único `CONNECTION LIMIT 0` → terminar → borrar |
+| C-4 La media publicada no se cierra | **Aceptado por escrito**, no corregido. Ver RFC-14 |
+| M-1 Sin contrato de propiedad/grants | Corregido en despliegue |
+| M-2 Nombres de bases ambiguos | Corregido en el diseño del lote A |
+| M-3 «Sin cola» vs cron/worker | Corregido en RFC-13 |
+| M-4 Tope duro como fase 2 | Corregido: rige desde fase 1 |
+| M-5 «Reimprimir» contraseña | Corregido: se regenera, está hasheada |
+| M-6 `->domain()` contradictorio | Corregido a favor de RFC-06 |
+| M-7 `path_generator` vs `url_generator` | Corregido |
+| Mn-1 RFC-06 con registro en fase 1 | Corregido |
+| Mn-2 50 vs 48 tablas | **Ajustado**: los dos son correctos —`information_schema` cuenta 2 vistas de PostGIS, `BASE TABLE` no—. La conclusión del auditor vale igual: el conteo no sirve como señal de completitud |
+
+Los tres primeros críticos eran **contradicciones entre documentos escritos en
+momentos distintos**, invisibles releyendo cada uno por separado. Es exactamente
+lo que una auditoría sin historia de conversación puede encontrar y una propia
+no.
+
 ## Evidencia verificada en código real
 
 - `.env` apunta a desarrollo correcto: `DB_DATABASE=demo_db` (`.env:36-40`).

@@ -83,6 +83,34 @@ Es redundante y va igual: una ruta que alguien abra por error mañana no deberí
 además terminar indexada. La regla vale para el host central y para todos los
 subdominios de inquilino.
 
+## Límite conocido y aceptado: la media publicada NO está cerrada
+
+**El cierre alcanza al HTML, no a los bytes.** La librería de medios guarda en
+el disco `public` (`config/media-library.php:36`) y ni `Property` ni `Project`
+fuerzan un disco privado. El servidor web sirve esos archivos desde `/storage/…`
+**sin pasar por Laravel**: ni `ResolveTenant`, ni sesión, ni este RFC.
+
+O sea: alguien sin sesión que tenga la URL de una imagen publicada, la abre.
+
+Se acepta a propósito. La alternativa —servir `/storage` por Laravel— cierra el
+agujero y pone cada imagen a pasar por PHP; para un demo con pocos inquilinos y
+contenido de prueba, el intercambio no se justifica.
+
+**Lo que hay que decir en voz alta, porque es lo incómodo:**
+
+- La única barrera es que el `slug` no se adivina. Eso es **oscuridad, no control
+  de acceso**. Quien tenga la URL entra, y las URL aparecen en el HTML que el
+  propio inquilino ve y puede copiar.
+- Por lo tanto **la invitación tiene que advertirlo** (RFC-13): no subir al demo
+  nada que no pueda ser público. Si alguien evalúa el producto con fotos de un
+  cliente real, esas fotos quedan accesibles.
+- El prefijo `tenants/{slug}/` de RFC-08 sigue siendo necesario, pero resuelve
+  **colisión de archivos**, no confidencialidad. Son dos cosas distintas y
+  conviene no confundirlas.
+
+Si algún día el demo se abre al público (fase 2), esta decisión se revisa: ahí
+el contenido deja de ser sólo de conocidos.
+
 ## Lo que este RFC NO cambia
 
 **El subdominio sigue siendo la frontera.** Que el sitio esté cerrado quita la

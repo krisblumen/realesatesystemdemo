@@ -62,9 +62,11 @@ vivo con las imágenes rotas.
 
 1. Ninguna ruta de medios se compone sin el slug.
 2. El generador valida el slug antes de usarlo, aunque ya venga validado.
-3. Un inquilino no puede leer una ruta de otro aunque la adivine. Lo garantiza
-   la autorización existente sobre los controladores de medios, que ya exigen
-   pertenencia; el prefijo evita la colisión, no reemplaza el permiso.
+3. **Este RFC resuelve colisión, no confidencialidad.** El prefijo impide que
+   dos inquilinos escriban en la misma ruta. NO impide que alguien lea la ruta
+   de otro: la media vive en el disco `public` y el servidor web la sirve sin
+   pasar por Laravel. Ese límite está aceptado por escrito en RFC-14; no lo
+   cubre esta pieza y no hay que suponer que sí.
 
 ## Definition of Done
 
