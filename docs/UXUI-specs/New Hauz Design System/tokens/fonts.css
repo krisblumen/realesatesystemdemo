@@ -1,0 +1,7 @@
+/* New Hauz — Webfonts
+ * Montserrat + Inter are the brand fonts (per UX/UI guide) and are served
+ * from Google Fonts. If you need self-hosted binaries, swap these @import
+ * lines for local @font-face rules pointing at woff2 files in /assets/fonts.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700;800&display=swap');

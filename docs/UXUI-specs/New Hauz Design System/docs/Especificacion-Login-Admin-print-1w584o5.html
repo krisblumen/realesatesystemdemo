@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<style data-omelette-print-defaults>
+@media print {
+  h1, h2, h3, h4, h5, h6 { break-after: avoid; }
+  figure, table, pre, blockquote, img, svg, tr, [class~="card" i] { break-inside: avoid; }
+  img, svg { max-width: 100%; }
+  p { orphans: 3; widows: 3; }
+}
+</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NewHauz Admin · Especificación del Login</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+  :root{
+    --slate:#1E293B; --slate-hover:#0F172A; --slate-btn-dark:#334155;
+    --navy:#091A5B; --orange:#F6A300;
+    --ink:#0F172A; --body:#334155; --muted:#64748B; --hair:#E2E8F0;
+    --rad-card:16px; --rad-ctrl:12px;
+  }
+  *{box-sizing:border-box;}
+  html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{ margin:0; font-family:var(--font-body); color:var(--body); background:#9aa0ab; }
+
+  /* ---- page model ---- */
+  .page{
+    width:816px; min-height:1056px; margin:24px auto; padding:64px 68px 56px;
+    background:#fff; position:relative; box-shadow:0 8px 30px rgba(0,0,0,.18);
+    display:flex; flex-direction:column;
+  }
+  @media print{
+    body{ background:#fff; }
+    .page{ width:auto; min-height:auto; margin:0; padding:54px 56px; box-shadow:none; page-break-after:always; }
+    .page:last-child{ page-break-after:auto; }
+  }
+  @page{ size:Letter; margin:0; }
+
+  /* ---- type ---- */
+  h1,h2,h3,h4{ font-family:var(--font-display); color:var(--ink); margin:0; letter-spacing:-.01em; }
+  p{ margin:0; }
+  .eyebrow{ font-family:var(--font-display); font-weight:700; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--orange); }
+  .sec-title{ font-weight:700; font-size:24px; margin:6px 0 4px; }
+  .sec-sub{ font-size:13.5px; color:var(--muted); line-height:1.5; max-width:560px; }
+  .h3{ font-family:var(--font-display); font-weight:700; font-size:14px; color:var(--ink); letter-spacing:.02em; }
+  .lead{ font-size:14.5px; line-height:1.7; color:var(--body); }
+
+  /* ---- running header / footer ---- */
+  .runhead{ display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--hair); padding-bottom:14px; margin-bottom:26px; }
+  .runhead img{ height:26px; }
+  .runhead .doc{ font-family:var(--font-display); font-weight:600; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .runfoot{ margin-top:auto; padding-top:18px; border-top:1px solid var(--hair); display:flex; justify-content:space-between; font-size:10.5px; color:#94A3B8; font-family:var(--font-display); letter-spacing:.04em; }
+  .runfoot b{ color:var(--navy); font-weight:600; }
+
+  .sec-head{ margin-bottom:22px; }
+
+  /* ---- blocks ---- */
+  .two{ display:grid; grid-template-columns:1fr 1fr; gap:26px; }
+  .three{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+  .block{ margin-bottom:26px; }
+  .note{ background:#F8FAFC; border:1px solid var(--hair); border-left:3px solid var(--navy); border-radius:10px; padding:14px 16px; font-size:12.5px; line-height:1.6; color:var(--body); }
+  .note.amber{ border-left-color:var(--orange); }
+
+  /* ---- swatches ---- */
+  .sw-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px 22px; }
+  .sw{ display:flex; align-items:center; gap:12px; }
+  .sw .chip{ width:40px; height:40px; border-radius:9px; flex-shrink:0; border:1px solid rgba(0,0,0,.08); }
+  .sw .nm{ font-family:var(--font-display); font-weight:600; font-size:12.5px; color:var(--ink); }
+  .sw .role{ font-size:11px; color:var(--muted); margin-top:1px; }
+  .sw .hex{ font-family:var(--font-display); font-size:11px; color:var(--body); letter-spacing:.02em; text-transform:uppercase; }
+
+  /* ---- spec tables ---- */
+  table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  th,td{ text-align:left; padding:9px 12px; border-bottom:1px solid var(--hair); vertical-align:top; }
+  th{ font-family:var(--font-display); font-weight:700; font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); }
+  td.k{ font-family:var(--font-display); font-weight:600; color:var(--ink); width:38%; }
+  td code, code.in{ font-family:'SFMono-Regular',ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; background:#F1F5F9; color:#0F172A; padding:1px 6px; border-radius:5px; }
+
+  .pill{ display:inline-flex; align-items:center; gap:6px; font-family:var(--font-display); font-weight:600; font-size:11px; padding:3px 10px; border-radius:999px; }
+  .pill.slate{ background:#1E293B; color:#fff; }
+  .pill.navy{ background:rgba(9,26,91,.1); color:var(--navy); }
+  .pill.orange{ background:rgba(246,163,0,.16); color:#9A6800; }
+
+  /* ---- figures ---- */
+  .fig-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px 22px; }
+  .fig{ border:1px solid var(--hair); border-radius:12px; overflow:hidden; background:#fff; }
+  .fig .shot{ width:100%; aspect-ratio:378/516; overflow:hidden; position:relative; background:#fff; }
+  .fig .shot img{ position:absolute; top:0; left:0; width:244.5%; height:auto; display:block; }
+  .fig .cap{ display:flex; align-items:flex-start; gap:10px; padding:12px 14px; border-top:1px solid var(--hair); }
+  .fig .num{ flex-shrink:0; width:22px; height:22px; border-radius:7px; background:var(--slate); color:#fff; font-family:var(--font-display); font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; }
+  .fig .cap .t{ font-family:var(--font-display); font-weight:600; font-size:12.5px; color:var(--ink); }
+  .fig .cap .d{ font-size:11px; color:var(--muted); margin-top:2px; line-height:1.4; }
+  .fig.dark .cap{ background:#0F172A; border-top-color:#1E293B; }
+  .fig.dark .cap .t{ color:#F8FAFC; }
+  .fig.dark .cap .d{ color:#94A3B8; }
+
+  /* ---- cover ---- */
+  .cover{ justify-content:space-between; }
+  .cover .top{ display:flex; align-items:center; justify-content:space-between; }
+  .cover .top img{ height:34px; }
+  .cover .stamp{ font-family:var(--font-display); font-weight:600; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); border:1px solid var(--hair); padding:6px 12px; border-radius:999px; }
+  .cover .mid{ }
+  .cover h1{ font-size:52px; font-weight:800; line-height:1.04; color:var(--navy); }
+  .cover h1 span{ color:var(--orange); }
+  .cover .desc{ font-size:16px; line-height:1.6; color:var(--body); max-width:520px; margin-top:20px; }
+  .cover .meta{ display:grid; grid-template-columns:1fr 1fr; gap:14px 30px; margin-top:8px; }
+  .cover .meta .row .l{ font-family:var(--font-display); font-weight:700; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+  .cover .meta .row .v{ font-size:13.5px; color:var(--ink); margin-top:3px; font-weight:500; }
+  .cover .rule{ height:4px; width:64px; background:var(--orange); border-radius:2px; margin:30px 0; }
+
+  ul.clean{ margin:0; padding:0; list-style:none; }
+  ul.clean li{ position:relative; padding:7px 0 7px 26px; font-size:13px; line-height:1.5; border-bottom:1px solid #F1F5F9; }
+  ul.clean li:last-child{ border-bottom:none; }
+  ul.clean li::before{ content:""; position:absolute; left:4px; top:13px; width:8px; height:8px; border-radius:50%; background:var(--orange); }
+  ul.clean li b{ color:var(--ink); font-family:var(--font-display); }
+
+  .toc{ margin-top:26px; }
+  .toc .row{ display:flex; align-items:baseline; gap:12px; padding:11px 0; border-bottom:1px solid #F1F5F9; }
+  .toc .n{ font-family:var(--font-display); font-weight:800; font-size:14px; color:var(--orange); width:30px; }
+  .toc .ttl{ font-family:var(--font-display); font-weight:600; font-size:14px; color:var(--ink); }
+  .toc .dots{ flex:1; border-bottom:1px dotted #CBD5E1; transform:translateY(-4px); }
+  .toc .pg{ font-family:var(--font-display); font-size:12px; color:var(--muted); }
+
+  .mini-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+  .meas{ font-family:var(--font-display); font-weight:700; font-size:13px; color:var(--ink); }
+  .meas small{ font-weight:500; color:var(--muted); font-size:11px; }
+</style>
+</head>
+<body>
+
+<!-- ============ PAGE 1 · COVER ============ -->
+<section class="page cover">
+  <div class="top">
+    <img src="../assets/logos/newhauz-logo-color.png" alt="New Hauz">
+    <div class="stamp">Especificación de Diseño · v1.0</div>
+  </div>
+
+  <div class="mid">
+    <div class="eyebrow" style="margin-bottom:18px;">NewHauz Admin System · Panel Interno</div>
+    <h1>Pantalla de<br>Inicio de Sesión<br><span>Especificación UI</span></h1>
+    <div class="rule"></div>
+    <p class="desc">Documento de especificación de alta fidelidad para la pantalla de <b>login</b> del panel administrativo interno. Estética <i>luxury corporate</i> en tono administrativo: glassmorphism sobrio, base gris/blanco, slate como color de acción y la marca (azul · naranja) sólo como acento.</p>
+  </div>
+
+  <div>
+    <div class="meta">
+      <div class="row"><div class="l">Producto</div><div class="v">NewHauz Admin System</div></div>
+      <div class="row"><div class="l">Stack objetivo</div><div class="v">Laravel 13 · Livewire 3 · Filament v3</div></div>
+      <div class="row"><div class="l">Idioma de interfaz</div><div class="v">Español (es-MX)</div></div>
+      <div class="row"><div class="l">Modos</div><div class="v">Claro · Oscuro</div></div>
+      <div class="row"><div class="l">Tono</div><div class="v">Sobrio · minimalista · premium</div></div>
+      <div class="row"><div class="l">Autoría</div><div class="v">By GESIF · 2026</div></div>
+    </div>
+
+    <div class="toc">
+      <div class="row"><span class="n">01</span><span class="ttl">Objetivo y principios</span><span class="dots"></span><span class="pg">02</span></div>
+      <div class="row"><span class="n">02</span><span class="ttl">Tokens — color, tipografía, forma</span><span class="dots"></span><span class="pg">03</span></div>
+      <div class="row"><span class="n">03</span><span class="ttl">Layout y anatomía de la tarjeta</span><span class="dots"></span><span class="pg">04</span></div>
+      <div class="row"><span class="n">04</span><span class="ttl">Especificación de componentes</span><span class="dots"></span><span class="pg">05</span></div>
+      <div class="row"><span class="n">05</span><span class="ttl">Estados y variantes</span><span class="dots"></span><span class="pg">06</span></div>
+      <div class="row"><span class="n">06</span><span class="ttl">Modo oscuro</span><span class="dots"></span><span class="pg">07</span></div>
+      <div class="row"><span class="n">07</span><span class="ttl">Implementación en Filament v3</span><span class="dots"></span><span class="pg">08</span></div>
+    </div>
+  </div>
+
+  <div class="runfoot"><span>NewHauz Admin System — Especificación del Login</span><span>By <b>GESIF</b> · © 2026 · Pág. 01</span></div>
+</section>
+
+<!-- ============ PAGE 2 · OBJETIVO + PRINCIPIOS ============ -->
+<section class="page">
+  <div class="runhead"><img src="../assets/logos/newhauz-logo-color.png" alt="New Hauz"><span class="doc">01 · Objetivo y principios</span></div>
+
+  <div class="sec-head">
+    <div class="eyebrow">Sección 01</div>
+    <h2 class="sec-title">Objetivo y principios de diseño</h2>
+    <p class="sec-sub">La pantalla de login es la primera impresión del sistema interno. Debe transmitir control, calma y solidez — no es marketing. Prioriza claridad, jerarquía y discreción.</p>
+  </div>
+
+  <div class="block">
+    <p class="lead">A diferencia del sitio público de New Hauz —comercial y cinematográfico— el panel administrativo es una <b>herramienta de trabajo</b>. El lenguaje visual se baja de tono: el azul y el naranja de marca dejan de ser protagonistas y pasan a ser <b>acentos pequeños</b>. El color de acción es un <b>slate sobrio</b>; el naranja aparece únicamente para señalar el <b>foco activo</b> de un campo.</p>
+  </div>
+
+  <div class="block">
+    <div class="h3" style="margin-bottom:12px;">Principios rectores</div>
+    <ul class="clean">
+      <li><b>Base neutra.</b> Gris y blanco dominan toda la superficie. Ningún color de marca se usa como fondo ni como relleno de botón principal.</li>
+      <li><b>Acento, no protagonismo.</b> Azul <code class="in">#091A5B</code> y naranja <code class="in">#F6A300</code> se reservan para detalles mínimos: foco, enlaces hover, firma del pie.</li>
+      <li><b>Glass sobrio.</b> Glassmorphism estilo iOS 18 —blur + saturación— pero contenido y legible, sin saturar de transparencias.</li>
+      <li><b>Jerarquía única.</b> Una sola acción primaria (“Entrar”). Todo lo demás es secundario y silencioso.</li>
+      <li><b>Calma sobre densidad.</b> Espaciado generoso, una columna, foco en la tarjeta centrada.</li>
+      <li><b>Realizable en Filament.</b> Todo el diseño se construye con CSS estándar; sin librerías externas ni animaciones imposibles.</li>
+    </ul>
+  </div>
+
+  <div class="two">
+    <div class="note">
+      <b>Qué SÍ es.</b><br>Una utilidad interna premium y discreta — “luxury corporate” bajado a tono administrativo. Slate como acción, marca como acento, mucho aire.
+    </div>
+    <div class="note amber">
+      <b>Qué NO es.</b><br>No es la home pública. Sin héroes a pantalla completa, sin naranja como botón, sin fondos de color de marca, sin lenguaje comercial.
+    </div>
+  </div>
+
+  <div class="runfoot"><span>NewHauz Admin System — Especificación del Login</span><span>By <b>GESIF</b> · © 2026 · Pág. 02</span></div>
+</section>
+
+<!-- ============ PAGE 3 · TOKENS ============ -->
+<section class="page">
+  <div class="runhead"><img src="../assets/logos/newhauz-logo-color.png" alt="New Hauz"><span class="doc">02 · Tokens</span></div>
+
+  <div class="sec-head">
+    <div class="eyebrow">Sección 02</div>
+    <h2 class="sec-title">Tokens de diseño</h2>
+    <p class="sec-sub">Variables de color, tipografía y forma que gobiernan la pantalla. El naranja es el único color de marca visible en reposo, y sólo en el anillo de foco.</p>
+  </div>
+
+  <div class="block">
+    <div class="h3" style="margin-bottom:14px;">Color · acción y marca</div>
+    <div class="sw-grid">
+      <div class="sw"><div class="chip" style="background:#1E293B"></div><div><div class="nm">Slate · acción <span class="hex">#1E293B</span></div><div class="role">Botón primario, checkbox, número de paso</div></div></div>
+      <div class="sw"><div class="chip" style="background:#0F172A"></div><div><div class="nm">Slate hover <span class="hex">#0F172A</span></div><div class="role">Hover del botón primario (modo claro)</div></div></div>
+      <div class="sw"><div class="chip" style="background:#091A5B"></div><div><div class="nm">Azul de marca <span class="hex">#091A5B</span></div><div class="role">Acento: enlace hover, firma “By GESIF”</div></div></div>
+      <div class="sw"><div class="chip" style="background:#F6A300"></div><div><div class="nm">Naranja de marca <span class="hex">#F6A300</span></div><div class="role">Acento: SÓLO anillo y borde de foco</div></div></div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="h3" style="margin-bottom:14px;">Color · superficie y texto</div>
+    <div class="sw-grid">
+      <div class="sw"><div class="chip" style="background:linear-gradient(160deg,#F7F7F7,#EAEAEA)"></div><div><div class="nm">Fondo claro</div><div class="role">#F7F7F7 → #EAEAEA + halo radial azul tenue</div></div></div>
+      <div class="sw"><div class="chip" style="background:linear-gradient(160deg,#111,#2D2D2D)"></div><div><div class="nm">Fondo oscuro</div><div class="role">#111111 → #2D2D2D + halo radial naranja tenue</div></div></div>
+      <div class="sw"><div class="chip" style="background:rgba(255,255,255,.66);box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)"></div><div><div class="nm">Tarjeta glass (claro)</div><div class="role">blanco 66% · borde blanco 75%</div></div></div>
+      <div class="sw"><div class="chip" style="background:#1c1e24"></div><div><div class="nm">Tarjeta glass (oscuro)</div><div class="role">#1C1E24 55% · borde blanco 12%</div></div></div>
+      <div class="sw"><div class="chip" style="background:#E2E8F0"></div><div><div class="nm">Borde input <span class="hex">#E2E8F0</span></div><div class="role">Borde de campo en reposo (claro)</div></div></div>
+      <div class="sw"><div class="chip" style="background:#64748B"></div><div><div class="nm">Texto sutil <span class="hex">#64748B</span></div><div class="role">Subtítulo, enlaces, placeholders</div></div></div>
+    </div>
+  </div>
+
+  <div class="two">
+    <div>
+      <div class="h3" style="margin-bottom:10px;">Tipografía</div>
+      <table>
+        <tr><td class="k">Títulos / botón</td><td>Montserrat · 600–700</td></tr>
+        <tr><td class="k">Labels / inputs</td><td>Inter · 400–500</td></tr>
+        <tr><td class="k">“Iniciar sesión”</td><td>Montserrat 600 · 21px</td></tr>
+        <tr><td class="k">Subtítulo</td><td>Inter 400 · 13.5px</td></tr>
+        <tr><td class="k">Label de campo</td><td>Inter 500 · 12.5px</td></tr>
+        <tr><td class="k">Texto de input</td><td>Inter 400 · 14.5px</td></tr>
+        <tr><td class="k">Botón</td><td>Montserrat 600 · 15px</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="h3" style="margin-bottom:10px;">Forma y movimiento</div>
+      <table>
+        <tr><td class="k">Radio tarjeta</td><td><code>16px</code></td></tr>
+        <tr><td class="k">Radio inputs / botón</td><td><code>12px</code></td></tr>
+        <tr><td class="k">Alto input / botón</td><td><code>52px</code></td></tr>
+        <tr><td class="k">Ancho tarjeta</td><td><code>~360px</code> · padding 38px</td></tr>
+        <tr><td class="k">Blur glass</td><td><code>blur(20px) saturate(180%)</code></td></tr>
+        <tr><td class="k">Transiciones</td><td><code>200ms ease</code></td></tr>
+        <tr><td class="k">Anillo de foco</td><td>borde naranja + <code>0 0 0 3px rgba(246,163,0,.22)</code></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="runfoot"><span>NewHauz Admin System — Especificación del Login</span><span>By <b>GESIF</b> · © 2026 · Pág. 03</span></div>
+</section>
+
+<!-- ============ PAGE 4 · LAYOUT / ANATOMÍA ============ -->
+<section class="page">
+  <div class="runhead"><img src="../assets/logos/newhauz-logo-color.png" alt="New Hauz"><span class="doc">03 · Layout y anatomía</span></div>
+
+  <div class="sec-head">
+    <div class="eyebrow">Sección 03</div>
+    <h2 class="sec-title">Layout y anatomía de la tarjeta</h2>
+    <p class="sec-sub">Pantalla completa, contenido centrado vertical y horizontalmente. El logo flota encima de la tarjeta glass; el pie de firma queda debajo.</p>
+  </div>
+
+  <div class="two" style="align-items:start;">
+    <div class="fig" style="border-radius:12px;">
+      <div class="shot"><img src="../screenshots/01-fig.png" alt="Login por defecto"></div>
+    </div>
+    <div>
+      <div class="h3" style="margin-bottom:12px;">Orden vertical (de arriba a abajo)</div>
+      <ul class="clean">
+        <li><b>Logo</b> — alto ~40px, centrado, flotando sobre el borde superior de la tarjeta (solape ~20px).</li>
+        <li><b>Título</b> — “Iniciar sesión” (Montserrat 600).</li>
+        <li><b>Subtítulo</b> — “Accede a tu panel de administración”.</li>
+        <li><b>Banner de estado</b> — opcional (error / suspensión).</li>
+        <li><b>Campo</b> — Correo electrónico.</li>
+        <li><b>Campo</b> — Contraseña, con icono mostrar/ocultar.</li>
+        <li><b>Fila meta</b> — “Recordarme” + “¿Olvidaste tu contraseña?”.</li>
+        <li><b>Botón</b> — “Entrar”, ancho completo.</li>
+        <li><b>Pie</b> — firma, debajo y fuera de la tarjeta.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="block" style="margin-top:24px;">
+    <div class="h3" style="margin-bottom:12px;">Medidas clave</div>
+    <table>
+      <tr><th>Elemento</th><th>Valor</th><th>Notas</th></tr>
+      <tr><td class="k">Tarjeta</td><td>ancho ~360px · padding 38px 34px 32px · radio 16px</td><td>Glass translúcido + blur 20px</td></tr>
+      <tr><td class="k">Logo</td><td>alto 40px · margin-bottom −20px</td><td>Solapa la tarjeta; z-index sobre el glass</td></tr>
+      <tr><td class="k">Inputs</td><td>alto 52px · radio 12px · padding 0 16px</td><td>Label encima, Inter 12.5px</td></tr>
+      <tr><td class="k">Separación campos</td><td>16px entre bloques</td><td>Fila meta 4–22px</td></tr>
+      <tr><td class="k">Botón</td><td>alto 52px · ancho 100% · radio 12px</td><td>Slate, texto blanco Montserrat 600</td></tr>
+      <tr><td class="k">Pie</td><td>texto 12px · gris · centrado</td><td>“By GESIF” en azul sutil</td></tr>
+    </table>
+  </div>
+
+  <div class="note amber"><b>Fondo.</b> En claro: degradado <code class="in">#F7F7F7 → #EAEAEA</code> con halo radial azul muy tenue centrado arriba. En oscuro: <code class="in">#111111 → #2D2D2D</code> con halo radial naranja muy tenue. El halo aporta profundidad sin introducir color de fondo saturado.</div>
+
+  <div class="runfoot"><span>NewHauz Admin System — Especificación del Login</span><span>By <b>GESIF</b> · © 2026 · Pág. 04</span></div>
+</section>
+
+<!-- ============ PAGE 5 · COMPONENTES ============ -->
+<section class="page">
+  <div class="runhead"><img src="../assets/logos/newhauz-logo-color.png" alt="New Hauz"><span class="doc">04 · Componentes</span></div>
+
+  <div class="sec-head">
+    <div class="eyebrow">Sección 04</div>
+    <h2 class="sec-title">Especificación de componentes</h2>
+    <p class="sec-sub">Cada control con su estado base e interacción. Las transiciones son de 200ms; el naranja sólo aparece en el foco.</p>
+  </div>
+
+  <table>
+    <tr><th>Componente</th><th>Reposo</th><th>Interacción</th></tr>
+    <tr>
+      <td class="k">Input (texto / email / password)</td>
+      <td>Fondo blanco · borde <code>#E2E8F0</code> 1.5px · radio 12px · alto 52px · label Inter encima</td>
+      <td><b>Foco:</b> borde naranja <code>#F6A300</code> + anillo <code>0 0 0 3px rgba(246,163,0,.22)</code></td>
+    </tr>
+    <tr>
+      <td class="k">Mostrar / ocultar contraseña</td>
+      <td>Icono ojo (línea, 1.8) gris <code>#94A3B8</code>, a la derecha del campo</td>
+      <td>Hover gris más oscuro; alterna ojo / ojo-tachado y <code>type</code></td>
+    </tr>
+    <tr>
+      <td class="k">Checkbox “Recordarme”</td>
+      <td>16px · <code>accent-color</code> slate · label Inter 13px</td>
+      <td>Nativo; en oscuro el accent pasa a naranja</td>
+    </tr>
+    <tr>
+      <td class="k">Enlace “¿Olvidaste tu contraseña?”</td>
+      <td>Inter 13px · gris <code>#64748B</code> · sin subrayado</td>
+      <td><b>Hover:</b> azul de marca <code>#091A5B</code> (naranja en oscuro)</td>
+    </tr>
+    <tr>
+      <td class="k">Botón primario “Entrar”</td>
+      <td>Fondo slate <code>#1E293B</code> · texto blanco · Montserrat 600 · 52px · radio 12px</td>
+      <td><b>Hover:</b> oscurece a <code>#0F172A</code> + eleva 1px + sombra suave</td>
+    </tr>
+    <tr>
+      <td class="k">Botón · cargando</td>
+      <td>Disabled · opacidad 0.92 · spinner 17px + “Entrando…”</td>
+      <td>Spinner girando (<code>0.7s</code> lineal infinito)</td>
+    </tr>
+    <tr>
+      <td class="k">Banner error</td>
+      <td>Rojo: fondo <code>rgba(220,38,38,.09)</code> · borde <code>.28</code> · texto <code>#B91C1C</code> · icono alerta</td>
+      <td>Aparece sobre los campos; campos a estado error</td>
+    </tr>
+    <tr>
+      <td class="k">Banner suspensión</td>
+      <td>Ámbar: fondo <code>rgba(246,163,0,.12)</code> · borde <code>.42</code> · texto <code>#92400E</code></td>
+      <td>Bloquea acceso; no marca campos en error</td>
+    </tr>
+    <tr>
+      <td class="k">Campo en error</td>
+      <td>Borde rojo <code>#DC2626</code> + fondo rojo 4%</td>
+      <td>Foco: anillo rojo <code>0 0 0 3px rgba(220,38,38,.18)</code></td>
+    </tr>
+  </table>
+
+  <div class="mini-row" style="margin-top:22px;">
+    <span class="pill slate">Acción = slate</span>
+    <span class="pill orange">Foco = naranja</span>
+    <span class="pill navy">Enlace hover = azul</span>
+  </div>
+  <p class="lead" style="margin-top:14px;">Regla de oro del color: el <b>naranja de marca sólo es visible en reposo cuando un campo tiene el foco</b>. Ninguna otra superficie en estado normal usa naranja. Esto mantiene el panel sobrio y dirige la atención del usuario al campo activo.</p>
+
+  <div class="runfoot"><span>NewHauz Admin System — Especificación del Login</span><span>By <b>GESIF</b> · © 2026 · Pág. 05</span></div>
+</section>
+
+<!-- ============ PAGE 6 · ESTADOS (CLARO) ============ -->
+<section class="page">
+  <div class="runhead"><img src="../assets/logos/newhauz-logo-color.png" alt="New Hauz"><span class="doc">05 · Estados y variantes</span></div>
+
+  <div class="sec-head">
+    <div class="eyebrow">Sección 05 · Modo claro</div>
+    <h2 class="sec-title">Estados y variantes</h2>
+    <p class="sec-sub">Las cinco variantes obligatorias en modo claro. Cada una se construye con los mismos componentes; sólo cambian estado de borde, banner y botón.</p>
+  </div>
+
+  <div class="fig-grid">
+    <div class="fig"><div class="shot"><img src="../screenshots/01-fig.png" alt="Estado 01"></div><div class="cap"><span class="num">1</span><div><div class="t">Por defecto</div><div class="d">Estado inicial limpio. Campos en reposo, botón slate.</div></div></div></div>
+    <div class="fig"><div class="shot"><img src="../screenshots/02-fig.png" alt="Estado 02"></div><div class="cap"><span class="num">2</span><div><div class="t">Input con foco</div><div class="d">Contraseña enfocada: borde + anillo naranja (único naranja en reposo).</div></div></div></div>
+    <div class="fig"><div class="shot"><img src="../screenshots/03-fig.png" alt="Estado 03"></div><div class="cap"><span class="num">3</span><div><div class="t">Error de credenciales</div><div class="d">Banner rojo “Credenciales incorrectas” + ambos campos en error.</div></div></div></div>
+    <div class="fig"><div class="shot"><img src="../screenshots/04-fig.png" alt="Estado 04"></div><div class="cap"><span class="num">4</span><div><div class="t">Cuenta suspendida</div><div class="d">Aviso ámbar de bloqueo. No marca los campos en error.</div></div></div></div>
+    <div class="fig"><div class="shot"><img src="../screenshots/05-fig.png" alt="Estado 05"></div><div class="cap"><span class="num">5</span><div><div class="t">Botón cargando</div><div class="d">Spinner + “Entrando…”, botón deshabilitado durante el envío.</div></div></div></div>
+    <div class="fig" style="display:flex;align-items:center;justify-content:center;background:#F8FAFC;">
+      <div style="padding:22px;text-align:center;">
+        <div class="meas" style="font-size:15px;">5 variantes · modo claro</div>
+        <p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;">Mismas medidas y tokens en todos los estados. El modo oscuro (pág. 07) reproduce estos estados clave sobre superficie translúcida oscura.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="runfoot"><span>NewHauz Admin System — Especificación del Login</span><span>By <b>GESIF</b> · © 2026 · Pág. 06</span></div>
+</section>
+
+<!-- ============ PAGE 7 · MODO OSCURO ============ -->
+<section class="page">
+  <div class="runhead"><img src="../assets/logos/newhauz-logo-color.png" alt="New Hauz"><span class="doc">06 · Modo oscuro</span></div>
+
+  <div class="sec-head">
+    <div class="eyebrow">Sección 06</div>
+    <h2 class="sec-title">Modo oscuro</h2>
+    <p class="sec-sub">Misma anatomía sobre fondo oscuro y tarjeta translúcida oscura. El logo cambia a <code class="in">logo-on-dark.png</code> y los acentos se invierten: el naranja toma más presencia en hover y checkbox.</p>
+  </div>
+
+  <div class="two" style="align-items:start;">
+    <div class="fig dark"><div class="shot"><img src="../screenshots/06-fig.png" alt="Estado 06"></div><div class="cap"><span class="num">6</span><div><div class="t">Por defecto (oscuro)</div><div class="d">Tarjeta glass oscura 55%, borde blanco 12%, botón slate <code>#334155</code>.</div></div></div></div>
+    <div class="fig dark"><div class="shot"><img src="../screenshots/07-fig.png" alt="Estado 07"></div><div class="cap"><span class="num">7</span><div><div class="t">Foco + error (oscuro)</div><div class="d">Anillo naranja sobre el campo activo y estado de error en rojo claro.</div></div></div></div>
+  </div>
+
+  <div class="block" style="margin-top:24px;">
+    <div class="h3" style="margin-bottom:12px;">Ajustes específicos del modo oscuro</div>
+    <table>
+      <tr><th>Token</th><th>Claro</th><th>Oscuro</th></tr>
+      <tr><td class="k">Fondo</td><td>#F7F7F7 → #EAEAEA · halo azul</td><td>#111111 → #2D2D2D · halo naranja</td></tr>
+      <tr><td class="k">Tarjeta</td><td>blanco 66% · borde blanco 75%</td><td>#1C1E24 55% · borde blanco 12%</td></tr>
+      <tr><td class="k">Logo</td><td>logo-on-light (azul/naranja)</td><td>logo-on-dark (blanco/amarillo)</td></tr>
+      <tr><td class="k">Botón</td><td>#1E293B → hover #0F172A</td><td>#334155 → hover #1E293B</td></tr>
+      <tr><td class="k">Input</td><td>blanco · borde #E2E8F0</td><td>negro 50% · borde blanco 14%</td></tr>
+      <tr><td class="k">Checkbox accent</td><td>slate #1E293B</td><td>naranja #F6A300</td></tr>
+      <tr><td class="k">Enlace hover</td><td>azul #091A5B</td><td>naranja #F6A300</td></tr>
+      <tr><td class="k">Firma “By GESIF”</td><td>azul #091A5B</td><td>azul claro #7C9BE8</td></tr>
+    </table>
+  </div>
+
+  <div class="runfoot"><span>NewHauz Admin System — Especificación del Login</span><span>By <b>GESIF</b> · © 2026 · Pág. 07</span></div>
+</section>
+
+<!-- ============ PAGE 8 · FILAMENT ============ -->
+<section class="page">
+  <div class="runhead"><img src="../assets/logos/newhauz-logo-color.png" alt="New Hauz"><span class="doc">07 · Implementación</span></div>
+
+  <div class="sec-head">
+    <div class="eyebrow">Sección 07</div>
+    <h2 class="sec-title">Implementación en Filament v3</h2>
+    <p class="sec-sub">El diseño está pensado para realizarse con CSS sobre la página de login de Filament, sin librerías externas. Guía práctica de aterrizaje.</p>
+  </div>
+
+  <div class="block">
+    <ul class="clean">
+      <li><b>Vista de login.</b> Personaliza la página de autenticación de Filament (panel provider → <code class="in">login()</code>) y publica/extiende su Blade para envolver la tarjeta glass.</li>
+      <li><b>CSS de tema.</b> Carga un CSS propio vía <code class="in">FilamentAsset::register([Css::make(...)])</code>; ahí viven los tokens, el glass y los estados.</li>
+      <li><b>Modo oscuro.</b> Usa el toggle nativo de Filament; condiciona los tokens con la clase <code class="in">.dark</code> que Filament aplica al raíz.</li>
+      <li><b>Glass.</b> <code class="in">backdrop-filter: blur(20px) saturate(180%)</code> sobre fondo blanco/oscuro translúcido; añade <code class="in">-webkit-</code> para Safari.</li>
+      <li><b>Foco naranja.</b> Aplica al <code class="in">:focus</code> de inputs: <code class="in">border-color:#F6A300</code> + <code class="in">box-shadow:0 0 0 3px rgba(246,163,0,.22)</code>.</li>
+      <li><b>Estados de error / suspensión.</b> Renderiza los banners desde la validación de Livewire (<code class="in">@error</code> / mensaje de cuenta suspendida) reusando las clases <code class="in">.alert-error</code> / <code class="in">.alert-suspend</code>.</li>
+      <li><b>Estado de carga.</b> Usa <code class="in">wire:loading</code> / <code class="in">wire:target</code> para alternar el spinner y el texto “Entrando…” y deshabilitar el botón.</li>
+      <li><b>Tipografía.</b> Registra Montserrat e Inter como webfonts del panel; aplica Montserrat a títulos y botón, Inter a labels e inputs.</li>
+    </ul>
+  </div>
+
+  <div class="two">
+    <div class="note"><b>Accesibilidad.</b> Contraste AA en texto y botón; foco siempre visible (anillo naranja); <code class="in">label</code> asociado a cada input; el botón de mostrar/ocultar contraseña con <code class="in">aria-label</code>.</div>
+    <div class="note amber"><b>Recursos.</b> Logos en <code class="in">assets/logos/</code> (claro · oscuro · monograma). Mockup interactivo de referencia: <code class="in">ui_kits/admin/login.html</code>.</div>
+  </div>
+
+  <div class="block" style="margin-top:24px;">
+    <div class="h3" style="margin-bottom:12px;">Checklist de entrega</div>
+    <table>
+      <tr><td class="k">✓ Modo claro · 5 estados</td><td>Por defecto, foco, error, suspensión, cargando</td></tr>
+      <tr><td class="k">✓ Modo oscuro · estados clave</td><td>Por defecto + foco/error</td></tr>
+      <tr><td class="k">✓ Color sobrio</td><td>Slate acción · naranja sólo en foco · azul en acento</td></tr>
+      <tr><td class="k">✓ Glass realizable</td><td>blur + saturación, sin librerías externas</td></tr>
+      <tr><td class="k">✓ Tipografía</td><td>Montserrat títulos/botón · Inter labels/inputs</td></tr>
+    </table>
+  </div>
+
+  <div class="runfoot"><span>NewHauz Admin System — Especificación del Login</span><span>By <b>GESIF</b> · © 2026 · Pág. 08</span></div>
+</section>
+
+<script>
+(async () => {
+  if (!document.title || !document.title.trim()) document.title = "Especificacion-Login-Admin";
+  // Prepend so page-supplied @page / break rules (deck-stage's margin:0,
+  // author CSS) keep source-order precedence over the baseline.
+  const baseCss = document.createElement('style');
+  baseCss.textContent = "@media print {\n  @page { margin: 0.5cm; }\n  figure, table { break-inside: avoid; }\n  *, *::before, *::after {\n    print-color-adjust: exact; -webkit-print-color-adjust: exact;\n    backdrop-filter: none !important; -webkit-backdrop-filter: none !important;\n    animation-delay: -99s !important; animation-duration: .001s !important;\n    animation-iteration-count: 1 !important; animation-fill-mode: both !important;\n    animation-play-state: running !important; transition-duration: 0s !important;\n  }\n}";
+  document.head.prepend(baseCss);
+  if (document.readyState === 'loading') {
+    await new Promise((r) => document.addEventListener('DOMContentLoaded', r, { once: true }));
+  }
+  let ds = document.querySelector('deck-stage');
+  // whenDefined never resolves when nothing registers the element, so only
+  // await it when a <deck-stage> tag exists (and race a timeout regardless).
+  if (ds && !customElements.get('deck-stage')) {
+    try {
+      await Promise.race([
+        customElements.whenDefined('deck-stage'),
+        new Promise((r) => setTimeout(r, 3000)),
+      ]);
+    } catch (e) {}
+    ds = document.querySelector('deck-stage');
+  }
+  // dc-runtime assigns window.DCLogic at init and mounts into #dc-root on
+  // DOMContentLoaded; settle on that subtree so React has rendered before
+  // print(). Non-DC pages fall through to weighing body.
+  const isDc = !ds && 'DCLogic' in window;
+  const settleRoot = ds || (isDc ? document.getElementById('dc-root') : null) || document.body;
+  if (settleRoot) {
+    // Weigh only content children — skip script/style/template so inline
+    // Babel/CSS doesn't register as stable "content" before the framework
+    // has mounted anything.
+    const MEDIA = 'img,svg,canvas,video,picture,iframe,embed,object';
+    const weigh = () => {
+      let text = 0, media = 0;
+      for (const c of settleRoot.children) {
+        const t = c.tagName;
+        if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+        text += (c.textContent || '').trim().length;
+        media += c.querySelectorAll(MEDIA).length + (c.matches(MEDIA) ? 1 : 0);
+      }
+      return text + media * 100;
+    };
+    // "Non-zero and stable" alone is not sufficient to mean rendered: generic
+    // body can carry a static shell while async main content is pending, and
+    // #dc-root can carry the root DC's static text while child refs are still
+    // .sc-placeholder boxes. Gate generic on readyState 'complete', and never
+    // accept stability while a dc-runtime placeholder is present.
+    const isGeneric = settleRoot === document.body;
+    const deadline = Date.now() + 15000;
+    let last = -1, stable = 0;
+    while (Date.now() < deadline) {
+      const n = weigh();
+      const ready =
+        (!isGeneric || document.readyState === 'complete') &&
+        !settleRoot.querySelector('.sc-placeholder');
+      if (n > 0 && n === last && ready) { if (++stable >= 2) break; } else { stable = 0; }
+      last = n;
+      await new Promise((r) => setTimeout(r, 250));
+    }
+  }
+  // Reveal content gated on scroll or visibility before printing. Lazy <img>,
+  // IntersectionObserver fade-ins, and collapsed <details> don't render while
+  // off-screen, so a long page would print with them blank or closed. Open
+  // every <details>, force native-lazy images eager, and scroll the document
+  // through its full height to trip lazy-load + IO; then wait (bounded) for the
+  // newly-triggered images. Inert for deck-stage (slides aren't scroll-gated).
+  try {
+    for (const d of document.querySelectorAll('details')) d.open = true;
+    for (const img of document.querySelectorAll('img[loading="lazy"]'))
+      img.loading = 'eager';
+    const scroller = document.scrollingElement || document.documentElement;
+    const full = Math.max(scroller.scrollHeight, document.body.scrollHeight);
+    const step = window.innerHeight || 800;
+    for (let y = 0; y <= full; y += step) {
+      window.scrollTo(0, y);
+      await new Promise((r) => requestAnimationFrame(r));
+    }
+    window.scrollTo(0, 0);
+    await Promise.race([
+      Promise.all(
+        [...document.images].map((img) =>
+          img.complete
+            ? null
+            : new Promise((res) => {
+                img.addEventListener('load', res, { once: true });
+                img.addEventListener('error', res, { once: true });
+              })
+        )
+      ),
+      new Promise((r) => setTimeout(r, 4000)),
+    ]);
+  } catch (e) {}
+  try { await document.fonts.ready; } catch (e) {}
+  // Jump every animation to its end state so print() never captures a slide
+  // mid-entrance. Ordering matters: the 0s-transition style must be live
+  // BEFORE data-deck-active is set so attribute-keyed transitions don't
+  // start a (now-0s) run from the pre-active base.
+  const st = document.createElement('style');
+  st.textContent = '*,*::before,*::after{animation-delay:-99s !important;animation-duration:.001s !important;animation-iteration-count:1 !important;animation-fill-mode:both !important;animation-play-state:running !important;transition-duration:0s !important}';
+  document.head.appendChild(st);
+  for (const d of document.querySelectorAll('deck-stage')) {
+    for (const c of d.children) {
+      const t = c.tagName;
+      if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+      c.setAttribute('data-deck-active', '');
+    }
+  }
+  // Re-append deck-stage's @page last so no author @page can add a margin and
+  // spill each full-bleed slide onto two sheets. Backstop for old copies.
+  if (ds) {
+    let pg = document.getElementById('deck-stage-print-page');
+    if (!pg) {
+      pg = document.createElement('style');
+      pg.textContent = '@page{size:' + (+ds.getAttribute('width') || 1920) +
+        'px ' + (+ds.getAttribute('height') || 1080) + 'px;margin:0}';
+    }
+    document.body.appendChild(pg);
+  }
+  try {
+    const sweep = () => {
+      for (const a of document.getAnimations()) {
+        try { a.finish(); } catch (e) {
+          try { a.currentTime = (a.effect && a.effect.getComputedTiming().duration) || 0; a.pause(); } catch (e2) {}
+        }
+      }
+    };
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+  } catch (e) {}
+  // Relax break-inside on oversized elements. An element taller than a
+  // printable page can't honor break-inside: avoid — browsers either overflow
+  // it or push it whole to the next page, leaving a blank gap, then break it
+  // anyway at an arbitrary point. After the final layout (content revealed,
+  // animations jumped), find elements taller than a page that still compute
+  // break-inside: avoid and reset them to auto, so the browser breaks them at
+  // their children's boundaries instead (children keep their own avoid). PAGE_PX
+  // is a conservative portrait estimate at 96 CSS px/in — Letter/A4 usable
+  // height minus our 0.5in margins — so only clearly-oversized elements are
+  // touched and under-page elements still stay whole. Skipped for decks, whose
+  // slides are sized to the page.
+  try {
+    if (!document.querySelector('deck-stage')) {
+      const PAGE_PX = 1024;
+      // Our print defaults add a body padding inset only when we also zero the
+      // @page margin; computed style can't tell us (it reports screen media),
+      // so read the injected rule directly.
+      const defaults = document.querySelector('style[data-omelette-print-defaults]');
+      const pageInset = /body\s*\{[^}]*padding/.test(defaults ? defaults.textContent || '' : '');
+      const SEL = 'section,article,figure,table,pre,blockquote,[class~="card" i],[class~="page" i],[class~="sheet" i]';
+      for (const el of document.body.querySelectorAll(SEL)) {
+        if (el instanceof HTMLElement && el.offsetHeight > PAGE_PX) {
+          el.setAttribute('data-om-oversized', '');
+          // Fake-paged docs simulate sheets with over-tall break-after:page
+          // boxes; honoring the break spills half-blank pages and ends a
+          // colored box mid-sheet. Flow them, and (only when we own the page
+          // inset) drop the redundant padding/background via the rule below.
+          const cs = getComputedStyle(el);
+          if (cs.breakAfter === 'page' || cs.pageBreakAfter === 'always') {
+            el.setAttribute('data-om-fakepage', '');
+          }
+        }
+      }
+      const ost = document.createElement('style');
+      ost.textContent = '@media print{' +
+        '[data-om-oversized]{break-inside:auto !important;page-break-inside:auto !important}' +
+        '[data-om-fakepage]{break-after:auto !important;page-break-after:auto !important}' +
+        (pageInset ? '[data-om-fakepage]{padding:0 !important;background:none !important}' : '') +
+        '}';
+      document.head.appendChild(ost);
+    }
+  } catch (e) {}
+  // macOS Preview renders Skia-PDF Luminosity soft-masks as opaque grey boxes;
+  // swap the CSS that triggers them for Preview-safe forms.
+  try {
+    for (const el of document.body.querySelectorAll('*')) {
+      const cs = getComputedStyle(el);
+
+      if (cs.boxShadow !== 'none' && cs.filter === 'none') {
+        const outs = [], kept = [];
+        for (const s of cs.boxShadow.split(/,(?![^(]*[)])/)) {
+          const t = s.trim();
+          const m = t.match(/^(rgba?[(][^)]+[)]) (-?[0-9.]+px) (-?[0-9.]+px) ([0-9.]+px) -?[0-9.]+px$/);
+          if (m && parseFloat(m[4]) > 0) outs.push('drop-shadow(' + m[2] + ' ' + m[3] + ' ' + m[4] + ' ' + m[1] + ')');
+          else kept.push(t);
+        }
+        if (outs.length) {
+          el.style.setProperty('filter', outs.join(' '), 'important');
+          el.style.setProperty('box-shadow', kept.join(', ') || 'none', 'important');
+        }
+      }
+
+      const mask = cs.maskImage && cs.maskImage !== 'none' ? cs.maskImage : cs.webkitMaskImage;
+      if (mask && mask !== 'none' && cs.filter === 'none') el.style.setProperty('filter', 'opacity(1)', 'important');
+    }
+  } catch (e) {}
+  setTimeout(() => { try { window.print(); } catch (e) {} }, 200);
+})();
+</script>
+</body>
+</html>

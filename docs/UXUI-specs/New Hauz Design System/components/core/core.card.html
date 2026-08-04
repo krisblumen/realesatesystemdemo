@@ -1,0 +1,59 @@
+<!-- @dsCard group="Components" viewport="700x440" name="Core — Buttons, Badges, Inputs" subtitle="Primary primitives" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  body { margin: 0; padding: 24px; background: var(--surface-page); font-family: var(--font-body); }
+  .group { margin-bottom: 22px; }
+  .lbl { font-family: var(--font-display); font-weight: 700; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+  .rowf { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  const { Button, Badge, Input } = window.NewHauzDesignSystem_e288df;
+  function Demo() {
+    return (
+      <div>
+        <div className="group">
+          <div className="lbl">Buttons</div>
+          <div className="rowf">
+            <Button variant="primary">Ver Propiedades</Button>
+            <Button variant="secondary">Contactar Asesor</Button>
+            <Button variant="ghost">Agenda Asesoría</Button>
+            <Button variant="dark">Inversionistas</Button>
+            <Button variant="primary" disabled>Disabled</Button>
+          </div>
+        </div>
+        <div className="group">
+          <div className="lbl">Badges</div>
+          <div className="rowf">
+            <Badge variant="orange" solid>Venta</Badge>
+            <Badge variant="navy" solid>Renta</Badge>
+            <Badge variant="orange">Preventa</Badge>
+            <Badge variant="success">Disponible</Badge>
+            <Badge variant="danger">Vendido</Badge>
+            <Badge variant="navy">Juriquilla</Badge>
+          </div>
+        </div>
+        <div className="group" style={{maxWidth: 420}}>
+          <div className="lbl">Inputs</div>
+          <div style={{display:'flex', flexDirection:'column', gap:14}}>
+            <Input label="Nombre" placeholder="Tu nombre completo" />
+            <Input label="Zona" as="select"><option>Juriquilla</option><option>Zibatá</option></Input>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+</script>
+</body>
+</html>

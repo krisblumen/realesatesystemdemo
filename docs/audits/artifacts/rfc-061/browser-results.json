@@ -1,0 +1,50 @@
+[
+  {
+    "scenario": "agent-redirect-zones",
+    "email": "agente.audit@newhauz.test",
+    "url": "http://127.0.0.1:8001/admin/mi-zona",
+    "expectedPath": "/admin/mi-zona",
+    "ok": true,
+    "textIncludes": "Mi Zona\nMis zonas asignadas\nZona Norte Audit — Querétaro\nZona Sur Audit — Corregidora\n\nConsulta aquí las zonas comerciales asignadas a tu usuario.\n\nEscritorio\nMi Zona"
+  },
+  {
+    "scenario": "agent-empty-zones",
+    "email": "agente.empty@newhauz.test",
+    "url": "http://127.0.0.1:8001/admin/mi-zona",
+    "expectedPath": "/admin/mi-zona",
+    "ok": true,
+    "textIncludes": "Mi Zona\nMis zonas asignadas\n\nAún no tienes zonas asignadas. Contacta al administrador.\n\nConsulta aquí las zonas comerciales asignadas a tu usuario.\n\nEscritorio\nMi Zona"
+  },
+  {
+    "scenario": "owner-dashboard",
+    "email": "owner.audit@newhauz.test",
+    "url": "http://127.0.0.1:8001/admin",
+    "expectedPath": "/admin",
+    "ok": true,
+    "textIncludes": "Búsqueda global\nEscritorio\nBienvenida/o\n\nOwner Audit\n\nSalir\n\nv3.3.54\n\nDocumentación\nGitHub\nZonas totales\n3\nZonas activas\n2\nAgentes asignados\n2\nEscritorio\nSeguridad\nSeguridad\nUsuarios\nOperación\nOperación\nZonas"
+  },
+  {
+    "scenario": "admin-dashboard",
+    "email": "admin.audit@newhauz.test",
+    "url": "http://127.0.0.1:8001/admin/login",
+    "expectedPath": "/admin",
+    "ok": false,
+    "textIncludes": "Iniciar sesión\n\nAccede a tu panel de administración\n\nCorreo electrónico*\nContraseña*\nMostrar contraseña\nRecordarme\nEntrar\nNewHauz Admin System © 2026 By GESIF\nDemasiados intentos. Intente de nuevo en 20 segundos.\nIntente de nuevo en 20 segundos."
+  },
+  {
+    "scenario": "owner-direct-agent-dashboard",
+    "loginEmail": "owner.audit@newhauz.test",
+    "path": "/admin/mi-zona",
+    "url": "http://127.0.0.1:8001/admin/login",
+    "blocked": false,
+    "textIncludes": "Iniciar sesión\n\nAccede a tu panel de administración\n\nCorreo electrónico*\nContraseña*\nMostrar contraseña\nRecordarme\nEntrar\nNewHauz Admin System © 2026 By GESIF"
+  },
+  {
+    "scenario": "admin-direct-agent-dashboard",
+    "loginEmail": "admin.audit@newhauz.test",
+    "path": "/admin/mi-zona",
+    "url": "http://127.0.0.1:8001/admin/login",
+    "blocked": false,
+    "textIncludes": "Iniciar sesión\n\nAccede a tu panel de administración\n\nCorreo electrónico*\nContraseña*\nMostrar contraseña\nRecordarme\nEntrar\nNewHauz Admin System © 2026 By GESIF"
+  }
+]

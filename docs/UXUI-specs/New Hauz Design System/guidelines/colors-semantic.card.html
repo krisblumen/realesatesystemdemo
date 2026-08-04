@@ -1,0 +1,24 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Semantic / Status" subtitle="Success, warning, danger, info — on tinted surfaces" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 20px; background: var(--surface-card); font-family: var(--font-body); }
+  .row { display: flex; gap: 12px; }
+  .sw { flex: 1; border-radius: var(--radius-md); padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .dot { width: 22px; height: 22px; border-radius: 50%; }
+  .name { font-family: var(--font-display); font-weight: 600; font-size: 13px; color: var(--text-strong); }
+  .hex { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .02em; }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="sw" style="background:#E6F4EC"><div class="dot" style="background:#1F8A4C"></div><div class="name">Success</div><div class="hex">#1F8A4C</div></div>
+    <div class="sw" style="background:#FCF3DC"><div class="dot" style="background:#B8860B"></div><div class="name">Warning</div><div class="hex">#B8860B</div></div>
+    <div class="sw" style="background:#FBE9E7"><div class="dot" style="background:#C0392B"></div><div class="name">Danger</div><div class="hex">#C0392B</div></div>
+    <div class="sw" style="background:#EEF1F8"><div class="dot" style="background:#233488"></div><div class="name">Info</div><div class="hex">#233488</div></div>
+  </div>
+</body>
+</html>

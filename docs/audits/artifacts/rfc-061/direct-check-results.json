@@ -1,0 +1,16 @@
+[
+  {
+    "scenario": "owner-direct-agent-dashboard",
+    "email": "owner.audit@newhauz.test",
+    "afterLogin": "http://127.0.0.1:8001/admin",
+    "url": "http://127.0.0.1:8001/admin/mi-zona",
+    "text": "403\nForbidden"
+  },
+  {
+    "scenario": "admin-direct-agent-dashboard",
+    "email": "admin.audit@newhauz.test",
+    "afterLogin": "http://127.0.0.1:8001/admin",
+    "url": "http://127.0.0.1:8001/admin/mi-zona",
+    "text": "403\nForbidden"
+  }
+]

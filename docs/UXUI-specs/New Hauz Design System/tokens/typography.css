@@ -1,0 +1,45 @@
+/* New Hauz — Typography
+ * Display/UI: Montserrat (500–800). Body/forms: Inter (400–500).
+ * Source: docs/GUIA-UX-UI-newhauz.md (Tipografía)
+ */
+
+:root {
+  --font-display: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* weights */
+  --fw-regular: 400;   /* @kind font */
+  --fw-medium: 500;    /* @kind font */
+  --fw-semibold: 600;  /* @kind font */
+  --fw-bold: 700;      /* @kind font */
+  --fw-extrabold: 800; /* @kind font */
+
+  /* Type scale (px). Display uses Montserrat, body uses Inter. */
+  --fs-display-xl: 64px;   /* hero headline */
+  --fs-display-lg: 48px;   /* section hero */
+  --fs-h1: 40px;
+  --fs-h2: 32px;
+  --fs-h3: 24px;
+  --fs-h4: 20px;
+  --fs-title: 18px;        /* card titles, nav */
+  --fs-body-lg: 18px;
+  --fs-body: 16px;
+  --fs-body-sm: 14px;
+  --fs-caption: 13px;
+  --fs-overline: 12px;     /* eyebrow / label, uppercase tracked */
+
+  /* line-heights */
+  --lh-tight: 1.05;    /* @kind font */
+  --lh-snug: 1.2;      /* @kind font */
+  --lh-normal: 1.5;    /* @kind font */
+  --lh-relaxed: 1.65;  /* @kind font */
+
+  /* letter-spacing */
+  --ls-tight: -0.02em; /* @kind font */
+  --ls-normal: 0;          /* @kind font */
+  --ls-wide: 0.08em;       /* @kind font */
+  --ls-wider: 0.16em;      /* @kind font */
+
+  /* semantic */
+  --text-eyebrow-spacing: var(--ls-wide); /* @kind font */
+}

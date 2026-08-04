@@ -1,0 +1,25 @@
+<!-- @dsCard group="Spacing" viewport="700x190" name="Elevation" subtitle="Soft navy-tinted shadows; lg = card hover" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin: 0; padding: 28px 24px; background: var(--surface-page); font-family: var(--font-body); }
+  .row { display: flex; gap: 24px; }
+  .col { display: flex; flex-direction: column; align-items: center; gap: 14px; flex: 1; }
+  .box { width: 100%; height: 64px; background: #fff; border-radius: var(--radius-lg); }
+  .t { font-size: 12px; color: var(--text-muted); }
+  .t b { color: var(--text-strong); font-family: var(--font-display); }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="col"><div class="box" style="box-shadow:var(--shadow-sm)"></div><div class="t"><b>sm</b></div></div>
+    <div class="col"><div class="box" style="box-shadow:var(--shadow-md)"></div><div class="t"><b>md</b></div></div>
+    <div class="col"><div class="box" style="box-shadow:var(--shadow-lg)"></div><div class="t"><b>lg</b> · hover</div></div>
+    <div class="col"><div class="box" style="box-shadow:var(--shadow-xl)"></div><div class="t"><b>xl</b></div></div>
+    <div class="col"><div class="box" style="box-shadow:var(--shadow-cta)"></div><div class="t"><b>cta</b> · orange</div></div>
+  </div>
+</body>
+</html>

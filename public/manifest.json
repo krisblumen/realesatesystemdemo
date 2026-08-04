@@ -1,0 +1,24 @@
+{
+    "name": "New Hauz — Panel de administración",
+    "short_name": "New Hauz",
+    "description": "Panel de administración de New Hauz.",
+    "start_url": "/admin",
+    "scope": "/admin",
+    "display": "standalone",
+    "background_color": "#091A5B",
+    "theme_color": "#091A5B",
+    "icons": [
+        {
+            "src": "/images/brand/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/images/brand/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ]
+}

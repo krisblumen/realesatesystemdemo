@@ -1,0 +1,36 @@
+/* New Hauz — minimal base resets & helpers.
+ * Keeps specimens and kits consistent. Components rely on tokens, not this.
+ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-normal);
+  color: var(--text-body);
+  background: var(--surface-page);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-display);
+  color: var(--text-strong);
+  margin: 0;
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-tight);
+}
+
+/* eyebrow / overline label seen above section titles */
+.nh-eyebrow {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-overline);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+a { color: inherit; }
