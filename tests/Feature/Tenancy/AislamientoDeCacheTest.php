@@ -32,6 +32,8 @@ class AislamientoDeCacheTest extends TestCase
 
     private const BASE_B = 'demo_probe_cache_b';
 
+    private const BASE_CACHE = 'demo_probe_cache_store';
+
     private string $original;
 
     protected function setUp(): void
@@ -50,19 +52,31 @@ class AislamientoDeCacheTest extends TestCase
         // `phpunit.xml` fija CACHE_STORE=array, así que hay que cambiar TAMBIÉN
         // el almacén por defecto: configurar la conexión del almacén `database`
         // sin eso no tenía ningún efecto, y el test daba un falso rojo.
+        // BASE PROPIA para el almacén compartido, y no `demo_test`.
+        //
+        // Apuntarlo a la base de pruebas hacía que este test dependiera de que
+        // ALGÚN OTRO la hubiera migrado antes —la tabla `cache` sale de una
+        // migración— sin declararlo. Verde por estado ajeno: contra una base
+        // recién creada, muere con «relation cache does not exist».
+        //
+        // Es exactamente el defecto que encontramos en SectionBandTest, y no
+        // conviene dejar mi propia versión de él.
+        DB::connection('maintenance')->statement('DROP DATABASE IF EXISTS "'.self::BASE_CACHE.'"');
+        DB::connection('maintenance')->statement('CREATE DATABASE "'.self::BASE_CACHE.'"');
+
         config(['database.connections.cache_compartido' => array_merge(
             config('database.connections.pgsql'),
-            ['database' => $this->original],
+            ['database' => self::BASE_CACHE],
         )]);
+        DB::purge('cache_compartido');
+
+        DB::connection('cache_compartido')->statement(
+            'CREATE TABLE IF NOT EXISTS cache (key varchar(255) PRIMARY KEY, value text NOT NULL, expiration integer NOT NULL)',
+        );
         config([
             'cache.default' => 'database',
             'cache.stores.database.connection' => 'cache_compartido',
         ]);
-
-        // El almacén compartido NO está dentro de la transacción del test: lo
-        // que escribe un caso sobrevive al siguiente. Sin vaciarlo, el segundo
-        // test leería un valor del primero y creería que hay una fuga.
-        DB::connection('cache_compartido')->table('cache')->truncate();
 
         foreach ([self::BASE_A, self::BASE_B] as $base) {
             DB::connection('maintenance')->statement('DROP DATABASE IF EXISTS "'.$base.'"');
@@ -88,7 +102,9 @@ class AislamientoDeCacheTest extends TestCase
         config(['database.connections.pgsql.database' => $this->original]);
         DB::purge('pgsql');
 
-        foreach ([self::BASE_A, self::BASE_B] as $base) {
+        DB::purge('cache_compartido');
+
+        foreach ([self::BASE_A, self::BASE_B, self::BASE_CACHE] as $base) {
             DB::connection('maintenance')->statement('DROP DATABASE IF EXISTS "'.$base.'"');
         }
 
