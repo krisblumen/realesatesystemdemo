@@ -20,12 +20,12 @@ h1,h2,h3,h4,
   font-family:'Montserrat',ui-sans-serif,system-ui,sans-serif; letter-spacing:-0.01em;
 }
 .fi-simple-layout{
-  background:radial-gradient(circle at 50% 28%,rgba(9,26,91,.09),transparent 58%),
-             linear-gradient(160deg,#F7F7F7 0%,#EAEAEA 100%);
+  background:radial-gradient(circle at 50% 28%,rgba(46, 56, 66,.09),transparent 58%),
+             linear-gradient(160deg,#F2F4F6 0%,#E3E6E9 100%);
 }
 .dark .fi-simple-layout{
-  background:radial-gradient(circle at 50% 28%,rgba(246,163,0,.12),transparent 56%),
-             linear-gradient(160deg,#111111 0%,#2D2D2D 100%);
+  background:radial-gradient(circle at 50% 28%,rgba(245, 166, 36,.12),transparent 56%),
+             linear-gradient(160deg,#171D23 0%,#20272E 100%);
 }
 .fi-simple-main{
   position:relative;
@@ -39,14 +39,17 @@ h1,h2,h3,h4,
   background-color:rgba(28,30,36,.55); border-color:rgba(255,255,255,.12);
   box-shadow:0 18px 50px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.08);
 }
+/* La composición del acceso es HORIZONTAL y colgada sobre la tarjeta.
+   Los 7rem de antes eran para el logo VERTICAL: con una composición ancha,
+   esa altura la estira hasta salirse de la pantalla por arriba. */
 .fi-simple-layout .fi-logo{
   position:absolute; left:50%; top:0;
-  transform:translate(-50%, calc(-100% - 0.75rem));
-  margin:0; z-index:20; width:auto; height:7rem !important;
-  filter:drop-shadow(0 14px 28px rgba(0,0,0,.22));
+  transform:translate(-50%, calc(-100% - 1rem));
+  margin:0; z-index:20; width:auto; height:2.75rem !important;
+  filter:drop-shadow(0 10px 22px rgba(0,0,0,.18));
 }
 .fi-input-wrp{ border-radius:12px; }
-.fi-input-wrp:focus-within{ box-shadow:0 0 0 3px rgba(246,163,0,.22); border-color:var(--nh-orange); }
+.fi-input-wrp:focus-within{ box-shadow:0 0 0 3px rgba(245, 166, 36,.22); border-color:var(--nh-orange); }
 .fi-btn{ border-radius:12px; transition:transform .2s ease, box-shadow .2s ease, background-color .2s ease; }
 .fi-btn:hover{ transform:translateY(-1px); }
 .fi-section{ transition:box-shadow .2s ease; }
@@ -186,10 +189,10 @@ h1,h2,h3,h4,
    fila se redibuja como tarjeta (ver regla .fi-resource-leads .fi-ta-row
    mas arriba) y esa regla ya fija su propio background. */
 .nh-lead-row-new{
-  background-color:rgba(246,163,0,.10) !important;
+  background-color:rgba(245, 166, 36,.10) !important;
 }
 .dark .nh-lead-row-new{
-  background-color:rgba(246,163,0,.16) !important;
+  background-color:rgba(245, 166, 36,.16) !important;
 }
 
 /* Capturas de pantalla del manual de Ayuda (shortcode {{captura: ...}}).

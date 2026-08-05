@@ -13,7 +13,7 @@
         @endif
         {{-- Degradado navy → transparente (izq a der) sobre las imágenes --}}
         <div class="absolute inset-0 bg-gradient-to-r from-brand-primary/[0.92] via-brand-primary/[0.55] to-transparent"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,rgba(246,163,0,0.10),transparent_45%)]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,rgba(245,166,36,0.10),transparent_45%)]"></div>
         <div class="relative mx-auto max-w-[var(--container-content)] px-6 py-16">
             <nav class="mb-8 flex items-center gap-2.5 text-sm text-on-brand-primary/60">
                 <a href="{{ url('/') }}" class="transition-colors hover:text-on-brand-primary">Inicio</a>

@@ -259,7 +259,7 @@
     {{-- ===== Inversionistas ===== --}}
     <section class="px-6 pb-24">
         <div class="relative mx-auto max-w-[var(--container-content)] overflow-hidden rounded-brand-xl bg-brand-primary">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,rgba(246,163,0,0.14),transparent_50%)]"></div>
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,rgba(245,166,36,0.14),transparent_50%)]"></div>
             <div class="relative grid gap-12 px-8 py-16 sm:px-14 lg:grid-cols-2">
                 <div>
                     <p class="eyebrow mb-5 text-accent-on-brand-primary">Inversionistas</p>
