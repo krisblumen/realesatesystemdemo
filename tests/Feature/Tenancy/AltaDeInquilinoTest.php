@@ -157,6 +157,46 @@ class AltaDeInquilinoTest extends TestCase
         $this->assertSame(['owner'], $roles);
     }
 
+    public function test_the_tenant_database_belongs_to_the_application_role_not_the_creator(): void
+    {
+        // DEUDA DE LA AUDITORÍA (M-1) QUE NO ESTABA IMPLEMENTADA, y que apareció
+        // recién en el servidor.
+        //
+        // Quien crea la base es el rol de aprovisionamiento, el único con
+        // CREATEDB. Pero quien tiene que USARLA es el rol con el que la
+        // aplicación atiende peticiones. Sin declarar el dueño, la base queda
+        // del creador: el alta reporta éxito y el PRIMER request del inquilino
+        // falla por permisos.
+        //
+        // Y la salida apurada sería darle CREATEDB al rol de la aplicación, que
+        // destruye la separación que protege el DDL.
+        DB::connection('maintenance')->statement('DROP ROLE IF EXISTS demo_probe_dueno');
+        DB::connection('maintenance')->statement('CREATE ROLE demo_probe_dueno');
+
+        config(['tenancy.rol_aplicacion' => 'demo_probe_dueno']);
+
+        try {
+            $resultado = $this->alta()->crear('dueno@ejemplo.com');
+            $this->creadas[] = $resultado->tenant->database;
+
+            $dueno = DB::connection('maintenance')->selectOne(
+                'SELECT pg_get_userbyid(datdba) AS rol FROM pg_database WHERE datname = ?',
+                [$resultado->tenant->database],
+            )->rol;
+
+            $this->assertSame('demo_probe_dueno', $dueno, 'La base tiene que quedar del rol de la aplicación.');
+        } finally {
+            config(['tenancy.rol_aplicacion' => null]);
+
+            foreach ($this->creadas as $base) {
+                DB::connection('maintenance')->statement('DROP DATABASE IF EXISTS "'.$base.'"');
+            }
+            $this->creadas = [];
+
+            DB::connection('maintenance')->statement('DROP ROLE IF EXISTS demo_probe_dueno');
+        }
+    }
+
     public function test_two_tenants_in_a_row_do_not_collide(): void
     {
         // Prueba que el cerrojo se SUELTA. Si quedara tomado, la segunda alta

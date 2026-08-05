@@ -104,10 +104,26 @@ bien y **el primer request del inquilino falla por permisos** — y la salida
 apurada sería darle `CREATEDB` a `demo_app`, que rompe justamente la separación
 que protege el DDL.
 
-Contrato: `demo_provisioner` crea la base y **le transfiere la propiedad a
-`demo_app`** en el mismo paso del alta. La plantilla se construye ya con esa
-propiedad, así que la copia la hereda. Verificar en el alta que `demo_app` puede
-leer y escribir antes de marcar `activo`.
+Contrato, y **una sola sentencia lo resuelve entero**:
+
+```sql
+GRANT demo_app TO demo_provisioner;
+```
+
+Con esa membresía pasan dos cosas a la vez. `demo_provisioner` **hereda** los
+permisos de `demo_app`, así que puede leer y escribir la tabla `tenants` de la
+central —que es de `demo_app` por haberla migrado—. Y puede crear bases
+declarando `OWNER demo_app`, cosa que Postgres sólo permite a quien puede asumir
+ese rol.
+
+El dueño se declara **al crear** y no se transfiere después: entre crear y
+transferir habría una ventana en la que la base existe y la aplicación no puede
+usarla, y un fallo en el medio la dejaría así para siempre. Se configura con
+`TENANCY_ROL_APLICACION=demo_app`.
+
+Sin esto, el alta reporta éxito y el PRIMER request del inquilino falla por
+permisos. La salida apurada —dar `CREATEDB` a `demo_app`— destruye la separación
+que protege el DDL.
 
 El motivo de separar los roles está en RFC-05: el nombre de una base se
 interpola en DDL porque Postgres no acepta parámetros para identificadores. Si el rol que ejecuta esa
@@ -169,8 +185,8 @@ Confiar sólo en la dirección del proxy. CloudPanel corre en el mismo host.
 - [ ] PostGIS instalado **en `template1`**, o la plantilla no se puede construir
       sin volver superusuario al rol que aprovisiona.
 - [ ] Rol `demo_provisioner` con `CREATEDB`, separado de `demo_app`.
-- [ ] Propiedad y permisos: `demo_app` es dueño de las bases de inquilino y
-      puede leer y escribir sin tener `CREATEDB` (M-1).
+- [ ] `GRANT demo_app TO demo_provisioner;` y `TENANCY_ROL_APLICACION=demo_app`
+      en el `.env`. Sin eso, el alta funciona y el inquilino no puede entrar.
 - [ ] `CONNECTION LIMIT` puesto en `demo_app`, y `demo_app` **no** es
       superusuario (si lo fuera, el tope no aplicaría).
 - [ ] Base central creada y migrada.

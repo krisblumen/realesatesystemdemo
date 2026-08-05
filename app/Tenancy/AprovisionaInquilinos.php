@@ -121,10 +121,15 @@ class AprovisionaInquilinos
         $this->tomarCerrojo($clave);
 
         try {
+            // El dueño se declara al CREAR y no se transfiere después: entre
+            // crear y transferir habría una ventana en la que la base existe y
+            // la aplicación no puede usarla, y un fallo en el medio la dejaría
+            // así para siempre.
             DB::connection('maintenance')->statement(sprintf(
-                'CREATE DATABASE %s TEMPLATE %s',
+                'CREATE DATABASE %s TEMPLATE %s%s',
                 $this->citar($destino),
                 $this->citar($plantilla),
+                $this->clausulaDeDueno(),
             ));
         } finally {
             // EN `finally`, NO en el camino feliz. `pg_advisory_lock` se ata a
@@ -205,6 +210,21 @@ class AprovisionaInquilinos
             'estado' => TenantEstado::Fallido,
             'motivo_falla' => mb_substr($e->getMessage(), 0, 2000),
         ])->save();
+    }
+
+    /**
+     * `OWNER` explícito, o nada si no hay rol declarado.
+     *
+     * Quien crea la base es el rol de aprovisionamiento, el único con CREATEDB.
+     * Pero quien tiene que USARLA es el rol de la aplicación. Sin esta cláusula
+     * la base queda del creador y el primer request del inquilino falla por
+     * permisos — con el alta reportando éxito.
+     */
+    private function clausulaDeDueno(): string
+    {
+        $rol = (string) Config::get('tenancy.rol_aplicacion');
+
+        return $rol === '' ? '' : ' OWNER '.$this->citar($rol);
     }
 
     private function citar(string $identificador): string

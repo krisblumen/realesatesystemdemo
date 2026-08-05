@@ -165,7 +165,10 @@ class BuildDemoTemplate extends Command
             // `CREATE DATABASE` no corre dentro de una transacción ni sobre la
             // base que se está creando: por eso la conexión de mantenimiento.
             DB::connection('maintenance')->statement('DROP DATABASE IF EXISTS '.$this->citar($nombre));
-            DB::connection('maintenance')->statement('CREATE DATABASE '.$this->citar($nombre));
+            $rol = (string) config('tenancy.rol_aplicacion');
+            $dueno = $rol === '' ? '' : ' OWNER '.$this->citar($rol);
+
+            DB::connection('maintenance')->statement('CREATE DATABASE '.$this->citar($nombre).$dueno);
 
             return true;
         });
