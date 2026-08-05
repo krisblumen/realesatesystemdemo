@@ -98,6 +98,45 @@ composer test    # suite completa
 
 ---
 
+## Desplegar
+
+Tres cosas **no viajan en git** y hay que generarlas en el servidor:
+
+```bash
+composer install --no-dev --optimize-autoloader
+```
+
+```bash
+npm ci && npm run build
+```
+
+```bash
+php artisan filament:assets
+```
+
+Las tres comparten el mismo modo de falla, y por eso cuestan de encontrar: **no
+rompen nada al desplegar**. El sitio arranca, las páginas se dibujan, y sólo
+falla cuando alguien intenta usarlo. Sin la última, por ejemplo, la pantalla de
+acceso se ve perfecta y el formulario devuelve un 405 al enviarlo — porque sin
+su JavaScript el envío deja de pasar por Livewire.
+
+Después, la base central y la plantilla:
+
+```bash
+php artisan migrate --database=central --path=database/migrations/central --force
+```
+
+```bash
+php artisan demo:plantilla:construir demo_template_v1
+```
+
+El resto —roles de PostgreSQL, PostGIS en `template1`, DNS y certificado
+comodín, proxy de confianza, cola y cron— está en
+`docs/deployment/DEMO-MULTI-INQUILINO.md`, con el checklist previo al primer
+inquilino.
+
+---
+
 ## Operar el demo
 
 ```bash
