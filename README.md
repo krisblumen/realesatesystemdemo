@@ -116,9 +116,17 @@ php artisan filament:assets
 
 Las tres comparten el mismo modo de falla, y por eso cuestan de encontrar: **no
 rompen nada al desplegar**. El sitio arranca, las páginas se dibujan, y sólo
-falla cuando alguien intenta usarlo. Sin la última, por ejemplo, la pantalla de
-acceso se ve perfecta y el formulario devuelve un 405 al enviarlo — porque sin
-su JavaScript el envío deja de pasar por Livewire.
+falla cuando alguien intenta usarlo.
+
+Los de Livewire **sí viajan en git**, a propósito: viven en `public/vendor/livewire/`
+y se regeneran con `php artisan livewire:publish --assets` cada vez que Livewire
+cambia de versión. Están publicados y no servidos por PHP porque, cuando los
+sirve la aplicación, cuelgan de una URL terminada en `.js` que los servidores web
+suelen atender por extensión sin llegar nunca a PHP — y entonces el script no
+carga, Livewire no arranca, el formulario de acceso se envía de forma nativa a
+una ruta que sólo acepta GET, y responde 405. La pantalla se ve perfecta hasta
+que alguien intenta entrar. Un test fija que lo publicado coincida con lo
+instalado, porque Livewire avisa del desajuste sólo por la consola del navegador.
 
 Después, la base central y la plantilla:
 

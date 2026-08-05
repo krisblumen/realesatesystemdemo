@@ -179,6 +179,40 @@ Confiar sólo en la dirección del proxy. CloudPanel corre en el mismo host.
   no emite comodines.
 - Renovación automática verificada antes de invitar a nadie.
 
+## El servidor web sirve por extensión, y eso rompe Livewire
+
+CloudPanel —y casi cualquier vhost armado por un panel— trae un bloque que
+atiende por extensión todo lo que termine en `.css`, `.js`, `.png` y demás:
+
+```nginx
+location ~* ^.+\.(css|js|jpg|...|map)$ {
+    expires max;
+    access_log off;
+}
+```
+
+Ese bloque **nunca llega a PHP**. Si Livewire sirve su JavaScript desde una ruta
+de la aplicación (`/livewire/livewire.min.js`, que es lo que hace cuando sus
+assets no están publicados), la petición cae ahí y devuelve 404.
+
+Lo que sigue cuesta de rastrear porque el síntoma aparece lejos: sin ese script,
+Livewire no arranca; sin Livewire, el formulario de acceso de Filament se envía
+de forma nativa a `/admin/login`, que sólo acepta GET; y la respuesta es **405
+Method Not Allowed** al intentar entrar. La pantalla de acceso se ve perfecta.
+
+**No se arregla en nginx.** Se arregla publicando los assets, que ya viajan en
+git en `public/vendor/livewire/`: entonces la dirección pasa a ser
+`/vendor/livewire/livewire.min.js`, un archivo real, y ese mismo bloque lo sirve
+bien. Al actualizar Livewire hay que volver a publicarlos —hay un test que lo
+verifica— porque el aviso de desajuste sale sólo por la consola del navegador.
+
+Se intentó primero esquivarlo con una excepción en el vhost
+(`location ^~ /livewire/ { try_files $uri /index.php?$query_string; }`) y **no
+sirve**: la petición llega a PHP con la URL cambiada, Laravel enruta la portada
+en vez del script, el cierre del demo la manda al login y la respuesta pasa a ser
+un 302 hacia `/index.php/admin/login`. Además, cualquier edición del sitio desde
+el panel pisa el vhost y se lleva la excepción puesta a mano.
+
 ## Checklist antes del primer inquilino
 
 - [ ] PostgreSQL 16 con PostGIS en el VPS.
@@ -196,3 +230,7 @@ Confiar sólo en la dirección del proxy. CloudPanel corre en el mismo host.
 - [ ] DNS comodín resolviendo.
 - [ ] Certificado comodín emitido y renovando solo.
 - [ ] Verificado que sin sesión ninguna ruta de inquilino devuelve contenido.
+- [ ] Assets de Livewire publicados en `public/vendor/livewire/`, o el acceso
+      devuelve 405 y la pantalla se ve bien.
+- [ ] Sin excepciones a mano en el vhost para `/livewire/`: no hacen falta y el
+      panel las pisa.
