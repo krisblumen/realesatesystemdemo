@@ -116,6 +116,34 @@ central —que es de `demo_app` por haberla migrado—. Y puede crear bases
 declarando `OWNER demo_app`, cosa que Postgres sólo permite a quien puede asumir
 ese rol.
 
+### Cómo se invocan los comandos que crean o borran bases
+
+La conexión `maintenance` toma `DB_USERNAME` del `.env`, y ahí vive `demo_app`,
+que **no tiene `CREATEDB` a propósito**. Así que construir una plantilla, invitar
+o borrar se corre pasando el rol de aprovisionamiento por el entorno:
+
+```bash
+DB_USERNAME=demo_provisioner DB_PASSWORD='...' php artisan demo:plantilla:construir demo_template_vN
+DB_USERNAME=demo_provisioner DB_PASSWORD='...' php artisan demo:invitar persona@ejemplo.com
+DB_USERNAME=demo_provisioner DB_PASSWORD='...' php artisan demo:borrar
+```
+
+Funciona porque Laravel lee el `.env` sin pisar variables que ya existan en el
+entorno. Sin esto:
+
+```
+SQLSTATE[42501]: Insufficient privilege: permission denied to create database
+```
+
+Y **no** rompe la separación: `demo:plantilla:construir` corre las migraciones en
+un proceso hijo al que le quita esas credenciales, para que las tablas queden a
+nombre de `demo_app`. Crear la base necesita privilegio; crear las tablas no.
+Cada paso corre con el rol que le toca.
+
+El resto de los comandos —`demo:padron`, `demo:reemitir-acceso`, `demo:expirar`,
+`demo:por-cada-inquilino`— NO crean ni borran bases y corren con el `.env` tal
+cual.
+
 El dueño se declara **al crear** y no se transfiere después: entre crear y
 transferir habría una ventana en la que la base existe y la aplicación no puede
 usarla, y un fallo en el medio la dejaría así para siempre. Se configura con
