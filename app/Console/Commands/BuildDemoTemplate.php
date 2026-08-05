@@ -4,8 +4,10 @@ namespace App\Console\Commands;
 
 use Database\Seeders\DemoTemplateSeeder;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Process;
 use RuntimeException;
 
 /**
@@ -53,25 +55,27 @@ class BuildDemoTemplate extends Command
 
         try {
             $this->recrear($nombre);
-            $this->apuntar($nombre);
 
-            // `--database` explícito, y NO sólo la conexión por defecto mutada.
+            // MIGRAR Y SEMBRAR EN UN PROCESO APARTE, con la base apuntada desde
+            // el arranque.
             //
-            // Mutar `pgsql` y purgar hacía que el REGISTRO de las migraciones
-            // fuera a la plantilla y el DDL de alguna no: quedaban 46
-            // migraciones anotadas como corridas y la tabla `permissions` sin
-            // crear, así que la plantilla nacía rota y decía estar completa. Un
-            // nombre de conexión propio no deja lugar a esa ambigüedad.
-            $this->components->task('Migrando', fn (): bool => $this->callSilent('migrate', [
-                '--database' => self::CONEXION,
-                '--force' => true,
-            ]) === 0 || throw new RuntimeException('Falló la migración de la plantilla.'));
+            // Hacerlo en este proceso no alcanza y ya falló dos veces. Reapuntar
+            // la conexión por defecto a mitad de ejecución deja atrás todo lo
+            // que ya la resolvió: en el lote B fue el registro de las
+            // migraciones; acá fue el almacén de caché, del que Spatie guarda su
+            // propia referencia al arrancar y que ninguna purga posterior mueve.
+            //
+            // Un proceso nuevo no tiene nada resuelto. Es la única forma de que
+            // migraciones, sembradores, caché y registro de permisos vean todos
+            // la misma base.
+            $this->components->task('Migrando', fn (): bool => $this->enUnProcesoAparte($nombre, 'migrate --force'));
 
-            $this->components->task('Sembrando', fn (): bool => $this->callSilent('db:seed', [
-                '--class' => DemoTemplateSeeder::class,
-                '--database' => self::CONEXION,
-                '--force' => true,
-            ]) === 0 || throw new RuntimeException('Falló el sembrado de la plantilla.'));
+            $this->components->task('Sembrando', fn (): bool => $this->enUnProcesoAparte(
+                $nombre,
+                'db:seed --force --class='.str_replace('\\', '\\\\', DemoTemplateSeeder::class),
+            ));
+
+            $this->apuntar($nombre);
 
             $resumen = $this->verificar();
         } finally {
@@ -116,6 +120,43 @@ class BuildDemoTemplate extends Command
         Config::set('database.default', self::CONEXION);
 
         DB::purge(self::CONEXION);
+
+        // EL ALMACÉN DE CACHÉ TAMBIÉN, y no es un detalle.
+        //
+        // El caché usa el driver `database` sin conexión declarada, así que
+        // resuelve la por defecto — pero se memoiza la PRIMERA vez que alguien
+        // lo pide. Si ya se resolvió contra `pgsql`, cambiar la por defecto no
+        // lo mueve, y una migración que vacíe permisos escribe en la base
+        // equivocada.
+        //
+        // En desarrollo eso no fallaba: `pgsql` apunta a una base que existe,
+        // así que el borrado iba a otro lado y nadie se enteraba. Sólo apareció
+        // en el servidor, donde esa conexión apunta al centinela y la base no
+        // existe. Es exactamente para lo que el centinela está.
+        Cache::forgetDriver(Config::get('cache.default'));
+    }
+
+    /**
+     * Corre un comando artisan con `DB_DATABASE` apuntando a la plantilla.
+     *
+     * El proceso hijo arranca leyendo esa variable, así que su conexión por
+     * defecto ES la plantilla desde la primera línea: no hay nada resuelto de
+     * antes que pueda quedar apuntando a otro lado.
+     */
+    private function enUnProcesoAparte(string $nombre, string $comando): bool
+    {
+        $resultado = Process::path(base_path())
+            ->env(['DB_DATABASE' => $nombre])
+            ->timeout(600)
+            ->run('php artisan '.$comando);
+
+        if (! $resultado->successful()) {
+            throw new RuntimeException(
+                "Falló «{$comando}» sobre la plantilla:\n".trim($resultado->errorOutput() ?: $resultado->output()),
+            );
+        }
+
+        return true;
     }
 
     private function recrear(string $nombre): void
