@@ -90,4 +90,23 @@ return [
 
     'dominio_base' => env('TENANCY_DOMINIO_BASE', 'demo.localhost'),
 
+    /*
+    |---------------------------------------------------------------------------
+    | Rol dueño de las bases de inquilino
+    |---------------------------------------------------------------------------
+    |
+    | Quien CREA las bases es el rol de aprovisionamiento —el único con
+    | CREATEDB— pero quien tiene que poder USARLAS es el rol con el que la
+    | aplicación atiende peticiones. Sin declarar el dueño, la base queda del
+    | creador y el primer request del inquilino falla por permisos.
+    |
+    | Requiere que el rol de aprovisionamiento sea MIEMBRO de este:
+    |   GRANT demo_app TO demo_provisioner;
+    |
+    | Vacío en desarrollo, donde todo corre con el mismo usuario.
+    |
+    */
+
+    'rol_aplicacion' => env('TENANCY_ROL_APLICACION'),
+
 ];
