@@ -43,21 +43,21 @@
 
     $logoSize = $featured
         ? match ($s['logo_size'] ?? 'md') {
-            'sm' => 'h-16 sm:h-20',
-            'lg' => 'h-28 sm:h-32 lg:h-40',
-            'xl' => 'h-32 sm:h-40 lg:h-48',
-            default => 'h-20 sm:h-24 lg:h-28',
+            'sm' => 'max-h-16 sm:max-h-20',
+            'lg' => 'max-h-28 sm:max-h-32 lg:max-h-40',
+            'xl' => 'max-h-32 sm:max-h-40 lg:max-h-48',
+            default => 'max-h-20 sm:max-h-24 lg:max-h-28',
         }
         : match ($s['logo_size'] ?? 'md') {
-            'sm' => 'h-10 sm:h-12',
-            'lg' => 'h-16 sm:h-20',
+            'sm' => 'max-h-10 sm:max-h-12',
+            'lg' => 'max-h-16 sm:max-h-20',
             // Rampa propia para la variante `standard` (design D5, cambio
             // cms-pagina-proyectos): 14rem fijos es el alto del logo grande
             // de A-74 hoy (`style="height:14rem"`); en móvil queda en 12rem
             // en vez de un alto fijo — mejor que el original, y sin él muere
             // el único `style=` inline que le quedaba al hero (§6.1).
-            'xl' => 'h-48 sm:h-56',
-            default => 'h-12 sm:h-16',
+            'xl' => 'max-h-48 sm:max-h-56',
+            default => 'max-h-12 sm:max-h-16',
         };
 
     $hasTitle = ($s['title'] ?? '') !== '';
@@ -121,7 +121,7 @@
             @if ($showLogo)
                 <img src="{{ $s['logo_url'] }}" alt="{{ $logoAlt }}"
                      @if ($logoAlt === '') aria-hidden="true" @endif
-                     class="{{ $logoSize }} mb-9 w-auto">
+                     class="{{ $logoSize }} mb-9 w-auto max-w-full object-contain">
             @endif
             @if (($s['eyebrow'] ?? '') !== '')
                 <p class="eyebrow {{ \App\Support\Frontend\SectionTypography::eyebrow($s) }} mb-5 text-accent-on-brand-primary">{{ $s['eyebrow'] }}</p>
@@ -147,7 +147,7 @@
                      se distinguen. --}}
                 <div class="mt-8 inline-flex items-center gap-3.5 rounded-brand-md border border-on-brand-primary/10 bg-on-brand-primary/5 px-4 py-2.5 backdrop-blur-sm">
                     <img src="{{ $s['logo']['media_url'] }}" alt="{{ $s['logo']['alt'] ?? '' }}"
-                         class="h-8 w-auto {{ ($s['logo']['from_fallback'] ?? false) ? 'brightness-0 invert ' : '' }}opacity-80">
+                         class="max-h-8 max-w-[120px] w-auto object-contain {{ ($s['logo']['from_fallback'] ?? false) ? 'brightness-0 invert ' : '' }}opacity-80">
                     <span class="font-brand-heading text-sm font-semibold text-on-brand-primary/80">{{ $s['logo']['alt'] ?? '' }}</span>
                 </div>
             @endif

@@ -6,41 +6,57 @@ use Filament\Facades\Filament;
 use Tests\TestCase;
 
 /**
- * La marca del panel, y por qué el acceso lleva otra que el resto.
+ * La marca del panel.
  *
- * Son dos composiciones distintas del mismo logo: el panel usa la vertical, que
- * es la que entra en una barra superior; el acceso usa la horizontal con la
- * bajada —«Sistema de administración inmobiliaria»— porque ahí hay espacio y es
- * el único momento en que alguien que no conoce el producto lo está mirando.
+ * El panel lleva la marca de LANDRA y no la del inquilino, y la distinción
+ * importa: la que sube cada cliente es para su sitio público, que es lo que el
+ * demo existe para lucir. El panel es el producto que se está mostrando.
  *
- * Filament no distingue esas dos pantallas por sí solo: usa el mismo logo en
- * todas. Se resuelve pasando una función que mira la ruta.
+ * Se usa la composición horizontal completa en todas las pantallas. La vertical
+ * queda para el sitio, como respaldo de quien no subió la suya: en una barra
+ * superior sale alta, angosta y con el nombre ilegible.
+ *
+ * Lo único que cambia entre pantallas es la altura, y Filament no distingue el
+ * acceso del resto por sí solo — de ahí la función que mira la ruta.
  */
 class MarcaDelPanelTest extends TestCase
 {
-    public function test_the_login_page_uses_the_lockup_with_the_descriptor(): void
+    public function test_the_login_page_shows_landras_lockup(): void
     {
         $respuesta = $this->get('/admin/login');
 
         $respuesta->assertOk();
-        $respuesta->assertSee('login-logo-on-light.png', escape: false);
-        $respuesta->assertSee('login-logo-on-dark.png', escape: false);
+        $respuesta->assertSee('logo-lockup-on-light.png', escape: false);
+        $respuesta->assertSee('logo-lockup-on-dark.png', escape: false);
     }
 
-    public function test_outside_the_login_the_panel_uses_the_compact_mark(): void
+    public function test_the_same_lockup_serves_the_rest_of_the_panel(): void
     {
         // Se pregunta al panel y no a una pantalla: pedir el tablero exigiría una
-        // sesión, y lo que se quiere fijar acá es qué logo resuelve la función
-        // cuando la ruta NO es la de acceso.
+        // sesión, y lo que se fija acá es qué resuelve la configuración.
         $this->assertStringContainsString(
-            'logo-on-light.svg',
+            'logo-lockup-on-light.png',
             (string) Filament::getPanel('admin')->getBrandLogo(),
         );
 
         $this->assertStringContainsString(
-            'logo-on-dark.svg',
+            'logo-lockup-on-dark.png',
             (string) Filament::getPanel('admin')->getDarkModeBrandLogo(),
         );
+    }
+
+    public function test_the_login_gives_the_logo_more_room_than_the_topbar(): void
+    {
+        // La barra superior no tiene el alto del acceso. Con una sola altura,
+        // una de las dos pantallas queda mal — y la que se rompe en silencio es
+        // la barra, porque nadie la mira dos veces.
+        $enElPanel = (string) Filament::getPanel('admin')->getBrandLogoHeight();
+
+        $this->assertSame('2rem', $enElPanel);
+
+        $this->get('/admin/login')
+            ->assertOk()
+            ->assertSee('2.75rem', escape: false);
     }
 
     public function test_the_favicon_is_landras(): void

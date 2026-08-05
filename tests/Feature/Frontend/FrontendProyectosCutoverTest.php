@@ -69,7 +69,10 @@ class FrontendProyectosCutoverTest extends TestCase
         $html = $this->get('/proyectos')->assertOk()->getContent();
 
         $this->assertStringContainsString('brightness-0 invert opacity-80', $html, 'El badge A-74 debe seguir apareciendo sin publicar.');
-        $this->assertStringContainsString('h-48 sm:h-56', $html, 'El logo grande debe usar la rampa de 14rem, no el style= inline original.');
+        // La rampa pasó a ser un TECHO (`max-h-`) y no una altura: un logo
+        // vertical entra más chico en vez de estirarse. El compromiso con el
+        // cutover sigue siendo el mismo — la rampa de clases, no un style inline.
+        $this->assertStringContainsString('max-h-48 sm:max-h-56', $html, 'El logo grande debe usar la rampa de 14rem, no el style= inline original.');
         $this->assertStringNotContainsString('style="height:14rem"', $html, 'El style= inline debía morir con el cutover del hero (§6.1).');
     }
 

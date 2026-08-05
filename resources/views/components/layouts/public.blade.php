@@ -168,9 +168,15 @@
     <input type="checkbox" id="nh-nav" class="peer sr-only">
 
     <header class="sticky top-0 z-50 border-b border-cloud bg-white/90 backdrop-blur-md">
+        {{-- El logo del inquilino entra en una CAJA, no en una altura.
+             Cada cliente sube la marca que tiene, y no todas son horizontales: a
+             alto fijo, una vertical queda ilegible y una muy ancha empuja el
+             menú. Con alto y ancho máximos más `object-contain`, al horizontal
+             lo limita el ancho, al vertical el alto, y ninguno se deforma. --}}
         <div class="mx-auto flex h-[76px] max-w-[var(--container-content)] items-center justify-between gap-6 px-6">
             <a href="{{ url('/') }}" class="flex-none">
-                <img src="{{ $profile['brand']['logo_light_url'] }}" alt="{{ $profile['site_name'] }}" class="h-11 w-auto">
+                <img src="{{ $profile['brand']['logo_light_url'] }}" alt="{{ $profile['site_name'] }}"
+                     class="max-h-11 max-w-[220px] w-auto object-contain">
             </a>
 
             <nav class="hidden items-center gap-2 lg:flex" aria-label="Navegación principal">
@@ -217,7 +223,8 @@
            class="fixed inset-y-0 right-0 z-[70] w-[300px] max-w-[84vw] translate-x-full overflow-y-auto bg-white p-6 shadow-xl transition-transform duration-300 ease-[var(--ease-out-expo)] motion-reduce:transition-none peer-checked:translate-x-0"
            role="dialog" aria-modal="true" aria-label="Menú">
         <div class="mb-5 flex items-center justify-between">
-            <img src="{{ $profile['brand']['logo_light_url'] }}" alt="{{ $profile['site_name'] }}" class="h-9 w-auto">
+            <img src="{{ $profile['brand']['logo_light_url'] }}" alt="{{ $profile['site_name'] }}"
+                 class="max-h-9 max-w-[180px] w-auto object-contain">
             <label for="nh-nav" id="nh-nav-close" role="button" tabindex="0"
                    class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-focus" aria-label="Cerrar menú">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
@@ -255,7 +262,8 @@
         <div class="mx-auto max-w-[var(--container-content)] px-6 pt-16 pb-9">
             <div class="grid gap-10 border-b border-white/10 pb-12 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
                 <div>
-                    <img src="{{ $profile['brand']['logo_dark_url'] }}" alt="{{ $profile['site_name'] }}" class="h-16 w-auto">
+                    <img src="{{ $profile['brand']['logo_dark_url'] }}" alt="{{ $profile['site_name'] }}"
+                         class="max-h-16 max-w-[260px] w-auto object-contain">
                     <p class="mt-5 max-w-[260px] text-sm leading-relaxed text-on-brand-primary/60">
                         Construimos patrimonio, diseñamos espacios y comercializamos oportunidades en Querétaro.
                     </p>

@@ -62,7 +62,7 @@ class FrontendSettingsPageTest extends TestCase
             // With no custom media, every card shows the default-brand state.
             ->assertSee('Marca de Landra por defecto')
             // Each card states the ideal format and dimensions.
-            ->assertSee('~400×120 px')
+            ->assertSee('cualquier forma, mínimo 200 px de lado')
             ->assertSee('512×512 px (mín. 32×32)')
             ->assertSee('1200×630 px (proporción 1.91:1)');
     }

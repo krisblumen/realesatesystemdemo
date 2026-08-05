@@ -514,9 +514,10 @@ class FrontendHeroContractMatrixTest extends TestCase
     /**
      * Design D5: la variante `standard` (la que usa `/proyectos`, ausente de
      * `hero_variants`) necesita su PROPIA rampa para `logo_size: xl` — la
-     * genérica (`h-20 sm:h-24 lg:h-28`) no llega a los 14rem fijos que el
+     * genérica (`max-h-20 sm:max-h-24 lg:max-h-28`) no llega a los 14rem que el
      * logo grande de A-74 tiene hoy. En móvil queda en 12rem (mejor que un
-     * alto fijo) y en `sm+` iguala los 14rem originales.
+     * alto fijo) y en `sm+` iguala los 14rem originales. La rampa es un TECHO:
+     * un logo vertical entra más chico en vez de deformarse.
      */
     public function test_the_standard_variant_ramps_an_xl_logo_to_14rem(): void
     {
@@ -526,7 +527,7 @@ class FrontendHeroContractMatrixTest extends TestCase
         $start = strpos($html, '<section data-nh-hero');
         $hero = substr($html, $start, strpos($html, '</section>', $start) - $start);
 
-        $this->assertStringContainsString('h-48 sm:h-56', $hero);
+        $this->assertStringContainsString('max-h-48 sm:max-h-56', $hero);
         $this->assertStringNotContainsString('h-20 sm:h-24 lg:h-28', $hero, 'La rampa genérica no debe seguir aplicando a xl en la variante standard.');
     }
 
