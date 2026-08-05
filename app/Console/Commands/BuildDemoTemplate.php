@@ -146,7 +146,25 @@ class BuildDemoTemplate extends Command
     private function enUnProcesoAparte(string $nombre, string $comando): bool
     {
         $resultado = Process::path(base_path())
-            ->env(['DB_DATABASE' => $nombre])
+            ->env([
+                'DB_DATABASE' => $nombre,
+
+                // SE QUITAN las credenciales heredadas, para que el hijo lea las
+                // del `.env` — que son las del rol de la APLICACIÓN.
+                //
+                // Este comando se invoca con el rol de aprovisionamiento, el
+                // único con CREATEDB. Si el hijo lo heredara, las tablas
+                // quedarían de ese rol: copiar una base preserva el dueño de
+                // cada tabla, así que TODOS los inquilinos nacerían con tablas
+                // que la aplicación no puede leer. El síntoma es cruel —el alta
+                // reporta éxito y el primer request muere con «permission denied
+                // for table»— y apareció en el primer inquilino real.
+                //
+                // Crear la base necesita privilegio; crear las TABLAS no. Cada
+                // paso corre con el rol que le corresponde.
+                'DB_USERNAME' => false,
+                'DB_PASSWORD' => false,
+            ])
             ->timeout(600)
             ->run('php artisan '.$comando);
 

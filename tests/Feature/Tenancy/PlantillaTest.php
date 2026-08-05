@@ -247,6 +247,62 @@ class PlantillaTest extends TestCase
         );
     }
 
+    public function test_the_tables_do_not_belong_to_the_provisioning_role(): void
+    {
+        // EL DEFECTO QUE ESTE TEST PREVIENE, encontrado en el PRIMER inquilino
+        // real del servidor.
+        //
+        // El comando se invoca con el rol de aprovisionamiento, el único con
+        // CREATEDB. Si las migraciones heredaran ese rol, las tablas quedarían
+        // suyas — y copiar una base preserva el dueño de cada tabla, así que
+        // TODOS los inquilinos nacerían con tablas que la aplicación no puede
+        // leer. El síntoma es cruel: el alta reporta éxito, la base existe, es
+        // del rol correcto, y el primer request muere con «permission denied
+        // for table».
+        //
+        // Crear la base necesita privilegio; crear las TABLAS no. Cada paso
+        // corre con el rol que le corresponde, y el hijo usa el `.env`.
+        $base = 'demo_probe_tpl_roles';
+        $prov = 'demo_probe_prov';
+
+        DB::connection('maintenance')->statement('DROP ROLE IF EXISTS '.$prov);
+        DB::connection('maintenance')->statement("CREATE ROLE {$prov} LOGIN CREATEDB PASSWORD 'probe'");
+
+        // La membresía que el despliegue exige: `GRANT demo_app TO
+        // demo_provisioner`. Sin ella el provisioner ni siquiera puede VERIFICAR
+        // lo que acaba de construir —las tablas son del rol de la aplicación— y
+        // el comando muere en su propio chequeo. Es la razón concreta de ese
+        // GRANT, y este test la deja probada.
+        $app = config('database.connections.pgsql.username');
+        DB::connection('maintenance')->statement('GRANT '.$app.' TO '.$prov);
+
+        try {
+            // Se invoca EXACTAMENTE como en el servidor: con el rol de
+            // aprovisionamiento en el entorno del comando.
+            $resultado = Process::path(base_path())
+                ->env(['DB_USERNAME' => $prov, 'DB_PASSWORD' => 'probe'])
+                ->timeout(600)
+                ->run('php artisan demo:plantilla:construir '.$base.' --force');
+
+            $this->assertTrue($resultado->successful(), $resultado->output().$resultado->errorOutput());
+
+            $delProvisioner = $this->enLaPlantillaLlamada($base, fn ($c) => $c->table('pg_tables')
+                ->where('schemaname', 'public')
+                ->where('tableowner', $prov)
+                ->count());
+
+            $this->assertSame(
+                0,
+                $delProvisioner,
+                'Las tablas quedaron del rol de aprovisionamiento: la aplicación no va a poder leerlas.',
+            );
+        } finally {
+            DB::purge('probe_tpl');
+            DB::connection('maintenance')->statement('DROP DATABASE IF EXISTS "'.$base.'"');
+            DB::connection('maintenance')->statement('DROP ROLE IF EXISTS '.$prov);
+        }
+    }
+
     public function test_building_a_template_does_not_change_the_one_in_use(): void
     {
         // Son dos actos separados a propósito: se puede construir la siguiente
