@@ -47,6 +47,30 @@ return [
             'lock_table' => env('DB_CACHE_LOCK_TABLE'),
         ],
 
+        /*
+         * Los cerrojos del programador de tareas.
+         *
+         * `withoutOverlapping()` y `onOneServer()` guardan su cerrojo en el
+         * caché, y el almacén `database` de arriba resuelve la conexión POR
+         * DEFECTO — que desde consola es el centinela, porque un comando no
+         * tiene subdominio del cual resolver un inquilino.
+         *
+         * Sin este almacén, `demo:borrar` falla antes de mirar un solo
+         * inquilino. La central es el lugar correcto: el programa de tareas es
+         * de la instalación entera, no de ningún inquilino.
+         *
+         * NO se cambia el almacén por defecto a este: el caché de cada inquilino
+         * vive en SU base, y moverlo acá dejaría todo junto, separado apenas por
+         * un prefijo.
+         */
+        'central' => [
+            'driver' => 'database',
+            'connection' => 'central',
+            'table' => env('DB_CACHE_TABLE', 'cache'),
+            'lock_connection' => 'central',
+            'lock_table' => env('DB_CACHE_LOCK_TABLE'),
+        ],
+
         'file' => [
             'driver' => 'file',
             'path' => storage_path('framework/cache/data'),

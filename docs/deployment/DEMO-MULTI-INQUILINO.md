@@ -287,6 +287,60 @@ en vez del script, el cierre del demo la manda al login y la respuesta pasa a se
 un 302 hacia `/index.php/admin/login`. Además, cualquier edición del sitio desde
 el panel pisa el vhost y se lleva la excepción puesta a mano.
 
+## Tareas programadas: una sola línea de cron
+
+**No hace falta un servicio de systemd para la cola.** El programa de tareas ya
+agenda `queue:work --stop-when-empty --max-time=55` cada minuto: drena la cola y
+sale. Un worker permanente sería una pieza más para vigilar a cambio de ahorrar
+como mucho un minuto de latencia — y el camino crítico, el alta de un inquilino,
+es síncrono y no pasa por la cola.
+
+Una línea, como el usuario del sitio y desde el directorio de producción:
+
+```cron
+* * * * * cd /home/<usuario>/htdocs/<dominio> && php artisan schedule:run >> /dev/null 2>&1
+```
+
+### Por qué esto no es "prender el cron y listo"
+
+Un comando de consola **no tiene subdominio del cual resolver un inquilino**, así
+que su conexión por defecto se queda en el centinela. Eso parte las tareas en dos
+familias que no se pueden agendar igual, y la plataforma de origen —una sola
+base— no distinguía:
+
+| Familia | Ejemplos | Cómo se agenda |
+|---|---|---|
+| Central | `demo:expirar`, `demo:borrar`, `queue:work` | Directo. Leen el padrón, que vive en la central por conexión declarada |
+| De inquilino | `leads:reconcile`, `frontend:media:reconcile`, `contratos:*` | `demo:por-cada-inquilino <comando>`: una corrida por inquilino activo, cada una en su base |
+
+`demo:por-cada-inquilino` lanza un **proceso aparte** por inquilino, con
+`DB_DATABASE` apuntando a su base. Es el mismo motivo que en la construcción de
+la plantilla: reapuntar la conexión dentro de un proceso vivo deja atrás todo lo
+que ya la resolvió y memoizó. Cuesta un arranque de Laravel por inquilino, y se
+paga con gusto — la alternativa es que el aislamiento dependa de que nadie se
+olvide de limpiar un singleton.
+
+Un fallo en un inquilino se reporta y el recorrido sigue: con veinte, que el
+tercero tumbe a los diecisiete de atrás convierte un fallo puntual en un apagón.
+Y el recorrido **rechaza comandos destructivos** (`migrate:fresh`, `db:wipe` y
+compañía): es el peor lugar posible para que se cuele uno, porque multiplica el
+daño por la cantidad de gente que confió en el demo.
+
+### Los cerrojos van en la central
+
+`withoutOverlapping()` y `onOneServer()` guardan su cerrojo en el caché, y el
+caché usa la conexión por defecto — el centinela. Sin `Schedule::useCache('central')`
+(en `routes/console.php`), **`demo:borrar` falla antes de mirar un solo
+inquilino**: el comando que libera disco no libera nada.
+
+Requiere que `demo_central` tenga `cache` y `cache_locks`. Verificar:
+
+```bash
+psql -d demo_central -c "\dt cache*"
+```
+
+Todo esto está protegido por `TareasProgramadasTest`.
+
 ## Checklist antes del primer inquilino
 
 - [ ] PostgreSQL 16 con PostGIS en el VPS.
@@ -299,7 +353,10 @@ el panel pisa el vhost y se lleva la excepción puesta a mano.
       superusuario (si lo fuera, el tope no aplicaría).
 - [ ] Base central creada y migrada.
 - [ ] Plantilla construida, y **ninguna** conexión de la aplicación apuntándole.
-- [ ] Cola corriendo y cron activo.
+- [ ] Línea de cron con `schedule:run` como el usuario del sitio (no hace falta
+      worker de systemd: el programa ya agenda la cola cada minuto).
+- [ ] `demo_central` con las tablas `cache` y `cache_locks`, o los cerrojos del
+      programador fallan y `demo:borrar` no corre.
 - [x] `trustProxies` acotado al bucle local en `bootstrap/app.php`, con test.
 - [ ] DNS comodín resolviendo.
 - [x] Certificado comodín emitido con acme.sh e instalado con `--reloadcmd`.
