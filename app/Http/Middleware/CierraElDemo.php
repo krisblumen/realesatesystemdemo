@@ -66,6 +66,26 @@ class CierraElDemo
 
     private function exigeSesion(Request $request): bool
     {
+        // LIVEWIRE ES EL TRANSPORTE, NO UNA PÁGINA.
+        //
+        // El formulario de acceso de Filament no se envía por HTTP normal: lo
+        // manda Livewire a `POST livewire/update`, que está en el grupo `web` y
+        // por lo tanto pasa por acá. Sin esta excepción el cierre lo redirigía
+        // al login por no haber sesión todavía — o sea, IMPEDÍA INICIAR LA
+        // SESIÓN QUE ÉL MISMO EXIGE. Nadie podía entrar, y no quedaba rastro en
+        // el log, porque un 302 no es un error.
+        //
+        // Se compara por RUTA y no por nombre porque el nombre de esa ruta
+        // depende del panel que la registre, y porque la que sirve el JavaScript
+        // no tiene nombre.
+        //
+        // No abre nada que el cierre estuviera protegiendo: las páginas que
+        // Livewire transporta siguen aplicando su propia autorización, y el
+        // panel la suya. Lo único que se deja pasar es el sobre, no la carta.
+        if ($request->is('livewire/*')) {
+            return false;
+        }
+
         $nombre = (string) $request->route()?->getName();
 
         foreach (self::ABIERTAS as $prefijo) {

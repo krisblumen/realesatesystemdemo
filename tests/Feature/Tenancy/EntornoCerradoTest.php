@@ -4,6 +4,7 @@ namespace Tests\Feature\Tenancy;
 
 use App\Enums\TenantEstado;
 use App\Models\Tenant;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Tests\Concerns\UsaBaseCentral;
@@ -75,6 +76,33 @@ class EntornoCerradoTest extends TestCase
         $this->get('http://cerradodemo1.demo.test/_token')
             ->assertOk()
             ->assertSee('firma');
+    }
+
+    public function test_livewire_is_not_blocked_because_it_is_the_transport_of_the_login(): void
+    {
+        // EL DEFECTO QUE ESTE TEST PREVIENE.
+        //
+        // El formulario de acceso de Filament no se envía por HTTP normal: lo
+        // manda Livewire a `POST livewire/update`, que vive en el grupo `web` y
+        // por lo tanto pasa por este cierre. Sin excepción, el cierre lo
+        // redirigía al login por no haber sesión — o sea, impedía iniciar la
+        // sesión que él mismo exige. Nadie puede entrar nunca, y no queda rastro
+        // en el log, porque un 302 no es un error.
+        //
+        // Se compara por RUTA y no por nombre porque los nombres de las rutas de
+        // Livewire cambian con el panel que las registra, y porque la ruta que
+        // sirve su JavaScript no tiene nombre.
+        //
+        // Se desactiva SÓLO la verificación de CSRF: corre antes que el cierre,
+        // así que sin quitarla el 419 taparía lo que este test mide.
+        $respuesta = $this->withoutMiddleware(VerifyCsrfToken::class)
+            ->post('http://cerradodemo1.demo.test/livewire/update', []);
+
+        $this->assertNotEquals(
+            route('filament.admin.auth.login'),
+            $respuesta->headers->get('location'),
+            'El cierre está mandando al login el transporte con el que se inicia sesión.',
+        );
     }
 
     public function test_the_closure_does_not_touch_anything_outside_a_tenant(): void
