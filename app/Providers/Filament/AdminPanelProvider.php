@@ -8,6 +8,7 @@ use App\Filament\Pages\Auth\ResetPassword;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\FrontendSettingsPage;
 use App\Filament\Resources\FrontendPageResource\Pages\EditFrontendPage;
+use App\Http\Middleware\AtiendeElHostCentral;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\ResolveTenant;
 use Filament\Http\Middleware\Authenticate;
@@ -166,6 +167,11 @@ class AdminPanelProvider extends PanelProvider
                 // Se descubrió en el servidor, con el panel devolviendo 500
                 // mientras la resolución funcionaba bien en el resto del sitio.
                 ResolveTenant::class,
+
+                // El panel tampoco funciona en el host central: buscaría los
+                // usuarios en una base que no tiene esa tabla. Antes daba 500;
+                // ahora cae en la portada como el resto.
+                AtiendeElHostCentral::class,
 
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

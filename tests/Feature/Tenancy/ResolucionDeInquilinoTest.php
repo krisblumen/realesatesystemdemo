@@ -3,6 +3,7 @@
 namespace Tests\Feature\Tenancy;
 
 use App\Enums\TenantEstado;
+use App\Http\Middleware\AtiendeElHostCentral;
 use App\Http\Middleware\CierraElDemo;
 use App\Http\Middleware\ResolveTenant;
 use App\Models\Tenant;
@@ -42,6 +43,13 @@ class ResolucionDeInquilinoTest extends TestCase
         // devolvería una redirección al login y el test no podría mirar la
         // conexión. El cierre tiene sus propios tests.
         $this->withoutMiddleware(CierraElDemo::class);
+
+        // Y también el que atiende el host central, por el mismo motivo: acá se
+        // prueba a QUÉ BASE resuelve una petición, no qué página se sirve. Con
+        // ese middleware puesto, el host central contesta su portada y la sonda
+        // nunca corre — el test no podría mirar la conexión. Lo que ese host
+        // sirve tiene sus propios tests en `HostCentralTest`.
+        $this->withoutMiddleware(AtiendeElHostCentral::class);
 
         $this->original = config('database.connections.pgsql.database');
 

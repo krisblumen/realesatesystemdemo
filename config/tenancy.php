@@ -54,6 +54,24 @@ return [
 
     /*
     |---------------------------------------------------------------------------
+    | Sitio promocional
+    |---------------------------------------------------------------------------
+    |
+    | A dónde mandar a quien llega al dominio base sin subdominio. Vacío mientras
+    | no exista: el host central sirve su propia página mínima, que no consulta
+    | ninguna tabla.
+    |
+    | Ese orden es deliberado. Redirigir siempre ataría el host central a que
+    | exista otro sitio, y mientras ese sitio no esté listo cambiaríamos un 500
+    | por el 500 del otro dominio. Con la página propia como piso, la redirección
+    | es una mejora y no un requisito.
+    |
+    */
+
+    'sitio_promocional' => env('TENANCY_SITIO_PROMOCIONAL'),
+
+    /*
+    |---------------------------------------------------------------------------
     | Cerrojo de aprovisionamiento
     |---------------------------------------------------------------------------
     |

@@ -110,7 +110,13 @@ class EntornoCerradoTest extends TestCase
         // Se activa cuando HAY inquilino, no con una bandera: una bandera es
         // algo que alguien puede olvidarse de encender, y el síntoma de
         // olvidarla es un demo abierto que parece cerrado.
-        $this->get('http://demo.test/_publica')
+        //
+        // Se usa un host AJENO y ya no el central: desde que el host central
+        // sirve su propia portada, la petición no llega al cierre y este test
+        // dejaría de medir lo que dice medir. Un host ajeno sigue siendo el caso
+        // que importa — una instalación de la plataforma sin inquilinos, que no
+        // tiene por qué quedar cerrada.
+        $this->get('http://localhost/_publica')
             ->assertOk()
             ->assertSee('contenido');
     }
