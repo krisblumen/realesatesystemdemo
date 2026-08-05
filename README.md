@@ -100,7 +100,7 @@ composer test    # suite completa
 
 ## Desplegar
 
-Tres cosas **no viajan en git** y hay que generarlas en el servidor:
+Cuatro cosas **no viajan en git** y hay que generarlas en el servidor:
 
 ```bash
 composer install --no-dev --optimize-autoloader
@@ -114,7 +114,15 @@ npm ci && npm run build
 php artisan filament:assets
 ```
 
-Las tres comparten el mismo modo de falla, y por eso cuestan de encontrar: **no
+```bash
+php artisan storage:link
+```
+
+El último es el más silencioso de los cuatro: sin ese enlace, el sistema acepta
+que un inquilino suba su logo, lo guarda bien, y lo sirve con un 404. Nada falla
+al desplegar — falla el día que alguien sube su marca.
+
+Las cuatro comparten el mismo modo de falla, y por eso cuestan de encontrar: **no
 rompen nada al desplegar**. El sitio arranca, las páginas se dibujan, y sólo
 falla cuando alguien intenta usarlo.
 

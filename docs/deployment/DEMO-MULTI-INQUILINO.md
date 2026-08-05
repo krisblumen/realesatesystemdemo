@@ -392,6 +392,24 @@ psql -d demo_central -c "\dt cache*"
 
 Todo esto está protegido por `TareasProgramadasTest`.
 
+## El enlace de `storage` no es opcional
+
+```bash
+php artisan storage:link
+```
+
+Sin él, la librería de medios guarda los archivos correctamente y el servidor web
+los devuelve con **404**. El sistema acepta la subida, la confirma, y la imagen no
+aparece nunca.
+
+Es un enlace por instalación y no por inquilino: las rutas ya llevan el inquilino
+adelante (RFC-08), porque la numeración de la librería arranca en 1 en cada base
+y sin ese prefijo dos inquilinos escribirían en `1/`.
+
+Se descubrió cuando el widget de marca del escritorio mostró una imagen rota en
+desarrollo. En el servidor el síntoma habría sido el mismo, con la diferencia de
+que quien lo sufriría es la persona invitada subiendo su logo.
+
 ## Checklist antes del primer inquilino
 
 - [ ] PostgreSQL 16 con PostGIS en el VPS.
@@ -410,6 +428,8 @@ Todo esto está protegido por `TareasProgramadasTest`.
 - [ ] `demo_central` con las tablas `cache` y `cache_locks`, o los cerrojos del
       programador fallan y `demo:borrar` no corre.
 - [x] `trustProxies` acotado al bucle local en `bootstrap/app.php`, con test.
+- [ ] `php artisan storage:link` corrido, o las imágenes que suba un inquilino
+      devuelven 404 sin que nada avise.
 - [ ] DNS comodín resolviendo.
 - [x] Certificado comodín emitido con acme.sh e instalado con `--reloadcmd`.
 - [ ] Verificado que sin sesión ninguna ruta de inquilino devuelve contenido.

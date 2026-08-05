@@ -49,6 +49,16 @@ class FrontendSettingsService implements FrontendContent
      * (CacheManager.php:120), a LogicException that is neither a
      * RuntimeException nor the PSR interface, so it slipped straight through.
      */
+    /**
+     * El logo de respaldo, cuando el inquilino todavía no subió el suyo.
+     *
+     * Es constante y no un literal suelto porque hay quien necesita PREGUNTAR si
+     * lo que se está sirviendo es el respaldo o la marca del cliente — el widget
+     * del escritorio, sin ir más lejos. Con el literal repetido, ese chequeo se
+     * rompe en silencio el día que alguien cambia el archivo acá.
+     */
+    public const LOGO_CLARO_POR_DEFECTO = 'images/brand/logo-on-light.svg';
+
     public function settings(): array
     {
         $key = sprintf('frontend:g%d:settings', $this->generation->current());
@@ -113,7 +123,7 @@ class FrontendSettingsService implements FrontendContent
                 'og_description' => $setting?->default_og_description,
             ],
             'brand' => [
-                'logo_light_url' => $this->brandUrl($setting, 'logo_light_media_id', 'logo-light', asset('images/brand/logo-on-light.svg')),
+                'logo_light_url' => $this->brandUrl($setting, 'logo_light_media_id', 'logo-light', asset(self::LOGO_CLARO_POR_DEFECTO)),
                 'logo_dark_url' => $this->brandUrl($setting, 'logo_dark_media_id', 'logo-dark', asset('images/brand/logo-on-dark.svg')),
                 'favicon_url' => $this->brandUrl($setting, 'favicon_media_id', 'favicon', asset('images/brand/landra-core.ico')),
                 'og_image_url' => $this->brandUrl($setting, 'og_image_media_id', 'default-og-image', asset('images/metaimage/meta_image_landra.jpg')),

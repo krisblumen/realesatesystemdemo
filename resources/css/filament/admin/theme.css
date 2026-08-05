@@ -46,6 +46,13 @@ h1,h2,h3,h4,
    La barra superior es angosta: una composición ancha la empuja, y el ancho
    máximo es lo único que lo impide. `object-fit` evita que la caja la deforme. */
 .fi-logo{ max-width:13rem; object-fit:contain; }
+/* La caja del logo del inquilino en el escritorio.
+   Va acá y NO como utilidades de Tailwind en la vista: el panel carga su propio
+   bundle, y `max-h-14` / `max-w-[220px]` / `object-contain` no existen en él.
+   Escritas en el Blade son texto muerto — y encima pasan un test que sólo mire
+   el HTML. El logo lo sube el cliente, así que la caja acota las DOS
+   dimensiones: la vertical no se estira, la muy ancha no empuja el botón. */
+.landra-marca-logo{ max-height:3.5rem; max-width:13.75rem; width:auto; object-fit:contain; }
 
 .fi-simple-layout .fi-logo{
   position:absolute; left:50%; top:0;
