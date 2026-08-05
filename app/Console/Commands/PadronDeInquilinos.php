@@ -22,7 +22,7 @@ use Illuminate\Console\Command;
  */
 class PadronDeInquilinos extends Command
 {
-    protected $signature = 'demo:padron {--estado= : Filtrar por estado}';
+    protected $signature = 'demo:padron {--estado= : Filtrar por estado} {--correos : Mostrar el correo de cada inquilino}';
 
     protected $description = 'Lista los inquilinos del demo y su estado';
 
@@ -39,20 +39,45 @@ class PadronDeInquilinos extends Command
             return self::SUCCESS;
         }
 
+        // EL CORREO SALE SÓLO SI SE PIDE.
+        //
+        // La decisión original era no mostrarlo nunca —«no hace falta para
+        // operar»— y el primer despliegue real la desmintió: sin el correo no se
+        // sabe de quién es un inquilino ni con qué usuario se entra, y la salida
+        // fue abrir `tinker`. Un padrón que obliga a escribir consultas a mano no
+        // es un padrón.
+        //
+        // Pero sigue siendo el único dato personal de esta tabla, y esta tabla es
+        // lo que uno muestra en una pantalla compartida o pega en un chat. Por
+        // eso se pide, y no viene puesto.
+        $conCorreos = (bool) $this->option('correos');
+
+        $encabezados = ['Slug', 'Estado', 'Nació', 'Vence', 'Plantilla', 'Intentos', 'Motivo de falla'];
+
+        if ($conCorreos) {
+            array_splice($encabezados, 1, 0, ['Correo']);
+        }
+
         $this->table(
-            ['Slug', 'Estado', 'Nació', 'Vence', 'Plantilla', 'Intentos', 'Motivo de falla'],
-            $inquilinos->map(fn (Tenant $t): array => [
-                $t->slug,
-                $t->estado->value,
-                $t->created_at?->format('Y-m-d'),
-                $t->expira_en?->format('Y-m-d'),
-                $t->template_version,
-                // Distingue «falló recién» de «lleva noches fallando».
-                $t->intentos_de_borrado > 0 ? (string) $t->intentos_de_borrado : '',
-                // El correo NO se muestra: no hace falta para operar y es el
-                // único dato personal del padrón.
-                $t->motivo_falla === null ? '' : mb_substr($t->motivo_falla, 0, 60),
-            ])->all(),
+            $encabezados,
+            $inquilinos->map(function (Tenant $t) use ($conCorreos): array {
+                $fila = [
+                    $t->slug,
+                    $t->estado->value,
+                    $t->created_at?->format('Y-m-d'),
+                    $t->expira_en?->format('Y-m-d'),
+                    $t->template_version,
+                    // Distingue «falló recién» de «lleva noches fallando».
+                    $t->intentos_de_borrado > 0 ? (string) $t->intentos_de_borrado : '',
+                    $t->motivo_falla === null ? '' : mb_substr($t->motivo_falla, 0, 60),
+                ];
+
+                if ($conCorreos) {
+                    array_splice($fila, 1, 0, [$t->email]);
+                }
+
+                return $fila;
+            })->all(),
         );
 
         $activos = $inquilinos->where('estado', TenantEstado::Activo)->count();

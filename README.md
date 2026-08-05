@@ -151,14 +151,27 @@ inquilino.
 php artisan demo:plantilla:construir demo_template_v2   # construye una plantilla nueva
 php artisan demo:invitar persona@ejemplo.com --dias=15  # crea un inquilino e imprime su acceso
 php artisan demo:padron                                 # qué inquilinos hay y qué les pasó
+php artisan demo:padron --correos                       # ...y de quién es cada uno
+php artisan demo:reemitir-acceso abcdefgh               # contraseña nueva para quien perdió la suya
 php artisan demo:expirar --slug=abcdefgh                # vencer hoy, sin esperar la fecha
 php artisan demo:borrar                                 # borra bases y archivos de los vencidos
 php artisan demo:abortar-borrado --slug=abcdefgh        # reabre un borrado que quedó a medias
+php artisan demo:por-cada-inquilino leads:reconcile     # corre una tarea en cada inquilino activo
 ```
 
 El acceso sale por consola y no por correo, a propósito: un mensaje que cae en
 spam es una persona que quería probar el producto y no pudo, con un inquilino
 aprovisionado ocupando lugar.
+
+La contraseña se muestra **una sola vez** —en la base queda hasheada— así que no
+se recupera, se regenera con `demo:reemitir-acceso`. Y el correo del inquilino
+sale del padrón sólo cuando se pide: es el único dato personal de esa tabla, y
+esa tabla es lo que uno muestra en una pantalla compartida.
+
+Ninguno de estos comandos abre la base de un inquilino para mirar adentro, y no
+hay «entrar como». El producto que este demo muestra promete que los datos de un
+cliente son de ese cliente; un demo que lo desmienta en la consola no lo está
+mostrando, lo está contradiciendo.
 
 ---
 
