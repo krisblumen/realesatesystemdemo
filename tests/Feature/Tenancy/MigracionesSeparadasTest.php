@@ -35,6 +35,33 @@ class MigracionesSeparadasTest extends TestCase
         );
     }
 
+    public function test_the_central_has_the_framework_tables_the_host_needs(): void
+    {
+        // EL DEFECTO QUE ESTE TEST PREVIENE, encontrado en el servidor.
+        //
+        // La sesión y el caché usan la conexión POR DEFECTO, y en el host
+        // central esa conexión es la central. Sin estas tablas, la PRIMERA
+        // petición a ese host muere con «relation sessions does not exist» —
+        // antes de llegar a ninguna ruta, porque la sesión arranca primero.
+        //
+        // El diseño del lote A lo decía y la implementación no lo hacía: la
+        // central sólo creaba `tenants`.
+        $central = $this->archivosDe('migrations/central');
+        $contenido = '';
+
+        foreach ($central as $archivo) {
+            $contenido .= (string) file_get_contents(database_path('migrations/central/'.$archivo));
+        }
+
+        foreach (['sessions', 'cache', 'jobs', 'failed_jobs'] as $tabla) {
+            $this->assertStringContainsString(
+                "Schema::create('{$tabla}'",
+                $contenido,
+                "La central necesita la tabla «{$tabla}»: sin ella el host central no atiende una sola petición.",
+            );
+        }
+    }
+
     public function test_the_tenant_migrations_do_not_include_the_central_ones(): void
     {
         $inquilino = $this->archivosDe('migrations');
