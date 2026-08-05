@@ -24,7 +24,7 @@ class FrontendSettingsService implements FrontendContent
     private const TTL_SECONDS = 300;
 
     /** Exact fallbacks of §16.7, verified against the public layout. */
-    private const FALLBACK_EMAIL = 'hola@newhauz.com.mx';
+    private const FALLBACK_EMAIL = 'hola@landracore.com';
 
     private const FALLBACK_WHATSAPP = '524422722623';
 
@@ -96,7 +96,7 @@ class FrontendSettingsService implements FrontendContent
         $email = $this->normalizedEmail($setting?->public_email);
 
         return [
-            'site_name' => $setting?->site_name ?: 'New Hauz',
+            'site_name' => $setting?->site_name ?: 'Landra',
             'tagline' => $setting?->tagline,
             'contact' => [
                 'phone' => $setting?->public_phone,
@@ -113,10 +113,10 @@ class FrontendSettingsService implements FrontendContent
                 'og_description' => $setting?->default_og_description,
             ],
             'brand' => [
-                'logo_light_url' => $this->brandUrl($setting, 'logo_light_media_id', 'logo-light', asset('images/brand/newhauz-on-light.svg')),
-                'logo_dark_url' => $this->brandUrl($setting, 'logo_dark_media_id', 'logo-dark', asset('images/brand/newhauz-on-dark.svg')),
-                'favicon_url' => $this->brandUrl($setting, 'favicon_media_id', 'favicon', asset('images/brand/newhauz_monogram.ico')),
-                'og_image_url' => $this->brandUrl($setting, 'og_image_media_id', 'default-og-image', asset('images/metaimage/meta_image_newhauz.jpg')),
+                'logo_light_url' => $this->brandUrl($setting, 'logo_light_media_id', 'logo-light', asset('images/brand/logo-on-light.svg')),
+                'logo_dark_url' => $this->brandUrl($setting, 'logo_dark_media_id', 'logo-dark', asset('images/brand/logo-on-dark.svg')),
+                'favicon_url' => $this->brandUrl($setting, 'favicon_media_id', 'favicon', asset('images/brand/landra-core.ico')),
+                'og_image_url' => $this->brandUrl($setting, 'og_image_media_id', 'default-og-image', asset('images/metaimage/meta_image_landra.jpg')),
             ],
         ];
     }

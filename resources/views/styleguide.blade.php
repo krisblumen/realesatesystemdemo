@@ -4,7 +4,7 @@
         <h1 class="mt-2 font-display text-5xl font-extrabold tracking-tight text-navy">Guía de estilo viva</h1>
         <p class="mt-4 max-w-xl text-lg leading-relaxed text-stone">
             Tokens del design system mapeados a Tailwind v4. Esta página valida la base sobre la que
-            construimos el sitio público de New Hauz.
+            construimos el sitio público de Landra.
         </p>
 
         {{-- Paleta --}}

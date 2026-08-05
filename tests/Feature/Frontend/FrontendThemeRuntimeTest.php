@@ -28,7 +28,7 @@ class FrontendThemeRuntimeTest extends TestCase
     {
         DB::table('frontend_settings')->updateOrInsert(
             ['singleton_key' => 'default'],
-            ['site_name' => 'New Hauz', 'theme' => json_encode($theme), 'created_at' => now(), 'updated_at' => now()],
+            ['site_name' => 'Landra', 'theme' => json_encode($theme), 'created_at' => now(), 'updated_at' => now()],
         );
 
         app(FrontendCacheGeneration::class)->bump();
@@ -88,7 +88,7 @@ class FrontendThemeRuntimeTest extends TestCase
         $html = $this->get('/')->assertOk()->getContent();
 
         $this->assertStringNotContainsString('alert(1)', $html);
-        $this->assertStringContainsString('--nh-primary: #091a5b', $html, 'It must fall back to the default.');
+        $this->assertStringContainsString('--nh-primary: #2e3842', $html, 'It must fall back to the default.');
     }
 
     public function test_the_brand_ink_served_for_a_hostile_light_theme_clears_aa(): void
@@ -98,11 +98,11 @@ class FrontendThemeRuntimeTest extends TestCase
         // tokens the HTML actually serves must clear AA against the background.
         $this->persistTheme([
             'primary' => '#fef08a',
-            'on_primary' => '#111111',
+            'on_primary' => '#171d23',
             'accent' => '#fde68a',
-            'on_accent' => '#111111',
+            'on_accent' => '#171d23',
             'background' => '#ffffff',
-            'text' => '#111111',
+            'text' => '#171d23',
         ]);
 
         $html = $this->get('/')->assertOk()->getContent();

@@ -1,7 +1,7 @@
 @php
     $cms = app(\App\Services\Frontend\FrontendPageRenderer::class)->render('inversionistas');
 @endphp
-<x-layouts.public title="Inversionistas · New Hauz" :seo="$cms['seo']">
+<x-layouts.public title="Inversionistas · Landra" :seo="$cms['seo']">
     @if (! $cms['fallback'])
         {{-- Página publicada desde el CMS (RFC-076): renderiza el snapshot. --}}
         @include('frontend.render', ['sections' => $cms['sections']])
@@ -30,7 +30,7 @@
                 <p class="eyebrow mb-4 text-brand-accent-ink">01 · Inversión con visión</p>
                 <h2 class="font-brand-heading text-[clamp(26px,3.4vw,36px)] font-bold leading-snug tracking-tight text-brand-primary-ink">Decisiones respaldadas por datos y estrategia.</h2>
                 <p class="mt-5 text-base leading-relaxed text-stone">
-                    Invertir en bienes raíces no se trata solo de comprar un terreno, adquirir una propiedad o iniciar un desarrollo; se trata de tomar decisiones con visión, datos y estrategia. En New Hauz acompañamos a inversionistas, propietarios y desarrolladores en la evaluación, planeación y estructuración de oportunidades inmobiliarias con potencial de crecimiento, rentabilidad y plusvalía.
+                    Invertir en bienes raíces no se trata solo de comprar un terreno, adquirir una propiedad o iniciar un desarrollo; se trata de tomar decisiones con visión, datos y estrategia. En Landra acompañamos a inversionistas, propietarios y desarrolladores en la evaluación, planeación y estructuración de oportunidades inmobiliarias con potencial de crecimiento, rentabilidad y plusvalía.
                 </p>
             </div>
             <div class="min-h-[480px] overflow-hidden rounded-brand-lg shadow-lg">

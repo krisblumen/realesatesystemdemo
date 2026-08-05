@@ -79,6 +79,7 @@ class InvitarADemo extends Command
         // Se muestra UNA sola vez: en la base ya quedó hasheada. Si se pierde no
         // hay forma de recuperarla, sólo de regenerarla.
         $this->components->warn('La contraseña no se vuelve a mostrar. Copiala ahora.');
+        $this->line("  Si se pierde: `php artisan demo:reemitir-acceso {$tenant->slug}`.");
 
         $this->newLine();
 

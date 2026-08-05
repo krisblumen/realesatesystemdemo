@@ -7,12 +7,12 @@
         @page { margin: 2cm 1.8cm; }
         * { box-sizing: border-box; }
         body { font-family: 'Helvetica', 'Arial', sans-serif; color: #1f2937; font-size: 11px; line-height: 1.5; margin: 0; }
-        h1 { font-size: 16px; color: #091A5B; margin: 0 0 2px; }
-        h2 { font-size: 12px; color: #091A5B; margin: 16px 0 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; }
-        h3 { font-size: 12px; margin: 12px 0 4px; color: #091A5B; }
+        h1 { font-size: 16px; color: #2e3842; margin: 0 0 2px; }
+        h2 { font-size: 12px; color: #2e3842; margin: 16px 0 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; }
+        h3 { font-size: 12px; margin: 12px 0 4px; color: #2e3842; }
         h4 { font-size: 11px; margin: 9px 0 2px; color: #0f172a; }
         .muted { color: #64748b; }
-        .header { border-bottom: 2px solid #091A5B; padding-bottom: 8px; margin-bottom: 12px; }
+        .header { border-bottom: 2px solid #2e3842; padding-bottom: 8px; margin-bottom: 12px; }
         table.data { width: 100%; border-collapse: collapse; margin: 6px 0; }
         table.data th { background: #f1f5f9; text-align: left; padding: 4px 8px; width: 38%; font-weight: bold; color: #334155; }
         table.data td { padding: 4px 8px; border-bottom: 1px solid #e2e8f0; }
@@ -20,8 +20,8 @@
         .firmas { width: 100%; margin-top: 22px; }
         .firmas td { width: 50%; vertical-align: top; padding: 10px; border: 1px solid #cbd5e1; }
         .firma-img { max-height: 70px; max-width: 90%; }
-        .sello { border: 1.5px dashed #091A5B; border-radius: 8px; padding: 10px; text-align: center; }
-        .sello .marca { font-size: 13px; font-weight: bold; color: #091A5B; letter-spacing: 1px; }
+        .sello { border: 1.5px dashed #2e3842; border-radius: 8px; padding: 10px; text-align: center; }
+        .sello .marca { font-size: 13px; font-weight: bold; color: #2e3842; letter-spacing: 1px; }
         .sello .qr { height: 90px; width: 90px; margin: 6px auto 0; display: block; }
         .evidencia { font-size: 9px; color: #64748b; margin-top: 6px; }
         .foot { margin-top: 14px; border-top: 1px solid #e2e8f0; padding-top: 6px; font-size: 9px; color: #94a3b8; }
@@ -30,7 +30,7 @@
            la primera dejaría el resto indistinguible del contrato sellado. */
         .marca-borrador {
             position: fixed; top: 40%; left: 0; width: 100%; text-align: center;
-            font-size: 62px; font-weight: bold; color: #091A5B; opacity: 0.10;
+            font-size: 62px; font-weight: bold; color: #2e3842; opacity: 0.10;
             transform: rotate(-24deg); letter-spacing: 6px; z-index: 0;
         }
         .aviso-borrador {
@@ -52,7 +52,7 @@
     @endif
 
     <div class="header">
-        <h1>NEW HAUZ INMOBILIARIA</h1>
+        <h1>LANDRA INMOBILIARIA</h1>
         <div class="muted">Contrato de prestación de servicios de intermediación inmobiliaria</div>
         <div class="muted">Folio <strong>{{ $contrato->folio }}</strong> · Plantilla {{ $contrato->plantilla_version }} · Tipo: {{ $contrato->tipo_operacion->label() }} · {{ $modalidad }}</div>
     </div>
@@ -91,7 +91,7 @@
                 <strong>EL PROFESIONAL INMOBILIARIO</strong>
                 <div class="sello">
                     {{-- Placeholder del sello (R-4/DIF-6): el arte SVG final lo entrega el equipo de diseño. --}}
-                    <div class="marca">NEW HAUZ</div>
+                    <div class="marca">LANDRA</div>
                     @if ($borrador ?? false)
                         {{-- SIN QR en el borrador. El código lleva a la
                              verificación pública, que sólo dice la verdad de un

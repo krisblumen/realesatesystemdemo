@@ -61,7 +61,7 @@ class FrontendGlobalViewDataTest extends TestCase
         // No publish ⇒ the per-page prop title is used, never a blank title.
         $html = $this->get('/servicios')->assertOk()->getContent();
 
-        $this->assertStringContainsString('<title>Servicios · New Hauz</title>', $html);
+        $this->assertStringContainsString('<title>Servicios · Landra</title>', $html);
     }
 
     public function test_the_layout_emits_canonical_and_structured_data(): void
@@ -75,7 +75,7 @@ class FrontendGlobalViewDataTest extends TestCase
         $this->assertStringContainsString('application/ld+json', $html);
         $this->assertStringContainsString('"@type":"Organization"', $html);
         $this->assertStringContainsString('"@type":"WebSite"', $html);
-        $this->assertStringContainsString('New Hauz', $html);
+        $this->assertStringContainsString('Landra', $html);
     }
 
     public function test_the_canonical_of_an_inner_page_derives_from_its_path(): void

@@ -120,17 +120,17 @@ class FrontendStoryPhotoTest extends TestCase
             'title' => 'Nuestra historia',
             'body' => 'Empezamos en un despacho chico.',
             'upload' => [$this->fotoSubida()],
-            'alt' => 'El equipo de New Hauz en su oficina',
+            'alt' => 'El equipo de Landra en su oficina',
         ]);
 
         $this->assertArrayHasKey('media_id', $payload);
-        $this->assertSame('El equipo de New Hauz en su oficina', $payload['alt']);
+        $this->assertSame('El equipo de Landra en su oficina', $payload['alt']);
         $this->assertSame([], $this->schema()->validate('rich_text', $payload));
 
         $html = $this->publicar($payload);
 
         $this->assertStringContainsString('lg:grid-cols-2 lg:gap-16', $html);
-        $this->assertStringContainsString('alt="El equipo de New Hauz en su oficina"', $html);
+        $this->assertStringContainsString('alt="El equipo de Landra en su oficina"', $html);
     }
 
     public function test_a_photo_without_a_description_is_refused(): void
@@ -261,7 +261,7 @@ class FrontendStoryPhotoTest extends TestCase
     {
         $payload = app(SectionPayloadCompiler::class)->compile($this->equipo(), [
             'eyebrow' => 'QUIÉNES SOMOS',
-            'title' => 'Las personas detrás de New Hauz',
+            'title' => 'Las personas detrás de Landra',
             'members' => [['name' => 'Kristian Alvarez', 'role' => 'Dirección']],
         ]);
 
@@ -273,7 +273,7 @@ class FrontendStoryPhotoTest extends TestCase
     {
         // Es una división con imagen comercial propia, no la marca principal.
         $payload = app(SectionPayloadCompiler::class)->compile($this->equipo(), [
-            'title' => 'Las personas detrás de New Hauz',
+            'title' => 'Las personas detrás de Landra',
             'members' => [['name' => 'Kristian Alvarez']],
             'spotlight' => [
                 'eyebrow' => 'DIVISIÓN',
@@ -340,7 +340,7 @@ class FrontendStoryPhotoTest extends TestCase
         $equipo = $this->equipo();
         $equipo->forceFill(['payload' => [
             'eyebrow' => 'EL EQUIPO',
-            'title' => 'Las personas detrás de New Hauz',
+            'title' => 'Las personas detrás de Landra',
             'spotlight' => ['title' => 'A-74 Arquitectura'],
             'members' => [['name' => 'Kristian Alvarez', 'role' => 'Dirección']],
         ]])->saveQuietly();

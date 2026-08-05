@@ -80,7 +80,7 @@ class PublicLeadCaptureTest extends TestCase
             function (LeadConfirmationNotification $notification) use ($lead): bool {
                 $mail = $notification->toMail($lead);
 
-                return str_contains(implode(' ', $mail->introLines), 'Un asesor de New Hauz');
+                return str_contains(implode(' ', $mail->introLines), 'Un asesor de Landra');
             },
         );
     }

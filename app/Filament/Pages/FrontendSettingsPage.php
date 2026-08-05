@@ -92,7 +92,7 @@ class FrontendSettingsPage extends Page implements HasForms
             $value = $theme[$colour] ?? null;
 
             if ($value !== null && $value !== '' && ! ThemeContract::isHex($value)) {
-                $errors["data.theme.{$colour}"] = 'Usa un color hexadecimal de seis dígitos, por ejemplo #091a5b.';
+                $errors["data.theme.{$colour}"] = 'Usa un color hexadecimal de seis dígitos, por ejemplo #2e3842.';
             }
         }
 
@@ -448,7 +448,7 @@ class FrontendSettingsPage extends Page implements HasForms
                     ]),
 
                 Section::make('Marca')
-                    ->description('Cada imagen muestra lo que se ve hoy en el sitio. Toca «Cambiar imagen» para subir una nueva; la anterior nunca se borra, solo deja de usarse. Sin imagen propia, se usa la marca New Hauz por defecto.')
+                    ->description('Cada imagen muestra lo que se ve hoy en el sitio. Toca «Cambiar imagen» para subir una nueva; la anterior nunca se borra, solo deja de usarse. Sin imagen propia, se usa la marca de Landra por defecto.')
                     ->schema([
                         $this->brandAsset(
                             NonDestructiveMediaUpload::make('logo_light')
@@ -517,9 +517,9 @@ class FrontendSettingsPage extends Page implements HasForms
         $setting = FrontendSetting::current();
         $refs = app(FrontendMediaReference::class);
         $light = $refs->resolve($setting->logo_light_media_id, $setting, 'logo-light')?->getUrl()
-            ?? asset('images/brand/newhauz-on-light.svg');
+            ?? asset('images/brand/logo-on-light.svg');
         $dark = $refs->resolve($setting->logo_dark_media_id, $setting, 'logo-dark')?->getUrl()
-            ?? asset('images/brand/newhauz-on-dark.svg');
+            ?? asset('images/brand/logo-on-dark.svg');
 
         return <<<HTML
 <div x-data="{
@@ -735,15 +735,15 @@ HTML;
      */
     private function seoPreviewHtml(Get $get): string
     {
-        $siteName = trim((string) ($get('site_name') ?: 'New Hauz'));
+        $siteName = trim((string) ($get('site_name') ?: 'Landra'));
         $title = trim((string) ($get('default_og_title') ?: $get('default_meta_title') ?: $siteName));
         $description = trim((string) ($get('default_og_description') ?: $get('default_meta_description')
-            ?: 'New Hauz — Real Estate en Querétaro. Construimos patrimonio, diseñamos espacios y comercializamos oportunidades.'));
+            ?: 'Landra — Real Estate. Construimos patrimonio, diseñamos espacios y comercializamos oportunidades.'));
 
         // The saved OG image (upload lives in the «Marca» section), or the default.
         $setting = FrontendSetting::current();
         $image = app(FrontendMediaReference::class)->resolve($setting->og_image_media_id, $setting, 'default-og-image')?->getUrl()
-            ?? asset('images/metaimage/meta_image_newhauz.jpg');
+            ?? asset('images/metaimage/meta_image_landra.jpg');
 
         $host = mb_strtoupper((string) (parse_url((string) url('/'), PHP_URL_HOST) ?: $siteName));
 
@@ -870,10 +870,10 @@ HTML;
 
         // The exact fallbacks the render uses when there is no custom image.
         $defaults = [
-            'logo-light' => asset('images/brand/newhauz-on-light.svg'),
-            'logo-dark' => asset('images/brand/newhauz-on-dark.svg'),
-            'favicon' => asset('images/brand/newhauz-monogram.png'),
-            'default-og-image' => asset('images/metaimage/meta_image_newhauz.jpg'),
+            'logo-light' => asset('images/brand/logo-on-light.svg'),
+            'logo-dark' => asset('images/brand/logo-on-dark.svg'),
+            'favicon' => asset('images/brand/isotipo-on-light.png'),
+            'default-og-image' => asset('images/metaimage/meta_image_landra.jpg'),
         ];
         $url = $custom ?? ($defaults[$collection] ?? '');
         $isCustom = $custom !== null;
@@ -889,7 +889,7 @@ HTML;
 
         $badge = $isCustom
             ? '<span style="color:#047857">● Imagen personalizada</span>'
-            : '<span style="color:#92400e">● Marca New Hauz por defecto</span>';
+            : '<span style="color:#92400e">● Marca de Landra por defecto</span>';
 
         $imgBox = $variant === 'og'
             ? "<img src=\"{$url}\" alt=\"{$title}\" style=\"{$imgStyle}\">"

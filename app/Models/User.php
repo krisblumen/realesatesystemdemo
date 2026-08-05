@@ -61,7 +61,7 @@ class User extends Authenticatable implements FilamentUser
         return $this->status === UserStatus::Pending;
     }
 
-    public function hasNewhauzMailbox(): bool
+    public function hasCorporateMailbox(): bool
     {
         return str_ends_with(strtolower($this->email), '@'.strtolower((string) config('mail_indicator.domain')));
     }

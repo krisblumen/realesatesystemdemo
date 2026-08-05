@@ -49,14 +49,22 @@ class ThemeContract
      */
     public const MIN_FOCUS_CONTRAST = 3.0;
 
-    /** Fallbacks mirror resources/css/app.css. */
+    /**
+     * Fallbacks mirror resources/css/app.css.
+     *
+     * Los valores salen del manual de imagen gráfica de Landra
+     * (`docs/UXUI-specs/Landra/`), no de mirar un logo: `primary` es slate-700,
+     * `accent` es amber-500, `background` es slate-50 y `text` es slate-900.
+     * Deducirlos de un SVG da colores parecidos y equivocados, que es la peor
+     * forma de equivocarse porque nadie la nota.
+     */
     public const DEFAULTS = [
-        'primary' => '#091a5b',
+        'primary' => '#2e3842',
         'on_primary' => '#ffffff',
-        'accent' => '#f6a300',
-        'on_accent' => '#111111',
-        'background' => '#f7f7f7',
-        'text' => '#111111',
+        'accent' => '#f5a624',
+        'on_accent' => '#171d23',
+        'background' => '#f2f4f6',
+        'text' => '#171d23',
         'heading_font' => 'Montserrat',
         'body_font' => 'Inter',
         // El antetítulo tiene tipografía PROPIA. Antes heredaba la de títulos

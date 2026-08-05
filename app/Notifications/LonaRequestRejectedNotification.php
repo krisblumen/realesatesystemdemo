@@ -55,7 +55,7 @@ class LonaRequestRejectedNotification extends Notification implements ShouldQueu
             ->line('Tu solicitud de lonas fue rechazada.')
             ->line($this->summary())
             ->action('Ver mis lonas', $this->url())
-            ->line('Este aviso fue generado automáticamente desde el panel de New Hauz.');
+            ->line('Este aviso fue generado automáticamente desde el panel de Landra.');
     }
 
     private function summary(): string

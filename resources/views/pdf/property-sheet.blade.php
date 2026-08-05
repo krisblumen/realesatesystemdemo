@@ -197,7 +197,7 @@
 </head>
 <body>
     <div class="banner">
-        <img class="logo" src="{{ public_path('images/brand/logo-on-dark.png') }}" alt="New Hauz">
+        <img class="logo" src="{{ public_path('images/brand/logo-on-dark.png') }}" alt="Landra">
 
         @if ($property->hasCoverImage())
             <img class="cover" src="{{ $property->getFirstMedia('cover')?->getPath('web') }}" alt="{{ $property->title }}">
@@ -276,7 +276,7 @@
     </div>
 
     <div class="footer">
-        New Hauz Bienes Ra&iacute;ces &middot; www.newhauz.com.mx &middot; Informaci&oacute;n sujeta a cambios sin previo aviso, no constituye una oferta.
+        Landra Bienes Ra&iacute;ces &middot; www.landracore.com &middot; Informaci&oacute;n sujeta a cambios sin previo aviso, no constituye una oferta.
     </div>
 </body>
 </html>

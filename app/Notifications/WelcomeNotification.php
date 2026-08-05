@@ -26,9 +26,9 @@ class WelcomeNotification extends Notification implements ShouldQueue
     public function toMail(User $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Bienvenido a New Hauz — activa tu cuenta')
+            ->subject('Bienvenido a Landra — activa tu cuenta')
             ->greeting("Hola {$notifiable->name}")
-            ->line('Te dimos de alta en el panel de administración de New Hauz.')
+            ->line('Te dimos de alta en el panel de administración de Landra.')
             ->action('Activar mi cuenta', Filament::getResetPasswordUrl($this->token, $notifiable))
             ->line('Ese link te deja elegir tu propia contraseña y vence en 60 minutos.')
             ->line('Si no esperabas este correo, puedes ignorarlo.');

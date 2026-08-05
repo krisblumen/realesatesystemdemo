@@ -25,8 +25,8 @@ class ThemeContractTest extends TestCase
 
         // Order must not matter — the ratio is symmetric.
         $this->assertSame(
-            round(ThemeContract::contrastRatio('#091a5b', '#ffffff'), 4),
-            round(ThemeContract::contrastRatio('#ffffff', '#091a5b'), 4),
+            round(ThemeContract::contrastRatio('#2e3842', '#ffffff'), 4),
+            round(ThemeContract::contrastRatio('#ffffff', '#2e3842'), 4),
         );
     }
 
@@ -34,28 +34,28 @@ class ThemeContractTest extends TestCase
     {
         // The shipped fallbacks must satisfy the very rule we enforce on the
         // owner; otherwise the default site would be non-compliant.
-        $this->assertTrue(ThemeContract::meetsAa('#ffffff', '#091a5b'), 'white on navy');
-        $this->assertTrue(ThemeContract::meetsAa('#111111', '#f6a300'), 'ink on orange');
-        $this->assertTrue(ThemeContract::meetsAa('#111111', '#f7f7f7'), 'ink on canvas');
+        $this->assertTrue(ThemeContract::meetsAa('#ffffff', '#2e3842'), 'white on navy');
+        $this->assertTrue(ThemeContract::meetsAa('#171d23', '#f5a624'), 'ink on orange');
+        $this->assertTrue(ThemeContract::meetsAa('#171d23', '#f2f4f6'), 'ink on canvas');
     }
 
     public function test_low_contrast_pairs_are_rejected(): void
     {
         // Classic trap: white text on the brand accent looks fine in a mockup
         // and is unreadable in daylight.
-        $this->assertFalse(ThemeContract::meetsAa('#ffffff', '#f6a300'));
+        $this->assertFalse(ThemeContract::meetsAa('#ffffff', '#f5a624'));
         $this->assertFalse(ThemeContract::meetsAa('#cccccc', '#ffffff'));
     }
 
     public function test_hex_validation_is_strict(): void
     {
-        $this->assertTrue(ThemeContract::isHex('#091a5b'));
+        $this->assertTrue(ThemeContract::isHex('#2e3842'));
         $this->assertTrue(ThemeContract::isHex('#FFFFFF'));
 
         // Shorthand, missing hash, wrong length and injection attempts all fail.
         $this->assertFalse(ThemeContract::isHex('#fff'));
         $this->assertFalse(ThemeContract::isHex('091a5b'));
-        $this->assertFalse(ThemeContract::isHex('#091a5bb'));
+        $this->assertFalse(ThemeContract::isHex('#2e3842b'));
         $this->assertFalse(ThemeContract::isHex('#000}</style><script>alert(1)</script>'));
         $this->assertFalse(ThemeContract::isHex(null));
     }

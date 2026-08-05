@@ -1,6 +1,6 @@
 @props([
     'title' => null,
-    'description' => 'New Hauz — Real Estate en Querétaro. Construimos patrimonio, diseñamos espacios y comercializamos oportunidades.',
+    'description' => 'Landra — Real Estate en Querétaro. Construimos patrimonio, diseñamos espacios y comercializamos oportunidades.',
     // Imagen de portada para el preview al compartir (og:image). Si no se
     // pasa, se usa la imagen institucional por defecto (cuadrada, 1200x1200).
     'image' => null,
@@ -37,7 +37,7 @@
         // Precedencia (M-F1): SEO publicado de la página → default de settings →
         // el título/descripcion por vista → el hardcodeado. El render lee solo el
         // snapshot publicado; una edición draft nunca cambia estos metadatos.
-        $fallbackTitle = $title ? $title.' · New Hauz' : ($settingsSeo['meta_title'] ?: 'New Hauz · Real Estate en Querétaro');
+        $fallbackTitle = $title ? $title.' · Landra' : ($settingsSeo['meta_title'] ?: 'Landra · Real Estate en Querétaro');
         $metaTitle = ($pageSeo['meta_title'] ?? null) ?: $fallbackTitle;
         $metaDescription = ($pageSeo['meta_description'] ?? null) ?: ($settingsSeo['meta_description'] ?: $description);
         $ogTitle = ($pageSeo['og_title'] ?? null) ?: $metaTitle;
@@ -47,7 +47,7 @@
         // El tipo/dimensiones JPEG 1200×1200 solo son ciertos para la imagen
         // institucional por defecto; una og:image de media CMS puede ser de otro
         // formato/tamaño, así que no se anuncian (recomendación de la reauditoría).
-        $ogIsDefaultImage = ! $image && $ogImage === asset('images/metaimage/meta_image_newhauz.jpg');
+        $ogIsDefaultImage = ! $image && $ogImage === asset('images/metaimage/meta_image_landra.jpg');
     @endphp
     <title>{{ $metaTitle }}</title>
     <meta name="description" content="{{ $metaDescription }}">
@@ -62,7 +62,7 @@
 
     {{-- Open Graph: preview al compartir en WhatsApp, Facebook, LinkedIn --}}
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="New Hauz">
+    <meta property="og:site_name" content="Landra">
     <meta property="og:locale" content="es_MX">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:title" content="{{ $ogTitle }}">
@@ -83,7 +83,7 @@
     <meta name="twitter:image" content="{{ $ogImage }}">
 
     <link rel="icon" href="{{ $profile['brand']['favicon_url'] }}" sizes="any">
-    <link rel="icon" type="image/png" href="{{ asset('images/brand/newhauz-monogram.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/isotipo-on-light.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/brand/apple-touch-icon.png') }}">
 
     {{-- Datos estructurados (RFC-076): Organization + WebSite desde el kernel.

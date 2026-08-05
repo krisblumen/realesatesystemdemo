@@ -1,7 +1,7 @@
 <x-layouts.public :title="'Contrato ' . $contrato->folio" :floatingWhatsapp="false">
     <div class="mx-auto max-w-2xl px-4 py-8 sm:py-12">
         <header class="mb-6">
-            <p class="text-xs font-semibold uppercase tracking-wide text-[color:var(--color-primary,#091A5B)]">New Hauz Inmobiliaria</p>
+            <p class="text-xs font-semibold uppercase tracking-wide text-[color:var(--color-primary,#2e3842)]">Landra Inmobiliaria</p>
             <h1 class="mt-1 text-2xl font-bold text-slate-900">Contrato de intermediación</h1>
             <p class="mt-1 text-sm text-slate-500">Folio <span class="font-mono">{{ $contrato->folio }}</span> · Revisa el contenido y firma desde tu dispositivo.</p>
         </header>
@@ -72,7 +72,7 @@
                                 <input type="hidden" name="identificacion_{{ $lado }}" class="id-input">
                                 <div class="mt-2 flex gap-2">
                                     <button type="button" class="id-start flex-1 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700">Encender cámara</button>
-                                    <button type="button" class="id-shoot hidden flex-1 rounded-lg bg-[color:var(--color-primary,#091A5B)] px-3 py-2 text-sm font-semibold text-white">Tomar foto</button>
+                                    <button type="button" class="id-shoot hidden flex-1 rounded-lg bg-[color:var(--color-primary,#2e3842)] px-3 py-2 text-sm font-semibold text-white">Tomar foto</button>
                                     <button type="button" class="id-retry hidden flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-600">Repetir</button>
                                 </div>
                             </div>
@@ -90,7 +90,7 @@
                 <button type="button" id="firma-limpiar" class="mt-2 text-sm font-medium text-slate-500 hover:text-slate-700">Limpiar</button>
             </section>
 
-            <button type="submit" class="w-full rounded-lg bg-[color:var(--color-primary,#091A5B)] px-4 py-3 text-center font-semibold text-white">
+            <button type="submit" class="w-full rounded-lg bg-[color:var(--color-primary,#2e3842)] px-4 py-3 text-center font-semibold text-white">
                 Firmar contrato
             </button>
         </form>

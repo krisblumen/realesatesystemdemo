@@ -109,7 +109,7 @@ class FrontendInvalidContentSafetyTest extends TestCase
         // (a non-string handed to htmlspecialchars would have 500'd instead).
         $html = $this->get('/servicios')->assertOk()->getContent();
 
-        $this->assertMatchesRegularExpression('#<title>Servicios .* New Hauz</title>#', $html);
+        $this->assertMatchesRegularExpression('#<title>Servicios .* Landra</title>#', $html);
     }
 
     public static function invalidSeoProvider(): array

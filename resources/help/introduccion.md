@@ -1,6 +1,6 @@
 # Primeros pasos
 
-El panel de newhauz es donde tu equipo administra inmuebles, leads, zonas, contratos y campañas de
+El panel de landra es donde tu equipo administra inmuebles, leads, zonas, contratos y campañas de
 lonas. Esta guía te orienta rápido: qué ves según tu rol y cómo moverte entre secciones.
 
 ## ¿Para qué sirve?

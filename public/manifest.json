@@ -1,12 +1,12 @@
 {
-    "name": "New Hauz — Panel de administración",
-    "short_name": "New Hauz",
-    "description": "Panel de administración de New Hauz.",
+    "name": "Landra — Panel de administración",
+    "short_name": "Landra",
+    "description": "Panel de administración de Landra.",
     "start_url": "/admin",
     "scope": "/admin",
     "display": "standalone",
-    "background_color": "#091A5B",
-    "theme_color": "#091A5B",
+    "background_color": "#2E3842",
+    "theme_color": "#2E3842",
     "icons": [
         {
             "src": "/images/brand/icon-192.png",

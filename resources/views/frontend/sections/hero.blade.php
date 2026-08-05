@@ -91,13 +91,13 @@
 
     @if ($featured)
         <div class="absolute inset-0 bg-gradient-to-br from-brand-primary/[0.90] via-brand-primary/[0.78] to-brand-primary/[0.72]"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_78%_30%,rgba(246,163,0,0.12),transparent_45%)]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_78%_30%,rgba(245,166,36,0.12),transparent_45%)]"></div>
     @elseif ($compact)
         <div class="absolute inset-0 bg-gradient-to-br from-black/25 via-transparent to-white/10"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_82%_25%,rgba(246,163,0,0.10),transparent_48%)]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_82%_25%,rgba(245,166,36,0.10),transparent_48%)]"></div>
     @else
         <div class="absolute inset-0 bg-gradient-to-r from-brand-primary/[0.92] via-brand-primary/[0.55] to-transparent"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,rgba(246,163,0,0.10),transparent_45%)]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,rgba(245,166,36,0.10),transparent_45%)]"></div>
     @endif
 
     <div class="relative mx-auto max-w-[var(--container-content)] px-6 {{ $featured ? 'w-full pt-24 pb-28 lg:pb-44' : ($compact ? 'py-14' : 'py-20') }}">

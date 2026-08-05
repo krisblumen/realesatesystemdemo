@@ -11,7 +11,7 @@ class SyncMailUnseenCountsCommand extends Command
 {
     protected $signature = 'mail:sync-unseen';
 
-    protected $description = 'Sincroniza el conteo de mails no leidos de los usuarios @newhauz.com.mx via doveadm.';
+    protected $description = 'Sincroniza el conteo de mails no leidos de los usuarios @landracore.com via doveadm.';
 
     public function handle(): int
     {
@@ -22,7 +22,7 @@ class SyncMailUnseenCountsCommand extends Command
         User::query()
             ->active()
             ->get()
-            ->filter(fn (User $user): bool => $user->hasNewhauzMailbox())
+            ->filter(fn (User $user): bool => $user->hasCorporateMailbox())
             ->each(function (User $user) use ($scriptPath, $sudoUser, &$synced): void {
                 // Corre como el usuario dueno de los Maildirs (vmail), no root:
                 // ya tiene el permiso exacto que necesitamos y nada mas.

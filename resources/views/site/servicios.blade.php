@@ -34,7 +34,7 @@
     @endphp
     <section class="mx-auto max-w-[var(--container-content)] space-y-20 px-6 py-20">
         @forelse ($pageServices as $i => $service)
-            @php $img = $service['image_url'] ?? asset($serviceImages[$service['code']] ?? 'images/metaimage/meta_image_newhauz.jpg'); @endphp
+            @php $img = $service['image_url'] ?? asset($serviceImages[$service['code']] ?? 'images/metaimage/meta_image_landra.jpg'); @endphp
             <div class="grid items-center gap-12 lg:grid-cols-2 {{ $i % 2 === 1 ? 'lg:[&>div:first-child]:order-2' : '' }}">
                 <div>
                     <p class="eyebrow text-brand-accent-ink">{{ sprintf('%02d', $i + 1) }} · {{ $service['title'] }}</p>

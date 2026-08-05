@@ -53,7 +53,7 @@ class FrontendPublicThemeCoverageTest extends TestCase
     ];
 
     /** Brand colours written as raw hex inside arbitrary Tailwind values. */
-    private const BANNED_HEXES = ['#050F38', '#091A5B', '#14246E', '#F6A300', '#FFB829', '#E69500'];
+    private const BANNED_HEXES = ['#050F38', '#2e3842', '#14246E', '#f5a624', '#FFB829', '#E69500'];
 
     /** Surface utility => the ONLY foreground the contract guarantees over it. */
     private const SURFACE_FOREGROUND = [

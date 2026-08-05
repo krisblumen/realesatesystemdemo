@@ -53,11 +53,11 @@ class BrandPalette
         $theme = $this->theme->theme();
 
         $bases = [
-            'accent' => $theme['accent'] ?? '#f6a300',
-            'primary' => $theme['primary'] ?? '#091a5b',
+            'accent' => $theme['accent'] ?? '#f5a624',
+            'primary' => $theme['primary'] ?? '#2e3842',
             // El fondo del sitio no tiene variantes: la muestra es el color tal
             // cual lo configuró el cliente.
-            'site' => $theme['background'] ?? '#f7f7f7',
+            'site' => $theme['background'] ?? '#f2f4f6',
         ];
 
         $out = [];

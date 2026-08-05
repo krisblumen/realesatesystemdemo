@@ -34,7 +34,7 @@ class ContratoRecordatorioFirma extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject("Recordatorio · Contrato pendiente de firma · Folio {$this->contrato->folio}")
             ->greeting("Hola {$this->contrato->cliente_nombre}")
-            ->line("Tu contrato de intermediación con New Hauz (folio {$this->contrato->folio}) sigue pendiente de firma.")
+            ->line("Tu contrato de intermediación con Landra (folio {$this->contrato->folio}) sigue pendiente de firma.")
             ->line('Puedes firmarlo desde el enlace que te enviamos por correo. Si ya expiró, tu asesor puede reenviártelo conservando el mismo folio.');
     }
 }

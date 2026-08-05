@@ -297,11 +297,11 @@ class FrontendSurfaceForegroundTest extends TestCase
         $setting = FrontendSetting::current();
         $setting->theme = [
             'primary' => '#fef08a',
-            'on_primary' => '#111111',
+            'on_primary' => '#171d23',
             'accent' => '#fde68a',
-            'on_accent' => '#111111',
+            'on_accent' => '#171d23',
             'background' => '#ffffff',
-            'text' => '#111111',
+            'text' => '#171d23',
         ];
         $setting->save();
 

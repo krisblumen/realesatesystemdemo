@@ -23,12 +23,12 @@ class OwnerSeederTest extends TestCase
 
     public function test_seeds_initial_owner_with_role_and_active_status(): void
     {
-        putenv('OWNER_EMAIL=initial@newhauz.test');
+        putenv('OWNER_EMAIL=initial@landra.test');
         putenv('OWNER_PASSWORD=s3cret-pass');
 
         $this->seed(OwnerSeeder::class);
 
-        $owner = User::where('email', 'initial@newhauz.test')->firstOrFail();
+        $owner = User::where('email', 'initial@landra.test')->firstOrFail();
 
         $this->assertTrue($owner->hasRole('owner'));
         $this->assertSame(UserStatus::Active, $owner->status);
@@ -40,13 +40,13 @@ class OwnerSeederTest extends TestCase
 
     public function test_owner_seeder_is_idempotent(): void
     {
-        putenv('OWNER_EMAIL=initial@newhauz.test');
+        putenv('OWNER_EMAIL=initial@landra.test');
         putenv('OWNER_PASSWORD=s3cret-pass');
 
         $this->seed(OwnerSeeder::class);
         $this->seed(OwnerSeeder::class);
 
-        $this->assertSame(1, User::where('email', 'initial@newhauz.test')->count());
+        $this->assertSame(1, User::where('email', 'initial@landra.test')->count());
 
         putenv('OWNER_EMAIL');
         putenv('OWNER_PASSWORD');
@@ -59,6 +59,6 @@ class OwnerSeederTest extends TestCase
 
         $this->seed(OwnerSeeder::class);
 
-        $this->assertDatabaseHas('users', ['email' => 'owner@newhauz.test']);
+        $this->assertDatabaseHas('users', ['email' => 'owner@landra.test']);
     }
 }

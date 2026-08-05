@@ -17,15 +17,29 @@
 
 <h3>CONTRATO DE PRESTACIÓN DE SERVICIOS DE INTERMEDIACIÓN PARA LA {{ $operacion }} DE INMUEBLES DESTINADOS A
     “{{ $contrato->inmueble_tipo }}”</h3>
-<p>Que celebran, por una parte, GRUPO IBRAC INGENIERÍA Y CONSTRUCCIÓN, S. de R.L. de C.V., que opera bajo el nombre
-    comercial NEW HAUZ INMOBILIARIA (en lo sucesivo denominado como el <strong>“PROFESIONAL INMOBILIARIO”</strong>); y
+<p>Que celebran, por una parte, INMOBILIARIA DEMO, S. de R.L. de C.V., que opera bajo el nombre
+    comercial LANDRA (en lo sucesivo denominado como el <strong>“PROFESIONAL INMOBILIARIO”</strong>); y
     por la otra, <strong>{{ $contrato->cliente_nombre }}</strong> (en lo sucesivo denominado como
     <strong>“EL PROPIETARIO”</strong>); al tenor de las siguientes declaraciones y cláusulas:</p>
 
+{{-- DATOS DEL PROFESIONAL INMOBILIARIO: HOY SON DE RELLENO, A PROPÓSITO.
+
+     Este cuerpo traía la razón social y el RFC REALES de la empresa de origen.
+     En un demo eso significa que cualquier invitado puede generar y descargar un
+     documento con apariencia legal a nombre de una empresa que existe — que es
+     bastante peor que un logo equivocado.
+
+     `XAXX010101000` es el RFC genérico nacional del SAT: no pertenece a ningún
+     contribuyente, así que no puede colisionar con nadie.
+
+     LO QUE FALTA: estos datos tienen que salir de la configuración del inquilino.
+     `legal_name` ya existe en `frontend_settings`; el RFC no. Mientras no se
+     haga, cada inquilino firma con el mismo relleno.
+--}}
 <h3>Declaraciones</h3>
-<p><strong>I. Declara “EL PROFESIONAL INMOBILIARIO”.</strong> Que GRUPO IBRAC INGENIERÍA Y CONSTRUCCIÓN,
-    S. de R.L. de C.V., que opera bajo el nombre comercial NEW HAUZ INMOBILIARIA, es una sociedad mercantil
-    constituida conforme a las leyes mexicanas, con RFC GII1204209N5; que dentro de su objeto se encuentra la
+<p><strong>I. Declara “EL PROFESIONAL INMOBILIARIO”.</strong> Que INMOBILIARIA DEMO,
+    S. de R.L. de C.V., que opera bajo el nombre comercial LANDRA, es una sociedad mercantil
+    constituida conforme a las leyes mexicanas, con RFC XAXX010101000; que dentro de su objeto se encuentra la
     prestación de servicios de promoción, mediación e intermediación inmobiliaria; que cuenta con facultades y
     recursos para prestar los servicios materia de este contrato, sin asumir funciones reservadas a fedatarios,
     valuadores, autoridades o instituciones financieras.</p>
@@ -146,7 +160,7 @@
 
 <h4>DÉCIMA SEXTA. Documento final, sello digital y verificación.</h4>
 <p>Al completarse la firma, el sistema genera un PDF final con el folio, los datos contractuales, la firma, la
-    evidencia técnica resumida y el sello digital de NEW HAUZ. Se calcula un hash SHA-256 que se almacena en el
+    evidencia técnica resumida y el sello digital de LANDRA. Se calcula un hash SHA-256 que se almacena en el
     expediente. La página pública de verificación permite comprobar folio, estatus, fecha de firma e integridad
     mediante comparación del hash, sin exponer datos personales.</p>
 

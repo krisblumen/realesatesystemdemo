@@ -26,7 +26,7 @@ class FrontendThemeServiceTest extends TestCase
     {
         DB::table('frontend_settings')->updateOrInsert(
             ['singleton_key' => 'default'],
-            ['site_name' => 'New Hauz', 'theme' => json_encode($theme), 'created_at' => now(), 'updated_at' => now()],
+            ['site_name' => 'Landra', 'theme' => json_encode($theme), 'created_at' => now(), 'updated_at' => now()],
         );
     }
 
@@ -34,12 +34,12 @@ class FrontendThemeServiceTest extends TestCase
     {
         $theme = app(FrontendThemeService::class)->theme();
 
-        $this->assertSame('#091a5b', $theme['primary']);
+        $this->assertSame('#2e3842', $theme['primary']);
         $this->assertSame('#ffffff', $theme['on_primary']);
-        $this->assertSame('#f6a300', $theme['accent']);
-        $this->assertSame('#111111', $theme['on_accent']);
-        $this->assertSame('#f7f7f7', $theme['background']);
-        $this->assertSame('#111111', $theme['text']);
+        $this->assertSame('#f5a624', $theme['accent']);
+        $this->assertSame('#171d23', $theme['on_accent']);
+        $this->assertSame('#f2f4f6', $theme['background']);
+        $this->assertSame('#171d23', $theme['text']);
         $this->assertSame('Montserrat', $theme['heading_font']);
         $this->assertSame('Inter', $theme['body_font']);
     }
@@ -67,7 +67,7 @@ class FrontendThemeServiceTest extends TestCase
 
         $theme = app(FrontendThemeService::class)->theme();
 
-        $this->assertSame('#091a5b', $theme['primary'], 'An invalid colour must fall back.');
+        $this->assertSame('#2e3842', $theme['primary'], 'An invalid colour must fall back.');
         $this->assertStringNotContainsString('<script>', json_encode($theme));
         $this->assertStringNotContainsString('</style>', json_encode($theme));
     }
@@ -86,7 +86,7 @@ class FrontendThemeServiceTest extends TestCase
         $theme = app(FrontendThemeService::class)->theme();
 
         $this->assertSame('#123456', $theme['primary'], 'The valid value survives.');
-        $this->assertSame('#f6a300', $theme['accent'], 'Non-hex falls back.');
+        $this->assertSame('#f5a624', $theme['accent'], 'Non-hex falls back.');
         $this->assertSame('Montserrat', $theme['heading_font'], 'A font outside the allowlist falls back.');
         $this->assertSame(ThemeContract::expandRadius('medium'), $theme['radius_scale']);
     }
@@ -95,7 +95,7 @@ class FrontendThemeServiceTest extends TestCase
     {
         // White on the brand accent is the classic unreadable CTA. If it ever
         // reaches the database, the render must not publish it.
-        $this->persistTheme(['accent' => '#f6a300', 'on_accent' => '#ffffff']);
+        $this->persistTheme(['accent' => '#f5a624', 'on_accent' => '#ffffff']);
 
         $theme = app(FrontendThemeService::class)->theme();
 
@@ -150,9 +150,9 @@ class FrontendThemeServiceTest extends TestCase
         // invisible, so the service must not simply hand the accent through.
         $this->persistTheme([
             'accent' => '#fff7e8',
-            'on_accent' => '#111111',
+            'on_accent' => '#171d23',
             'background' => '#ffffff',
-            'text' => '#111111',
+            'text' => '#171d23',
         ]);
 
         $theme = app(FrontendThemeService::class)->theme();
@@ -184,11 +184,11 @@ class FrontendThemeServiceTest extends TestCase
     {
         // A dark brand primary over the light default background is legible, so
         // headings keep the brand colour — the theme is not flattened to black.
-        $this->persistTheme(['primary' => '#091a5b', 'accent' => '#8a5a00', 'background' => '#ffffff']);
+        $this->persistTheme(['primary' => '#2e3842', 'accent' => '#8a5a00', 'background' => '#ffffff']);
 
         $theme = app(FrontendThemeService::class)->theme();
 
-        $this->assertSame('#091a5b', $theme['primary_ink'], 'A legible primary is kept as ink.');
+        $this->assertSame('#2e3842', $theme['primary_ink'], 'A legible primary is kept as ink.');
         $this->assertSame('#8a5a00', $theme['accent_ink'], 'A legible accent is kept as ink.');
     }
 
@@ -200,11 +200,11 @@ class FrontendThemeServiceTest extends TestCase
         // to a colour the contract already guarantees over the background.
         $this->persistTheme([
             'primary' => '#fef08a',
-            'on_primary' => '#111111',
+            'on_primary' => '#171d23',
             'accent' => '#fde68a',
-            'on_accent' => '#111111',
+            'on_accent' => '#171d23',
             'background' => '#ffffff',
-            'text' => '#111111',
+            'text' => '#171d23',
         ]);
 
         $theme = app(FrontendThemeService::class)->theme();

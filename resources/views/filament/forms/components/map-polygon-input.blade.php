@@ -55,18 +55,18 @@
 
 @once
     <script>
-        window.newHauzGoogleMapsLoader = window.newHauzGoogleMapsLoader || null;
+        window.landraGoogleMapsLoader = window.landraGoogleMapsLoader || null;
 
-        function newHauzLoadGoogleMaps(apiKey) {
+        function landraLoadGoogleMaps(apiKey) {
             if (window.google?.maps?.Map) {
                 return Promise.resolve(window.google.maps);
             }
 
-            if (window.newHauzGoogleMapsLoader) {
-                return window.newHauzGoogleMapsLoader;
+            if (window.landraGoogleMapsLoader) {
+                return window.landraGoogleMapsLoader;
             }
 
-            window.newHauzGoogleMapsLoader = new Promise((resolve, reject) => {
+            window.landraGoogleMapsLoader = new Promise((resolve, reject) => {
                 const script = document.createElement('script');
                 const params = new URLSearchParams({
                     key: apiKey,
@@ -83,7 +83,7 @@
                 document.head.appendChild(script);
             });
 
-            return window.newHauzGoogleMapsLoader;
+            return window.landraGoogleMapsLoader;
         }
 
         function mapPolygon(cfg) {
@@ -114,7 +114,7 @@
                         return;
                     }
 
-                    newHauzLoadGoogleMaps(this.apiKey).then(() => {
+                    landraLoadGoogleMaps(this.apiKey).then(() => {
                         if (this.destroyed || this.map) {
                             return;
                         }
@@ -246,16 +246,16 @@
                 },
 
                 polygonRegistry() {
-                    window.newHauzZonePolygonRegistry ??= new Map();
+                    window.landraZonePolygonRegistry ??= new Map();
 
-                    if (!window.newHauzZonePolygonRegistry.has(this.polygonRegistryKey)) {
-                        window.newHauzZonePolygonRegistry.set(this.polygonRegistryKey, {
+                    if (!window.landraZonePolygonRegistry.has(this.polygonRegistryKey)) {
+                        window.landraZonePolygonRegistry.set(this.polygonRegistryKey, {
                             generation: 0,
                             dataLayers: new Set(),
                         });
                     }
 
-                    const registry = window.newHauzZonePolygonRegistry.get(this.polygonRegistryKey);
+                    const registry = window.landraZonePolygonRegistry.get(this.polygonRegistryKey);
 
                     // Compatibilidad con una instancia que hubiera quedado viva antes
                     // de desplegar este cambio durante navegación SPA.

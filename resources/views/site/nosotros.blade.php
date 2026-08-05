@@ -44,14 +44,14 @@
                 <p class="eyebrow mb-4 text-brand-accent-ink">Nuestra historia</p>
                 <h2 class="font-brand-heading text-[clamp(26px,3.4vw,36px)] font-bold leading-snug tracking-tight text-brand-primary-ink">De un despacho de arquitectura a una firma inmobiliaria integral.</h2>
                 <p class="mt-5 text-base leading-relaxed text-stone">
-                    New Hauz nació con una convicción: que diseñar, construir y comercializar un inmueble no deberían ser procesos separados. Empezamos proyectando casas a la medida en Juriquilla y, con cada entrega, nuestros clientes nos pidieron acompañarlos también en la inversión y la venta.
+                    Landra nació con una convicción: que diseñar, construir y comercializar un inmueble no deberían ser procesos separados. Empezamos proyectando casas a la medida en Juriquilla y, con cada entrega, nuestros clientes nos pidieron acompañarlos también en la inversión y la venta.
                 </p>
                 <p class="mt-4 text-base leading-relaxed text-stone">
                     Hoy integramos arquitectura, construcción, comercialización e inversión en una sola firma, con un único estándar de calidad y un trato cercano que distingue cada operación.
                 </p>
             </div>
             <div class="min-h-[420px] overflow-hidden rounded-brand-lg shadow-lg">
-                <img src="{{ asset('images/nosotros/sala_de_juntas.jpg') }}" alt="Sala de juntas de New Hauz"
+                <img src="{{ asset('images/nosotros/sala_de_juntas.jpg') }}" alt="Sala de juntas de Landra"
                      class="h-full min-h-[420px] w-full object-cover">
             </div>
         </div>
@@ -88,14 +88,14 @@
         <div class="mx-auto max-w-[var(--container-content)] px-6 py-20">
             <div class="mb-11 max-w-[560px]">
                 <p class="eyebrow mb-4 text-brand-primary-ink">El equipo</p>
-                <h2 class="font-brand-heading text-[clamp(26px,3.4vw,36px)] font-bold tracking-tight text-ink">Las personas detrás de New Hauz</h2>
+                <h2 class="font-brand-heading text-[clamp(26px,3.4vw,36px)] font-bold tracking-tight text-ink">Las personas detrás de Landra</h2>
             </div>
 
             <div class="mb-9 flex flex-wrap items-center gap-8 rounded-brand-lg border border-black/5 bg-white p-8 shadow-lg">
                 <img src="{{ asset('images/brand/a74-arquitectura.png') }}" alt="A-74 Arquitectura" class="h-28 w-auto">
                 <div class="min-w-[240px] flex-1">
                     <p class="eyebrow text-stone">Despacho de arquitectura</p>
-                    <h3 class="mt-2 font-brand-heading text-[22px] font-bold text-ink">A-74 Arquitectura es parte de New Hauz</h3>
+                    <h3 class="mt-2 font-brand-heading text-[22px] font-bold text-ink">A-74 Arquitectura es parte de Landra</h3>
                     <p class="mt-2 max-w-[560px] text-[15px] leading-relaxed text-graphite">
                         El brazo de diseño y proyecto de la firma. A-74 lleva cada residencia y desarrollo del concepto arquitectónico a la obra terminada.
                     </p>

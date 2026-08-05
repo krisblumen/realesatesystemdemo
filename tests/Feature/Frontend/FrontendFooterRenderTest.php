@@ -40,12 +40,12 @@ class FrontendFooterRenderTest extends TestCase
     {
         // Instagram has a profile, TikTok/Facebook do not: only Instagram's icon
         // (its accessible link) renders. The empty networks leave no trace.
-        $this->configureSocial(['instagram' => 'https://instagram.com/newhauz']);
+        $this->configureSocial(['instagram' => 'https://instagram.com/landra']);
 
         $footer = substr($this->get('/')->assertOk()->getContent(), strpos($this->get('/')->getContent(), '<footer'));
 
         $this->assertStringContainsString('aria-label="Instagram"', $footer);
-        $this->assertStringContainsString('https://instagram.com/newhauz', $footer);
+        $this->assertStringContainsString('https://instagram.com/landra', $footer);
         $this->assertStringNotContainsString('aria-label="TikTok"', $footer);
         $this->assertStringNotContainsString('aria-label="Facebook"', $footer);
     }
@@ -82,7 +82,7 @@ class FrontendFooterRenderTest extends TestCase
                     ['label' => 'Escondido', 'type' => 'route', 'target' => 'servicios', 'enabled' => false],
                 ],
             ]],
-            'legal_text' => '© New Hauz',
+            'legal_text' => '© Landra',
         ]);
 
         $footer = substr($this->get('/')->assertOk()->getContent(), strpos($this->get('/')->getContent(), '<footer'));
@@ -114,7 +114,7 @@ class FrontendFooterRenderTest extends TestCase
     {
         DB::table('frontend_settings')->updateOrInsert(
             ['singleton_key' => 'default'],
-            ['site_name' => 'New Hauz', 'footer' => $footerJson, 'created_at' => now(), 'updated_at' => now()],
+            ['site_name' => 'Landra', 'footer' => $footerJson, 'created_at' => now(), 'updated_at' => now()],
         );
         app(FrontendCacheGeneration::class)->bump();
 
@@ -134,7 +134,7 @@ class FrontendFooterRenderTest extends TestCase
                     ['label' => 'Bueno', 'type' => 'route', 'target' => 'contacto', 'enabled' => true],
                 ],
             ]],
-            'legal_text' => '© New Hauz',
+            'legal_text' => '© Landra',
         ]);
 
         $html = $this->get('/')->assertOk()->getContent();

@@ -24,8 +24,8 @@ class AgentSeeder extends Seeder
         $password = env('AGENT_PASSWORD', 'password');
 
         $agents = [
-            ['name' => 'Agente Uno',   'email' => 'agente1@newhauz.test'],
-            ['name' => 'Agente Dos',   'email' => 'agente2@newhauz.test'],
+            ['name' => 'Agente Uno',   'email' => 'agente1@landra.test'],
+            ['name' => 'Agente Dos',   'email' => 'agente2@landra.test'],
         ];
 
         $zones = Zone::where('status', 'activa')->pluck('id');

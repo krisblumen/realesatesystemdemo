@@ -37,7 +37,7 @@ class ContratoEnlaceEnviado extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject("Contrato de intermediación · Folio {$this->contrato->folio}")
             ->greeting("Hola {$this->contrato->cliente_nombre}")
-            ->line('New Hauz Inmobiliaria te compartió un contrato de intermediación para su revisión y firma.')
+            ->line('Landra Inmobiliaria te compartió un contrato de intermediación para su revisión y firma.')
             ->line("Folio: {$this->contrato->folio}")
             ->action('Revisar y firmar', $url)
             ->line('El enlace es de un solo uso y expira en 72 horas. Si expira, tu asesor puede reenviarlo.');

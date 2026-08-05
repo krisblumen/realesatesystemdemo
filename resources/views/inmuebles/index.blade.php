@@ -13,7 +13,7 @@
         @endif
         {{-- Degradado navy → transparente (izq a der) sobre las imágenes --}}
         <div class="absolute inset-0 bg-gradient-to-r from-brand-primary/[0.92] via-brand-primary/[0.55] to-transparent"></div>
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,rgba(246,163,0,0.10),transparent_45%)]"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,rgba(245,166,36,0.10),transparent_45%)]"></div>
         <div class="relative mx-auto max-w-[var(--container-content)] px-6 py-16">
             <nav class="mb-8 flex items-center gap-2.5 text-sm text-on-brand-primary/60">
                 <a href="{{ url('/') }}" class="transition-colors hover:text-on-brand-primary">Inicio</a>
@@ -23,7 +23,7 @@
             <p class="eyebrow mb-4 text-accent-on-brand-primary">Catálogo</p>
             <h1 class="font-brand-heading text-[clamp(30px,4.4vw,48px)] font-extrabold leading-tight text-on-brand-primary">Propiedades en Querétaro</h1>
             <p class="mt-3.5 max-w-[560px] text-[17px] leading-relaxed text-on-brand-primary/80">
-                Casas, departamentos y terrenos en venta y renta, opcionados por New Hauz.
+                Casas, departamentos y terrenos en venta y renta, opcionados por Landra.
             </p>
         </div>
     </section>
