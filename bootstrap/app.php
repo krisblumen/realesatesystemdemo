@@ -25,9 +25,29 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Detrás del reverse proxy de CloudPanel: confiar en los headers
-        // X-Forwarded-* para que Laravel detecte el esquema HTTPS original.
-        $middleware->trustProxies(at: '*');
+        // SÓLO EL BUCLE LOCAL, y el `'*'` que había antes no era un atajo
+        // inofensivo.
+        //
+        // Entre los encabezados que Laravel confía a un proxy está
+        // `X-Forwarded-Host`, y el inquilino se resuelve del `Host`. Confiando
+        // en cualquier origen, el `Host` efectivo lo elige quien manda la
+        // petición: la frontera entre inquilinos deja de ser una frontera. No
+        // entrega datos por sí solo —siguen haciendo falta credenciales— pero
+        // convierte en elegible por el cliente algo que el diseño decide.
+        //
+        // El bucle local es la respuesta correcta sin importar cómo esté armado
+        // el servidor. Si nginx habla con PHP por FastCGI, `REMOTE_ADDR` es la
+        // dirección real del cliente: nunca es el bucle, así que sus encabezados
+        // se ignoran y el esquema HTTPS sale de los parámetros que pone el vhost.
+        // Si en cambio hay un proxy delante en el mismo host, `REMOTE_ADDR` sí
+        // es el bucle y sus encabezados se respetan. Los dos casos quedan bien.
+        //
+        // Si algún día el proxy pasa a estar en otra máquina —una CDN, un
+        // balanceador—, ACÁ hay que poner su dirección. No `'*'`.
+        $middleware->trustProxies(at: [
+            '127.0.0.1',
+            '::1',
+        ]);
 
         $middleware->prependToPriorityList(
             AuthenticatesRequests::class,

@@ -125,6 +125,37 @@ class ResolucionDeInquilinoTest extends TestCase
         );
     }
 
+    public function test_a_client_cannot_choose_its_tenant_with_a_forwarded_host_header(): void
+    {
+        // ESTE ES EL QUE NO DA SÍNTOMA SI ESTÁ MAL.
+        //
+        // `X-Forwarded-Host` está entre los encabezados que Laravel confía a un
+        // proxy, y el inquilino se resuelve del `Host`. Si la aplicación confía
+        // en CUALQUIER origen —`trustProxies(at: '*')`—, entonces el `Host`
+        // efectivo lo elige quien manda la petición, y la frontera entre
+        // inquilinos deja de ser una frontera.
+        //
+        // No entrega datos por sí solo: siguen haciendo falta credenciales. Pero
+        // convierte «a qué base apunta esta petición» en algo que decide el
+        // cliente, que es exactamente lo que este diseño existe para impedir.
+        //
+        // Nada falla, nada se registra, y todo parece funcionar. Por eso hay un
+        // test y no una nota en un checklist.
+        $this->inquilino('aaaabbbbcccc', self::BASE_A);
+        $this->inquilino('ddddeeeeffff', self::BASE_B);
+
+        // Se simula una dirección de afuera (rango de documentación, RFC 5737).
+        // Sin esto el test corre desde el bucle local, que SÍ es de confianza, y
+        // mediría lo contrario de lo que quiere medir.
+        $respuesta = $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.7'])
+            ->get('http://aaaabbbbcccc.demo.test/_sonda', [
+                'X-Forwarded-Host' => 'ddddeeeeffff.demo.test',
+            ])->json();
+
+        $this->assertSame('aaaabbbbcccc', $respuesta['slug'], 'El encabezado del cliente cambió de inquilino.');
+        $this->assertSame(self::BASE_A, $respuesta['base'], 'La petición terminó apuntando a la base de otro.');
+    }
+
     public function test_two_hosts_reach_two_different_databases(): void
     {
         $this->inquilino('aaaabbbbcccc', self::BASE_A);
