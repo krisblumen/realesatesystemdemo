@@ -189,9 +189,69 @@ registra, y todo parece funcionar.
 ## DNS y certificado
 
 - Registro comodín `*.demo.<dominio>` apuntando al VPS.
-- Certificado comodín con certbot y validación **DNS-01** — la validación HTTP-01
-  no emite comodines.
-- Renovación automática verificada antes de invitar a nadie.
+- Certificado comodín con validación **DNS-01**: HTTP-01 no emite comodines.
+
+### Procedimiento (hecho en `landracore.com`, DNS en Hostinger)
+
+Se usa **acme.sh** y no certbot, porque tiene complemento oficial para la API de
+Hostinger y con eso la renovación queda automática de punta a punta. Todo como
+root, para que el cron de renovación sea de root.
+
+```bash
+curl https://get.acme.sh | sh -s email=<correo>
+~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+export HOSTINGER_Token="<token>"
+~/.acme.sh/acme.sh --issue --dns dns_hostinger \
+  -d demo.<dominio> -d '*.demo.<dominio>' --dnssleep 180
+```
+
+Tres cosas que cuestan un intento fallido cada una:
+
+**El nombre de la variable lo manda el script instalado, no la wiki.** Verificar
+con `grep -oE "HOSTINGER_[A-Za-z_]+" ~/.acme.sh/dnsapi/dns_hostinger.sh`. La wiki
+del proyecto documenta `HOSTINGER_API_KEY`; la versión instalada esperaba
+`HOSTINGER_Token`.
+
+**`--dnssleep 180` no es opcional.** Un comodín necesita DOS valores TXT en el
+mismo nombre `_acme-challenge`, y Let's Encrypt valida desde varios puntos de la
+red. La comprobación propia de acme.sh los dio por buenos y la validación del
+comodín falló cuatro segundos después con «No TXT record found»: los servidores
+de Hostinger todavía no habían convergido.
+
+**`--ecc` en la instalación**, porque acme.sh emite en `<dominio>_ecc`.
+
+La instalación apunta a las rutas que ya usa el vhost de CloudPanel, y con
+`--reloadcmd` cada renovación las reescribe y recarga nginx sola:
+
+```bash
+~/.acme.sh/acme.sh --install-cert -d demo.<dominio> --ecc \
+  --key-file /etc/nginx/ssl-certificates/demo.<dominio>.key \
+  --fullchain-file /etc/nginx/ssl-certificates/demo.<dominio>.crt \
+  --reloadcmd "systemctl reload nginx"
+```
+
+Copiar los archivos a mano funcionaría hoy y se caería en silencio en 60 días.
+
+### El costo que se aceptó
+
+El token de la API de Hostinger **no se puede acotar a un dominio**: es de cuenta,
+y quien lo tenga puede cambiar el DNS de todos los dominios de esa cuenta. Vive en
+`~/.acme.sh/account.conf` del VPS.
+
+Se aceptó porque esa máquina ya sirve la producción y las bases, así que un
+compromiso del disco no es un problema nuevo; y porque un certificado vencido por
+olvido es una falla bastante más probable que una intrusión.
+
+### Verificación
+
+```bash
+curl -4 -sI "https://<slug>.demo.<dominio>/admin" | head -1   # sin -k
+echo | openssl s_client -connect <slug>.demo.<dominio>:443 \
+  -servername <slug>.demo.<dominio> 2>/dev/null | \
+  openssl x509 -noout -issuer -dates -ext subjectAltName
+```
+
+El `subjectAltName` tiene que listar `*.demo.<dominio>`.
 
 ## El servidor web sirve por extensión, y eso rompe Livewire
 
@@ -227,6 +287,60 @@ en vez del script, el cierre del demo la manda al login y la respuesta pasa a se
 un 302 hacia `/index.php/admin/login`. Además, cualquier edición del sitio desde
 el panel pisa el vhost y se lleva la excepción puesta a mano.
 
+## Tareas programadas: una sola línea de cron
+
+**No hace falta un servicio de systemd para la cola.** El programa de tareas ya
+agenda `queue:work --stop-when-empty --max-time=55` cada minuto: drena la cola y
+sale. Un worker permanente sería una pieza más para vigilar a cambio de ahorrar
+como mucho un minuto de latencia — y el camino crítico, el alta de un inquilino,
+es síncrono y no pasa por la cola.
+
+Una línea, como el usuario del sitio y desde el directorio de producción:
+
+```cron
+* * * * * cd /home/<usuario>/htdocs/<dominio> && php artisan schedule:run >> /dev/null 2>&1
+```
+
+### Por qué esto no es "prender el cron y listo"
+
+Un comando de consola **no tiene subdominio del cual resolver un inquilino**, así
+que su conexión por defecto se queda en el centinela. Eso parte las tareas en dos
+familias que no se pueden agendar igual, y la plataforma de origen —una sola
+base— no distinguía:
+
+| Familia | Ejemplos | Cómo se agenda |
+|---|---|---|
+| Central | `demo:expirar`, `demo:borrar`, `queue:work` | Directo. Leen el padrón, que vive en la central por conexión declarada |
+| De inquilino | `leads:reconcile`, `frontend:media:reconcile`, `contratos:*` | `demo:por-cada-inquilino <comando>`: una corrida por inquilino activo, cada una en su base |
+
+`demo:por-cada-inquilino` lanza un **proceso aparte** por inquilino, con
+`DB_DATABASE` apuntando a su base. Es el mismo motivo que en la construcción de
+la plantilla: reapuntar la conexión dentro de un proceso vivo deja atrás todo lo
+que ya la resolvió y memoizó. Cuesta un arranque de Laravel por inquilino, y se
+paga con gusto — la alternativa es que el aislamiento dependa de que nadie se
+olvide de limpiar un singleton.
+
+Un fallo en un inquilino se reporta y el recorrido sigue: con veinte, que el
+tercero tumbe a los diecisiete de atrás convierte un fallo puntual en un apagón.
+Y el recorrido **rechaza comandos destructivos** (`migrate:fresh`, `db:wipe` y
+compañía): es el peor lugar posible para que se cuele uno, porque multiplica el
+daño por la cantidad de gente que confió en el demo.
+
+### Los cerrojos van en la central
+
+`withoutOverlapping()` y `onOneServer()` guardan su cerrojo en el caché, y el
+caché usa la conexión por defecto — el centinela. Sin `Schedule::useCache('central')`
+(en `routes/console.php`), **`demo:borrar` falla antes de mirar un solo
+inquilino**: el comando que libera disco no libera nada.
+
+Requiere que `demo_central` tenga `cache` y `cache_locks`. Verificar:
+
+```bash
+psql -d demo_central -c "\dt cache*"
+```
+
+Todo esto está protegido por `TareasProgramadasTest`.
+
 ## Checklist antes del primer inquilino
 
 - [ ] PostgreSQL 16 con PostGIS en el VPS.
@@ -239,10 +353,13 @@ el panel pisa el vhost y se lleva la excepción puesta a mano.
       superusuario (si lo fuera, el tope no aplicaría).
 - [ ] Base central creada y migrada.
 - [ ] Plantilla construida, y **ninguna** conexión de la aplicación apuntándole.
-- [ ] Cola corriendo y cron activo.
+- [ ] Línea de cron con `schedule:run` como el usuario del sitio (no hace falta
+      worker de systemd: el programa ya agenda la cola cada minuto).
+- [ ] `demo_central` con las tablas `cache` y `cache_locks`, o los cerrojos del
+      programador fallan y `demo:borrar` no corre.
 - [x] `trustProxies` acotado al bucle local en `bootstrap/app.php`, con test.
 - [ ] DNS comodín resolviendo.
-- [ ] Certificado comodín emitido y renovando solo.
+- [x] Certificado comodín emitido con acme.sh e instalado con `--reloadcmd`.
 - [ ] Verificado que sin sesión ninguna ruta de inquilino devuelve contenido.
 - [ ] Assets de Livewire publicados en `public/vendor/livewire/`, o el acceso
       devuelve 405 y la pantalla se ve bien.

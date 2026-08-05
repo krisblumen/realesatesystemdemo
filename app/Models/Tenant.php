@@ -78,6 +78,19 @@ class Tenant extends Model
      * `expirado` la dejaría ahí para siempre, ocupando conexiones y disco, y el
      * padrón la mostraría como si no existiera.
      */
+    /**
+     * Los inquilinos a los que hay que correrles las tareas programadas.
+     */
+    public function scopeQueRecibenTareas(Builder $query): Builder
+    {
+        $estados = array_values(array_filter(
+            TenantEstado::cases(),
+            fn (TenantEstado $estado): bool => $estado->recibeTareasProgramadas(),
+        ));
+
+        return $query->whereIn('estado', array_column($estados, 'value'));
+    }
+
     public function scopeParaBarrer(Builder $query): Builder
     {
         $estados = array_values(array_filter(

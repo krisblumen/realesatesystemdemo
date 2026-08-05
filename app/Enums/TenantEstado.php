@@ -59,6 +59,23 @@ enum TenantEstado: string
     }
 
     /**
+     * Si a este inquilino le corren las tareas programadas.
+     *
+     * Sólo los activos. Un `expirado` ya no atiende a nadie —correrle tareas es
+     * trabajo perdido sobre datos que nadie va a ver— y un `fallido` puede no
+     * tener base, así que el comando moriría por conexión.
+     *
+     * Es una pregunta distinta de `resuelvePeticiones()` aunque hoy den lo
+     * mismo: aquella habla de HTTP, esta de trabajo de fondo. Si algún día se
+     * quisiera, por ejemplo, seguir venciendo contratos durante la ventana de
+     * gracia de un expirado, se cambia acá y no en el programa de tareas.
+     */
+    public function recibeTareasProgramadas(): bool
+    {
+        return $this === self::Activo;
+    }
+
+    /**
      * Sólo un inquilino activo resuelve una petición.
      *
      * Hacia afuera, un inquilino que no resuelve devuelve lo mismo que uno
