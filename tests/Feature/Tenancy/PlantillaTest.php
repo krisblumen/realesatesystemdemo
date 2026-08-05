@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Tenancy;
 
+use Database\Seeders\DemoTemplateSeeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Process;
 use Tests\TestCase;
@@ -202,6 +203,48 @@ class PlantillaTest extends TestCase
         } finally {
             DB::purge('probe_tpl');
         }
+    }
+
+    public function test_no_template_seeder_depends_on_a_dev_only_dependency(): void
+    {
+        // EL DEFECTO QUE ESTE TEST PREVIENE, encontrado en el servidor.
+        //
+        // `fake()` viene de `fakerphp/faker`, que es dependencia de DESARROLLO.
+        // La plantilla se construye en el servidor, instalado con `--no-dev`, y
+        // ahí esa función no existe: el sembrado muere con «Call to undefined
+        // function fake()» después de cargar trece mil registros de geografía.
+        //
+        // Acá nunca falla —en desarrollo Faker está— así que el único guardián
+        // posible es este: revisar que ningún sembrador de la lista lo use.
+        $usados = (new \ReflectionClass(DemoTemplateSeeder::class))
+            ->getFileName();
+
+        $lista = file_get_contents($usados);
+        preg_match_all('/(\w+Seeder)::class/', $lista, $coincidencias);
+
+        $culpables = [];
+
+        foreach (array_unique($coincidencias[1]) as $seeder) {
+            $archivo = database_path('seeders/'.$seeder.'.php');
+
+            if (! is_file($archivo)) {
+                continue;
+            }
+
+            // Se ignoran los comentarios: lo que importa es el código.
+            $codigo = preg_replace('#/\*.*?\*/|//.*$#ms', '', (string) file_get_contents($archivo));
+
+            if (preg_match('/\bfake\(\)|::factory\(/', (string) $codigo) === 1) {
+                $culpables[] = $seeder;
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $culpables,
+            'Estos sembradores de la plantilla usan Faker o factories, y no existen en un servidor instalado con --no-dev: '
+            .implode(', ', $culpables),
+        );
     }
 
     public function test_building_a_template_does_not_change_the_one_in_use(): void
