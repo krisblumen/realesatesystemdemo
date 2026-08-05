@@ -298,8 +298,31 @@ es síncrono y no pasa por la cola.
 Una línea, como el usuario del sitio y desde el directorio de producción:
 
 ```cron
-* * * * * cd /home/<usuario>/htdocs/<dominio> && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /home/<usuario>/htdocs/<dominio> && DB_DATABASE=demo_central php artisan schedule:run >> /dev/null 2>&1
 ```
+
+### `DB_DATABASE=demo_central` no es opcional
+
+`schedule:run` pregunta si el programa está pausado (`illuminate:schedule:paused`)
+usando el almacén de caché POR DEFECTO, no el de los cerrojos. Sin la variable,
+ese almacén resuelve el centinela y el programador muere en la primera línea:
+
+```
+FATAL: database "demo_sin_resolver" does not exist
+(SQL: select * from "cache" where "key" in (...:schedule:paused))
+```
+
+El razonamiento de fondo: **un proceso del programador no está «sin resolver»,
+está resuelto a la central**. El centinela existe para lo que no se sabe, y acá
+sí se sabe. Declararlo es más honesto que agregar código que lo adivine.
+
+Los hijos que lanza `demo:por-cada-inquilino` pisan esa variable con la base de
+su inquilino y heredan el resto, así que el recorrido no se ve afectado. Y
+`queue:work`, que el programador lanza como subproceso, la hereda — su cola ya
+apunta a la central por conexión declarada.
+
+Si alguien rehace el cron sin la variable, **falla al instante y con ese mensaje**.
+Es de los pocos puntos de esta épica que se anuncian solos.
 
 ### Por qué esto no es "prender el cron y listo"
 
@@ -353,8 +376,9 @@ Todo esto está protegido por `TareasProgramadasTest`.
       superusuario (si lo fuera, el tope no aplicaría).
 - [ ] Base central creada y migrada.
 - [ ] Plantilla construida, y **ninguna** conexión de la aplicación apuntándole.
-- [ ] Línea de cron con `schedule:run` como el usuario del sitio (no hace falta
-      worker de systemd: el programa ya agenda la cola cada minuto).
+- [ ] Línea de cron con `DB_DATABASE=demo_central php artisan schedule:run` como
+      el usuario del sitio (no hace falta worker de systemd: el programa ya
+      agenda la cola cada minuto). Sin esa variable el programador no arranca.
 - [ ] `demo_central` con las tablas `cache` y `cache_locks`, o los cerrojos del
       programador fallan y `demo:borrar` no corre.
 - [x] `trustProxies` acotado al bucle local en `bootstrap/app.php`, con test.
