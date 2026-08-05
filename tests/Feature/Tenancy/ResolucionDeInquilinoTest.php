@@ -7,6 +7,7 @@ use App\Http\Middleware\CierraElDemo;
 use App\Http\Middleware\ResolveTenant;
 use App\Models\Tenant;
 use App\Tenancy\InquilinoActual;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\DB;
@@ -99,6 +100,28 @@ class ResolucionDeInquilinoTest extends TestCase
             array_search(StartSession::class, $prioridad, true),
             array_search(ResolveTenant::class, $prioridad, true),
             'ResolveTenant tiene que correr antes que StartSession.',
+        );
+    }
+
+    public function test_the_filament_panel_also_resolves_the_tenant(): void
+    {
+        // EL DEFECTO QUE ESTE TEST PREVIENE, encontrado en el servidor con el
+        // panel devolviendo 500 mientras el resto del sitio resolvía bien.
+        //
+        // Filament NO usa el grupo `web`: define su propia lista de middleware.
+        // Registrar ResolveTenant en el grupo no alcanza, y el panel es LA
+        // superficie del demo — sin él, la persona invitada no entra a nada.
+        //
+        // El test de orden que ya existía miraba la lista de prioridad global y
+        // por eso no lo vio: era verde y no protegía.
+        $middleware = Filament::getPanel('admin')->getMiddleware();
+
+        $this->assertContains(ResolveTenant::class, $middleware, 'El panel tiene que resolver el inquilino.');
+
+        $this->assertLessThan(
+            array_search(StartSession::class, $middleware, true),
+            array_search(ResolveTenant::class, $middleware, true),
+            'En el panel también va ANTES de que arranque la sesión.',
         );
     }
 
