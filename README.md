@@ -188,12 +188,13 @@ docs/
 ```
 
 Antes de desplegar, `docs/deployment/DEMO-MULTI-INQUILINO.md`. De todo ese
-checklist, dos puntos no dan síntoma si salen mal:
+checklist, el que no da síntoma si sale mal: el rol de la aplicación **no puede
+ser superusuario**, o los topes de conexión que protegen a los vecinos de la
+instancia no protegen nada.
 
-- El rol de la aplicación **no puede ser superusuario**, o los topes de conexión
-  que protegen a los vecinos de la instancia no protegen nada.
-- El proxy de confianza debe estar acotado a su dirección: con `'*'`, el `Host`
-  lo elige el cliente y la frontera entre inquilinos deja de ser una frontera.
+El otro de esa categoría —el proxy de confianza— ya no depende de que alguien se
+acuerde: `bootstrap/app.php` confía sólo en el bucle local, y un test verifica
+que un `X-Forwarded-Host` de afuera no pueda cambiar de inquilino.
 
 ---
 

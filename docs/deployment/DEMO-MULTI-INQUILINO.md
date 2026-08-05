@@ -156,15 +156,29 @@ más.
 
 ## Proxy de confianza
 
-`bootstrap/app.php:27` usa `trustProxies(at: '*')`, y entre los encabezados
-confiados está `X-Forwarded-Host` (`TrustProxies.php:23`).
+**Resuelto en `bootstrap/app.php`: sólo se confía en el bucle local.**
 
-Con el inquilino resuelto por subdominio, eso significa que **quien alcance el
-origen sin pasar por CloudPanel elige a qué inquilino resuelve**. No le da
-acceso —siguen haciendo falta credenciales— pero convierte la frontera en algo
-que el cliente puede elegir, que es justo lo que el diseño evita.
+Antes usaba `trustProxies(at: '*')`, y entre los encabezados confiados está
+`X-Forwarded-Host` (`TrustProxies.php:23`). Con el inquilino resuelto por
+subdominio, eso significaba que **quien alcanzara el origen elegía a qué
+inquilino resolvía**. No daba acceso —siguen haciendo falta credenciales— pero
+convertía la frontera en algo que el cliente podía elegir.
 
-Confiar sólo en la dirección del proxy. CloudPanel corre en el mismo host.
+El bucle local es la respuesta correcta sin importar cómo esté armado el
+servidor, y por eso no hace falta averiguarlo:
+
+| Arquitectura | `REMOTE_ADDR` que ve PHP | Qué pasa |
+|---|---|---|
+| nginx → PHP-FPM por FastCGI | La del cliente real | Nunca es el bucle: sus encabezados se ignoran y el esquema HTTPS sale de `fastcgi_param HTTPS "on"` del vhost |
+| Un proxy delante en el mismo host | El bucle | Se respetan los encabezados que pone el proxy |
+
+Si algún día el proxy pasa a otra máquina —una CDN, un balanceador— hay que
+poner su dirección ahí. Nunca `'*'`.
+
+Lo protege un test: `ResolucionDeInquilinoTest::test_a_client_cannot_choose_its_tenant_with_a_forwarded_host_header`.
+Simula un cliente de afuera y verifica que su `X-Forwarded-Host` no cambie de
+inquilino. Existe porque este fallo **no da ningún síntoma**: nada falla, nada se
+registra, y todo parece funcionar.
 
 > Lo mismo aplica al New Hauz de producción, que corre el mismo
 > `bootstrap/app.php`. Ahí no hay inquilinos, pero un `Host` elegible afecta la
@@ -226,7 +240,7 @@ el panel pisa el vhost y se lleva la excepción puesta a mano.
 - [ ] Base central creada y migrada.
 - [ ] Plantilla construida, y **ninguna** conexión de la aplicación apuntándole.
 - [ ] Cola corriendo y cron activo.
-- [ ] `trustProxies` acotado a la dirección del proxy, no `'*'`.
+- [x] `trustProxies` acotado al bucle local en `bootstrap/app.php`, con test.
 - [ ] DNS comodín resolviendo.
 - [ ] Certificado comodín emitido y renovando solo.
 - [ ] Verificado que sin sesión ninguna ruta de inquilino devuelve contenido.
