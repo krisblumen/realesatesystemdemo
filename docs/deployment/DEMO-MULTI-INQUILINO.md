@@ -189,9 +189,69 @@ registra, y todo parece funcionar.
 ## DNS y certificado
 
 - Registro comodín `*.demo.<dominio>` apuntando al VPS.
-- Certificado comodín con certbot y validación **DNS-01** — la validación HTTP-01
-  no emite comodines.
-- Renovación automática verificada antes de invitar a nadie.
+- Certificado comodín con validación **DNS-01**: HTTP-01 no emite comodines.
+
+### Procedimiento (hecho en `landracore.com`, DNS en Hostinger)
+
+Se usa **acme.sh** y no certbot, porque tiene complemento oficial para la API de
+Hostinger y con eso la renovación queda automática de punta a punta. Todo como
+root, para que el cron de renovación sea de root.
+
+```bash
+curl https://get.acme.sh | sh -s email=<correo>
+~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+export HOSTINGER_Token="<token>"
+~/.acme.sh/acme.sh --issue --dns dns_hostinger \
+  -d demo.<dominio> -d '*.demo.<dominio>' --dnssleep 180
+```
+
+Tres cosas que cuestan un intento fallido cada una:
+
+**El nombre de la variable lo manda el script instalado, no la wiki.** Verificar
+con `grep -oE "HOSTINGER_[A-Za-z_]+" ~/.acme.sh/dnsapi/dns_hostinger.sh`. La wiki
+del proyecto documenta `HOSTINGER_API_KEY`; la versión instalada esperaba
+`HOSTINGER_Token`.
+
+**`--dnssleep 180` no es opcional.** Un comodín necesita DOS valores TXT en el
+mismo nombre `_acme-challenge`, y Let's Encrypt valida desde varios puntos de la
+red. La comprobación propia de acme.sh los dio por buenos y la validación del
+comodín falló cuatro segundos después con «No TXT record found»: los servidores
+de Hostinger todavía no habían convergido.
+
+**`--ecc` en la instalación**, porque acme.sh emite en `<dominio>_ecc`.
+
+La instalación apunta a las rutas que ya usa el vhost de CloudPanel, y con
+`--reloadcmd` cada renovación las reescribe y recarga nginx sola:
+
+```bash
+~/.acme.sh/acme.sh --install-cert -d demo.<dominio> --ecc \
+  --key-file /etc/nginx/ssl-certificates/demo.<dominio>.key \
+  --fullchain-file /etc/nginx/ssl-certificates/demo.<dominio>.crt \
+  --reloadcmd "systemctl reload nginx"
+```
+
+Copiar los archivos a mano funcionaría hoy y se caería en silencio en 60 días.
+
+### El costo que se aceptó
+
+El token de la API de Hostinger **no se puede acotar a un dominio**: es de cuenta,
+y quien lo tenga puede cambiar el DNS de todos los dominios de esa cuenta. Vive en
+`~/.acme.sh/account.conf` del VPS.
+
+Se aceptó porque esa máquina ya sirve la producción y las bases, así que un
+compromiso del disco no es un problema nuevo; y porque un certificado vencido por
+olvido es una falla bastante más probable que una intrusión.
+
+### Verificación
+
+```bash
+curl -4 -sI "https://<slug>.demo.<dominio>/admin" | head -1   # sin -k
+echo | openssl s_client -connect <slug>.demo.<dominio>:443 \
+  -servername <slug>.demo.<dominio> 2>/dev/null | \
+  openssl x509 -noout -issuer -dates -ext subjectAltName
+```
+
+El `subjectAltName` tiene que listar `*.demo.<dominio>`.
 
 ## El servidor web sirve por extensión, y eso rompe Livewire
 
@@ -242,7 +302,7 @@ el panel pisa el vhost y se lleva la excepción puesta a mano.
 - [ ] Cola corriendo y cron activo.
 - [x] `trustProxies` acotado al bucle local en `bootstrap/app.php`, con test.
 - [ ] DNS comodín resolviendo.
-- [ ] Certificado comodín emitido y renovando solo.
+- [x] Certificado comodín emitido con acme.sh e instalado con `--reloadcmd`.
 - [ ] Verificado que sin sesión ninguna ruta de inquilino devuelve contenido.
 - [ ] Assets de Livewire publicados en `public/vendor/livewire/`, o el acceso
       devuelve 405 y la pantalla se ve bien.
