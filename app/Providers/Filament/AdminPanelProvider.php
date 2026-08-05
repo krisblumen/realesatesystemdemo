@@ -9,6 +9,7 @@ use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\FrontendSettingsPage;
 use App\Filament\Resources\FrontendPageResource\Pages\EditFrontendPage;
 use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\ResolveTenant;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -118,6 +119,19 @@ class AdminPanelProvider extends PanelProvider
                 'Seguridad',
             ])
             ->middleware([
+                // PRIMERO DE TODO, y antes de StartSession.
+                //
+                // Filament NO usa el grupo `web`: define su propia lista, así
+                // que registrar el middleware allá no alcanza —y el panel es la
+                // superficie principal del demo—. Sin esto, `/admin` nunca
+                // resuelve el inquilino: la conexión queda en el centinela y la
+                // sesión se leería de la base equivocada si el centinela no
+                // existiera.
+                //
+                // Se descubrió en el servidor, con el panel devolviendo 500
+                // mientras la resolución funcionaba bien en el resto del sitio.
+                ResolveTenant::class,
+
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
