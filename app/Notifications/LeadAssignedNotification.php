@@ -49,10 +49,10 @@ class LeadAssignedNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Nuevo lead asignado')
             ->greeting("Hola {$notifiable->name}")
-            ->line('Se te asignó un nuevo lead en New Hauz.')
+            ->line('Se te asignó un nuevo lead en Landra.')
             ->line($this->summary())
             ->action('Ver lead', $this->leadUrl())
-            ->line('Este aviso fue generado automáticamente desde el panel de New Hauz.');
+            ->line('Este aviso fue generado automáticamente desde el panel de Landra.');
     }
 
     private function summary(): string

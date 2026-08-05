@@ -5,7 +5,7 @@
 @source '../views';
 
 /*
- * New Hauz — Design tokens mapeados a Tailwind v4.
+ * Landra — Design tokens mapeados a Tailwind v4.
  * Fuente: design-reference/_ds (Navy + Orange, Montserrat + Inter).
  * Marca premium, corporativa, minimalista (inmobiliaria de lujo, Querétaro).
  */
@@ -25,12 +25,12 @@
  * estado siguen fijos a propósito.
  */
 @theme inline {
-    --color-brand-primary: var(--nh-primary, #091a5b);
+    --color-brand-primary: var(--nh-primary, #2e3842);
     --color-on-brand-primary: var(--nh-on-primary, #ffffff);
-    --color-brand-accent: var(--nh-accent, #f6a300);
-    --color-on-brand-accent: var(--nh-on-accent, #111111);
-    --color-site-background: var(--nh-bg, #f7f7f7);
-    --color-site-text: var(--nh-text, #111111);
+    --color-brand-accent: var(--nh-accent, #f5a624);
+    --color-on-brand-accent: var(--nh-on-accent, #171d23);
+    --color-site-background: var(--nh-bg, #f2f4f6);
+    --color-site-text: var(--nh-text, #171d23);
 
     --font-brand-heading: var(--nh-font-heading, 'Montserrat'), ui-sans-serif, system-ui, sans-serif;
     --font-brand-body: var(--nh-font-body, 'Inter'), ui-sans-serif, system-ui, sans-serif;
@@ -41,7 +41,7 @@
     --font-brand-eyebrow: var(--nh-font-eyebrow, 'Montserrat'), ui-sans-serif, system-ui, sans-serif;
 
     /* Acento sobre superficie primaria: degrada a on-primary si no es legible. */
-    --color-accent-on-brand-primary: var(--nh-accent-on-primary, #f6a300);
+    --color-accent-on-brand-primary: var(--nh-accent-on-primary, #f5a624);
 
     /*
      * Color de marca como TINTA sobre el fondo base (títulos, eyebrows, nav
@@ -49,11 +49,11 @@
      * es legible sobre el fondo y, si no, degrada al color de texto. `primary`
      * y `accent` siguen siendo superficies; estos son su rol de foreground.
      */
-    --color-brand-primary-ink: var(--nh-primary-ink, #091a5b);
-    --color-brand-accent-ink: var(--nh-accent-ink, #c77e00);
+    --color-brand-primary-ink: var(--nh-primary-ink, #2e3842);
+    --color-brand-accent-ink: var(--nh-accent-ink, #b9761a);
 
     /* Anillo de foco: garantizado >= 3:1 contra el fondo por el servidor. */
-    --color-brand-focus: var(--nh-focus, #f6a300);
+    --color-brand-focus: var(--nh-focus, #f5a624);
 
     /*
      * Variantes de los dos colores de marca: dos más oscuras y dos más claras.
@@ -67,15 +67,15 @@
      * para un borde; se evitó a propósito una escala perceptual (OKLCH) porque
      * pediría precalcular en el servidor y perdería el «sigue al tema».
      */
-    --color-brand-primary-d2: color-mix(in srgb, var(--nh-primary, #091a5b) 55%, #000000);
-    --color-brand-primary-d1: color-mix(in srgb, var(--nh-primary, #091a5b) 78%, #000000);
-    --color-brand-primary-l1: color-mix(in srgb, var(--nh-primary, #091a5b) 55%, #ffffff);
-    --color-brand-primary-l2: color-mix(in srgb, var(--nh-primary, #091a5b) 25%, #ffffff);
+    --color-brand-primary-d2: color-mix(in srgb, var(--nh-primary, #2e3842) 55%, #000000);
+    --color-brand-primary-d1: color-mix(in srgb, var(--nh-primary, #2e3842) 78%, #000000);
+    --color-brand-primary-l1: color-mix(in srgb, var(--nh-primary, #2e3842) 55%, #ffffff);
+    --color-brand-primary-l2: color-mix(in srgb, var(--nh-primary, #2e3842) 25%, #ffffff);
 
-    --color-brand-accent-d2: color-mix(in srgb, var(--nh-accent, #f6a300) 55%, #000000);
-    --color-brand-accent-d1: color-mix(in srgb, var(--nh-accent, #f6a300) 78%, #000000);
-    --color-brand-accent-l1: color-mix(in srgb, var(--nh-accent, #f6a300) 55%, #ffffff);
-    --color-brand-accent-l2: color-mix(in srgb, var(--nh-accent, #f6a300) 25%, #ffffff);
+    --color-brand-accent-d2: color-mix(in srgb, var(--nh-accent, #f5a624) 55%, #000000);
+    --color-brand-accent-d1: color-mix(in srgb, var(--nh-accent, #f5a624) 78%, #000000);
+    --color-brand-accent-l1: color-mix(in srgb, var(--nh-accent, #f5a624) 55%, #ffffff);
+    --color-brand-accent-l2: color-mix(in srgb, var(--nh-accent, #f5a624) 25%, #ffffff);
 
     --radius-brand-md: var(--nh-radius-md, 12px);
     --radius-brand-lg: var(--nh-radius-lg, 16px);
@@ -88,32 +88,32 @@
     --font-display: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
 
     /* ---- Marca: Navy ---- */
-    --color-navy: #091a5b;
+    --color-navy: #2e3842;
     --color-navy-50: #eef1f8;
     --color-navy-100: #dee2f0;
     --color-navy-500: #3b4da6;
     --color-navy-600: #233488;
     --color-navy-700: #14246e;
-    --color-navy-800: #091a5b;
+    --color-navy-800: #2e3842;
     --color-navy-900: #050f38;
 
     /* ---- Marca: Orange (CTA / conversión) ---- */
-    --color-orange: #f6a300;
+    --color-orange: #f5a624;
     --color-orange-50: #fff7e8;
     --color-orange-100: #fde9c9;
     --color-orange-400: #ffb829;
-    --color-orange-500: #f6a300;
-    --color-orange-600: #c77e00;
+    --color-orange-500: #f5a624;
+    --color-orange-600: #b9761a;
     --color-orange-hover: #d98c00;
 
     /* ---- Neutros ---- */
-    --color-ink: #111111;
+    --color-ink: #171d23;
     --color-graphite: #2d2d2d;
     --color-stone: #5b5b5b;
     --color-mist: #c9c9c9;
     --color-cloud: #eaeaea;
     --color-fog: #f2f2f2;
-    --color-canvas: #f7f7f7;
+    --color-canvas: #f2f4f6;
 
     /**
      * WhatsApp. Los ÚNICOS colores del sistema que NO se derivan del tema, y a
@@ -151,8 +151,8 @@
      * tenía botones que brillaban de un color que no era el suyo.
      */
     --shadow-cta:
-        0 0 24px color-mix(in srgb, var(--nh-accent, #f6a300) 38%, transparent),
-        0 8px 20px color-mix(in srgb, var(--nh-accent, #f6a300) 28%, transparent);
+        0 0 24px color-mix(in srgb, var(--nh-accent, #f5a624) 38%, transparent),
+        0 8px 20px color-mix(in srgb, var(--nh-accent, #f5a624) 28%, transparent);
 
     /* El mismo gesto para WhatsApp, con su verde: un botón que abre otro canal
        no debería brillar del color de la marca del sitio. */
@@ -220,7 +220,7 @@
     @supports (color: color-mix(in srgb, red, red)) {
         background-image: radial-gradient(
             ellipse 65% 110% at 67% 33%,
-            color-mix(in srgb, var(--nh-accent, #f6a300) 20%, transparent) 0%,
+            color-mix(in srgb, var(--nh-accent, #f5a624) 20%, transparent) 0%,
             transparent 70%
         );
     }
@@ -238,7 +238,7 @@
     @supports (color: color-mix(in srgb, red, red)) {
         background-image: radial-gradient(
             ellipse 65% 110% at 67% 33%,
-            color-mix(in srgb, color-mix(in srgb, var(--nh-accent, #f6a300) 45%, #ffffff) 20%, transparent) 0%,
+            color-mix(in srgb, color-mix(in srgb, var(--nh-accent, #f5a624) 45%, #ffffff) 20%, transparent) 0%,
             transparent 70%
         );
     }

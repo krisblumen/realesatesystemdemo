@@ -1,10 +1,10 @@
 # GEMINI.md
 
-This file provides instructional context for Gemini CLI when working in the **newhauz** repository.
+This file provides instructional context for Gemini CLI when working in the **landra** repository.
 
 ## Project Overview
 
-**newhauz** is a modern real estate platform built as a **Modern Monolith** with Laravel. It prioritizes SEO and developer velocity by keeping the frontend and backend in a single integrated repository.
+**landra** is a modern real estate platform built as a **Modern Monolith** with Laravel. It prioritizes SEO and developer velocity by keeping the frontend and backend in a single integrated repository.
 
 - **Backend**: Laravel 13.x (PHP 8.3+)
 - **Frontend**: Blade + Livewire v3, Vite 8, Tailwind CSS v4

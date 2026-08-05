@@ -24,7 +24,7 @@ class FrontendSettingSingletonTest extends TestCase
         $b = $this->realConnection('pgsql_singleton_b');
 
         $insert = "insert into frontend_settings (singleton_key, site_name, created_at, updated_at)
-                   values ('default', 'New Hauz', now(), now())
+                   values ('default', 'Landra', now(), now())
                    on conflict (singleton_key) do nothing";
 
         try {

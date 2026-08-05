@@ -131,7 +131,7 @@
 
         <div class="frame"></div>
 
-        <img class="logo" src="{{ public_path('images/brand/Logo_lonas.svg') }}" alt="NewHauz">
+        <img class="logo" src="{{ public_path('images/brand/Logo_lonas.svg') }}" alt="Landra">
 
         <div class="tipo">{{ strtoupper($operationType->label()) }}</div>
 
@@ -142,7 +142,7 @@
         <div class="agent-name">{{ $agent->name }}</div>
         <div class="agent-email">{{ $agent->email }}</div>
 
-        <div class="website">www.newhauz.com.mx</div>
+        <div class="website">www.landracore.com</div>
 
         @if ($qrDataUri)
             <div class="qr-box">

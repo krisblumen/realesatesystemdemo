@@ -20,12 +20,12 @@ class HomeFeaturedTest extends TestCase
 
     public function test_home_shows_only_published_featured_properties(): void
     {
-        Property::factory()->published()->create(['is_featured' => true, 'title' => 'Joya Destacada New Hauz']);
+        Property::factory()->published()->create(['is_featured' => true, 'title' => 'Joya Destacada Landra']);
         Property::factory()->published()->create(['is_featured' => false, 'title' => 'Comun Sin Destacar']);
 
         $this->get('/')
             ->assertOk()
-            ->assertSee('Joya Destacada New Hauz')
+            ->assertSee('Joya Destacada Landra')
             ->assertDontSee('Comun Sin Destacar');
     }
 
@@ -40,11 +40,11 @@ class HomeFeaturedTest extends TestCase
 
     public function test_home_shows_published_opportunities(): void
     {
-        Property::factory()->published()->create(['is_opportunity' => true, 'title' => 'Oportunidad Real New Hauz']);
+        Property::factory()->published()->create(['is_opportunity' => true, 'title' => 'Oportunidad Real Landra']);
 
         $this->get('/')
             ->assertOk()
-            ->assertSee('Oportunidad Real New Hauz');
+            ->assertSee('Oportunidad Real Landra');
     }
 
     public function test_featured_and_opportunity_are_mutually_exclusive(): void

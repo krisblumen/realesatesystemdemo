@@ -80,7 +80,7 @@ return new class extends Migration
             ->whereNull('payload')
             ->update([
                 'payload' => json_encode([
-                    'eyebrow' => 'Despacho de arquitectura · New Hauz',
+                    'eyebrow' => 'Despacho de arquitectura · Landra',
                     'title' => 'A-74 lleva cada proyecto del concepto arquitectónico a la obra terminada.',
                 ], JSON_UNESCAPED_UNICODE),
                 'updated_at' => now(),

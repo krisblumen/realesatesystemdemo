@@ -23,7 +23,7 @@
             <p class="eyebrow mb-4 text-accent-on-brand-primary">Catálogo</p>
             <h1 class="font-brand-heading text-[clamp(30px,4.4vw,48px)] font-extrabold leading-tight text-on-brand-primary">Propiedades en Querétaro</h1>
             <p class="mt-3.5 max-w-[560px] text-[17px] leading-relaxed text-on-brand-primary/80">
-                Casas, departamentos y terrenos en venta y renta, opcionados por New Hauz.
+                Casas, departamentos y terrenos en venta y renta, opcionados por Landra.
             </p>
         </div>
     </section>

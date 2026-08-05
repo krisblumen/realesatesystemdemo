@@ -38,10 +38,25 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login(Login::class)
             ->passwordReset(resetAction: ResetPassword::class)
-            ->brandLogo(asset('images/brand/logo-on-light.svg'))
-            ->darkModeBrandLogo(asset('images/brand/logo-on-dark.svg'))
-            ->brandLogoHeight('3.5rem')
-            ->favicon(asset('images/brand/newhauz_monogram.ico'))
+            // DOS COMPOSICIONES DEL MISMO LOGO, y no es un capricho.
+            //
+            // El panel usa la vertical, que es la que entra en una barra
+            // superior. El acceso usa la horizontal con la bajada —«Sistema de
+            // administración inmobiliaria»— porque ahí hay espacio y es el único
+            // momento en que alguien que no conoce el producto lo está mirando.
+            //
+            // Filament no distingue esas dos pantallas: usa el mismo logo en
+            // todas. Por eso va una función que mira la ruta, y por eso la
+            // altura también cambia — una composición horizontal a 3.5rem de
+            // alto se desborda a lo ancho.
+            ->brandLogo(fn (): string => $this->enElAcceso()
+                ? asset('images/brand/login-logo-on-light.png')
+                : asset('images/brand/logo-on-light.svg'))
+            ->darkModeBrandLogo(fn (): string => $this->enElAcceso()
+                ? asset('images/brand/login-logo-on-dark.png')
+                : asset('images/brand/logo-on-dark.svg'))
+            ->brandLogoHeight(fn (): string => $this->enElAcceso() ? '2.5rem' : '3.5rem')
+            ->favicon(asset('images/brand/landra-core.ico'))
             ->font('Inter')
             ->theme(asset('css/filament/admin/theme.css'))
             ->colors([
@@ -51,8 +66,8 @@ class AdminPanelProvider extends PanelProvider
                 'success' => Color::hex('#1F8A4C'),
                 'warning' => Color::hex('#B8860B'),
                 'info' => Color::hex('#233488'),
-                'brand-orange' => Color::hex('#F6A300'),
-                'brand-blue' => Color::hex('#091A5B'),
+                'brand-orange' => Color::hex('#F5A624'),
+                'brand-blue' => Color::hex('#2E3842'),
             ])
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
@@ -224,5 +239,17 @@ class AdminPanelProvider extends PanelProvider
         }
 
         return false;
+    }
+
+    /**
+     * Si la petición actual es una de las pantallas de acceso.
+     *
+     * Cubre acceso, recuperación y restablecimiento: todas son «pantallas
+     * simples» —sin barra superior ni menú— y en todas hay lugar para la
+     * composición horizontal.
+     */
+    private function enElAcceso(): bool
+    {
+        return request()->routeIs('filament.admin.auth.*');
     }
 }

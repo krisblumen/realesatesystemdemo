@@ -54,7 +54,7 @@ class FrontendSetting extends Model implements HasMedia
     {
         return self::firstOrCreate(
             ['singleton_key' => 'default'],
-            ['site_name' => 'New Hauz'],
+            ['site_name' => 'Landra'],
         );
     }
 

@@ -245,7 +245,7 @@ class FrontendNavigationService
 
     private function fallbackLegalText(): string
     {
-        return '© '.date('Y').' New Hauz. Todos los derechos reservados.';
+        return '© '.date('Y').' Landra. Todos los derechos reservados.';
     }
 
     /**

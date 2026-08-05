@@ -10,7 +10,7 @@
             if (window.google?.maps?.Map) {
                 return Promise.resolve(window.google.maps);
             }
-            window.newHauzGoogleMapsLoader = window.newHauzGoogleMapsLoader || new Promise((resolve, reject) => {
+            window.landraGoogleMapsLoader = window.landraGoogleMapsLoader || new Promise((resolve, reject) => {
                 const script = document.createElement('script');
                 const params = new URLSearchParams({ key, libraries: 'geometry', v: 'weekly' });
                 script.src = `https://maps.googleapis.com/maps/api/js?${params.toString()}`;
@@ -20,7 +20,7 @@
                 script.onerror = () => reject(new Error('No se pudo cargar Google Maps.'));
                 document.head.appendChild(script);
             });
-            return window.newHauzGoogleMapsLoader;
+            return window.landraGoogleMapsLoader;
         };
 
         loadGoogleMaps(apiKey).then((maps) => {

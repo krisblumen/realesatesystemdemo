@@ -48,7 +48,7 @@ class FrontendTypographyTest extends TestCase
     {
         FrontendSetting::query()->updateOrCreate(
             ['singleton_key' => 'default'],
-            ['theme' => $theme, 'site_name' => 'New Hauz'],
+            ['theme' => $theme, 'site_name' => 'Landra'],
         );
 
         app()->forgetInstance(FrontendThemeService::class);
@@ -360,7 +360,7 @@ class FrontendTypographyTest extends TestCase
     {
         $html = $this->preview([
             'primary' => '#123456', 'on_primary' => '#ffffff',
-            'accent' => '#f6a300', 'on_accent' => '#111111',
+            'accent' => '#f5a624', 'on_accent' => '#171d23',
             'background' => '#fafafa', 'text' => '#222222',
             'heading_font' => 'Playfair Display', 'eyebrow_font' => 'Caveat',
             'body_font' => 'Lora', 'radius' => 'xl',
@@ -383,7 +383,7 @@ class FrontendTypographyTest extends TestCase
         // bloque en blanco y el owner creería que rompió algo.
         $html = $this->preview([
             'primary' => '#ffffff', 'on_primary' => '#fefefe',
-            'accent' => '#f6a300', 'on_accent' => '#111111',
+            'accent' => '#f5a624', 'on_accent' => '#171d23',
             'background' => '#ffffff', 'text' => '#fdfdfd',
             'radius' => 'medium',
         ]);
@@ -398,7 +398,7 @@ class FrontendTypographyTest extends TestCase
         // tampoco: es la decisión del owner y tiene que poder verla.
         $html = $this->preview([
             'primary' => '#ffffff', 'on_primary' => '#fefefe',
-            'accent' => '#f6a300', 'on_accent' => '#111111',
+            'accent' => '#f5a624', 'on_accent' => '#171d23',
             'background' => '#ffffff', 'text' => '#fdfdfd',
             'radius' => 'medium', 'allow_low_contrast' => true,
         ]);
@@ -433,7 +433,7 @@ class FrontendTypographyTest extends TestCase
         // entiende mejor junto al resto — y el gris no mostraba ningún color real.
         $html = $this->preview([
             'primary' => '#123456', 'background' => '#fafafa',
-            'accent' => '#f6a300', 'on_accent' => '#111111',
+            'accent' => '#f5a624', 'on_accent' => '#171d23',
             'radius' => 'xl',
         ]);
 

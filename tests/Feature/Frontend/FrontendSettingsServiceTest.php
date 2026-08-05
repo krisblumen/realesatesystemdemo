@@ -32,14 +32,14 @@ class FrontendSettingsServiceTest extends TestCase
     {
         $dto = app(FrontendSettingsService::class)->settings();
 
-        $this->assertSame('New Hauz', $dto['site_name']);
-        $this->assertSame('hola@newhauz.com.mx', $dto['contact']['email']);
+        $this->assertSame('Landra', $dto['site_name']);
+        $this->assertSame('hola@landracore.com', $dto['contact']['email']);
         $this->assertSame('524422722623', $dto['contact']['whatsapp']);
         $this->assertSame('https://wa.me/524422722623', $dto['contact']['whatsapp_href']);
-        $this->assertStringContainsString('images/brand/newhauz-on-light.svg', $dto['brand']['logo_light_url']);
-        $this->assertStringContainsString('images/brand/newhauz-on-dark.svg', $dto['brand']['logo_dark_url']);
-        $this->assertStringContainsString('images/brand/newhauz_monogram.ico', $dto['brand']['favicon_url']);
-        $this->assertStringContainsString('images/metaimage/meta_image_newhauz.jpg', $dto['brand']['og_image_url']);
+        $this->assertStringContainsString('images/brand/logo-on-light.svg', $dto['brand']['logo_light_url']);
+        $this->assertStringContainsString('images/brand/logo-on-dark.svg', $dto['brand']['logo_dark_url']);
+        $this->assertStringContainsString('images/brand/landra-core.ico', $dto['brand']['favicon_url']);
+        $this->assertStringContainsString('images/metaimage/meta_image_landra.jpg', $dto['brand']['og_image_url']);
     }
 
     public function test_saved_values_override_fallbacks(): void
@@ -70,7 +70,7 @@ class FrontendSettingsServiceTest extends TestCase
 
         // Unreferenced: collection has files, the column is null -> fallback.
         $dto = app(FrontendSettingsService::class)->settings();
-        $this->assertStringContainsString('newhauz-on-light.svg', $dto['brand']['logo_light_url']);
+        $this->assertStringContainsString('logo-on-light.svg', $dto['brand']['logo_light_url']);
 
         // Referenced: the OLD one on purpose — proves it is the column deciding,
         // not "latest in collection".

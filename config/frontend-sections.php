@@ -288,7 +288,7 @@ return [
         'contacto' => [
             'eyebrow' => 'Hablemos',
             'title' => 'Estamos para asesorarte',
-            'subtitle' => 'Escríbenos y un asesor de New Hauz te contacta el mismo día. Sin compromiso.',
+            'subtitle' => 'Escríbenos y un asesor de Landra te contacta el mismo día. Sin compromiso.',
             'slides' => [],
         ],
         // A-74 Arquitectura (proyectos.blade.php:23-42). `logo` acá es el logo

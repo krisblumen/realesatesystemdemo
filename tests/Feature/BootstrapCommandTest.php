@@ -13,7 +13,7 @@ class BootstrapCommandTest extends TestCase
 
     public function test_bootstrap_command_seeds_roles_and_initial_owner(): void
     {
-        putenv('OWNER_EMAIL=boot@newhauz.test');
+        putenv('OWNER_EMAIL=boot@landra.test');
         putenv('OWNER_PASSWORD=boot-pass');
 
         $this->artisan('app:bootstrap')
@@ -21,7 +21,7 @@ class BootstrapCommandTest extends TestCase
 
         $this->assertSame(5, Role::count());
 
-        $owner = User::where('email', 'boot@newhauz.test')->firstOrFail();
+        $owner = User::where('email', 'boot@landra.test')->firstOrFail();
         $this->assertTrue($owner->hasRole('owner'));
 
         putenv('OWNER_EMAIL');

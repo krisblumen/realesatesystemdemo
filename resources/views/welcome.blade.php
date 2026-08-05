@@ -143,7 +143,7 @@
         <section class="mx-auto max-w-[var(--container-content)] px-6 pt-16 pb-24">
             <div class="mb-10 flex flex-wrap items-end justify-between gap-6">
                 <div>
-                    <p class="eyebrow text-brand-accent-ink">Selección New Hauz</p>
+                    <p class="eyebrow text-brand-accent-ink">Selección Landra</p>
                     <h2 class="mt-3.5 font-brand-heading text-[clamp(28px,4vw,40px)] font-bold leading-tight text-brand-primary-ink">Inmuebles destacados</h2>
                 </div>
                 <x-button variant="secondary" :href="route('inmuebles.index')">Ver todo el catálogo</x-button>
@@ -212,7 +212,7 @@
             <div class="mb-8 flex flex-wrap items-center gap-6 rounded-brand-lg border border-black/5 bg-white px-8 py-5 shadow-md">
                 <img src="{{ asset('images/brand/a74-arquitectura.png') }}" alt="A-74 Arquitectura" class="h-16 w-auto">
                 <div class="flex-1">
-                    <p class="eyebrow text-stone">Despacho de arquitectura · New Hauz</p>
+                    <p class="eyebrow text-stone">Despacho de arquitectura · Landra</p>
                     <h2 class="mt-1.5 font-brand-heading text-[clamp(22px,3vw,32px)] font-bold leading-tight text-brand-primary-ink">Proyectos destacados</h2>
                 </div>
                 <a href="{{ route('proyectos') }}"

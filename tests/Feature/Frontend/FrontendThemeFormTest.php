@@ -47,10 +47,10 @@ class FrontendThemeFormTest extends TestCase
         $this->form([
             'primary' => '#123456',
             'on_primary' => '#ffffff',
-            'accent' => '#f6a300',
-            'on_accent' => '#111111',
+            'accent' => '#f5a624',
+            'on_accent' => '#171d23',
             'background' => '#ffffff',
-            'text' => '#111111',
+            'text' => '#171d23',
             'heading_font' => 'Inter',
             'body_font' => 'Inter',
             'radius' => 'rounded',
@@ -65,7 +65,7 @@ class FrontendThemeFormTest extends TestCase
 
     public function test_low_contrast_on_primary_is_rejected(): void
     {
-        $this->form(['primary' => '#f7f7f7', 'on_primary' => '#ffffff'])
+        $this->form(['primary' => '#f2f4f6', 'on_primary' => '#ffffff'])
             ->call('save')
             ->assertHasErrors('data.theme.on_primary');
     }
@@ -73,7 +73,7 @@ class FrontendThemeFormTest extends TestCase
     public function test_low_contrast_on_accent_is_rejected(): void
     {
         // White on the brand orange: the classic unreadable CTA.
-        $this->form(['accent' => '#f6a300', 'on_accent' => '#ffffff'])
+        $this->form(['accent' => '#f5a624', 'on_accent' => '#ffffff'])
             ->call('save')
             ->assertHasErrors('data.theme.on_accent');
     }
@@ -118,7 +118,7 @@ class FrontendThemeFormTest extends TestCase
 
     public function test_a_rejected_theme_does_not_persist_anything(): void
     {
-        $this->form(['site_name' => 'irrelevante', 'accent' => '#f6a300', 'on_accent' => '#ffffff'])
+        $this->form(['site_name' => 'irrelevante', 'accent' => '#f5a624', 'on_accent' => '#ffffff'])
             ->set('data.site_name', 'No debe guardarse')
             ->call('save')
             ->assertHasErrors('data.theme.on_accent');

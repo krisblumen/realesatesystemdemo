@@ -52,10 +52,10 @@ class LonaRequestSubmittedNotification extends Notification implements ShouldQue
         return (new MailMessage)
             ->subject('Nueva solicitud de lonas')
             ->greeting("Hola {$notifiable->name}")
-            ->line('Un agente solicitó más lonas en New Hauz.')
+            ->line('Un agente solicitó más lonas en Landra.')
             ->line($this->summary())
             ->action('Ver solicitud', $this->url())
-            ->line('Este aviso fue generado automáticamente desde el panel de New Hauz.');
+            ->line('Este aviso fue generado automáticamente desde el panel de Landra.');
     }
 
     private function summary(): string

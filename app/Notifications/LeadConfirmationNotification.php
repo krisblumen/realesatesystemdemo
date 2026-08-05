@@ -25,7 +25,7 @@ class LeadConfirmationNotification extends Notification implements ShouldQueue
     public function toMail(Lead $notifiable): MailMessage
     {
         $mail = (new MailMessage)
-            ->subject('Recibimos tu mensaje — New Hauz')
+            ->subject('Recibimos tu mensaje — Landra')
             ->greeting("Hola {$notifiable->name}");
 
         // Solo se personaliza con el asesor si el lead viene de un inmueble
@@ -34,7 +34,7 @@ class LeadConfirmationNotification extends Notification implements ShouldQueue
         $agent = $this->lead->property_id !== null ? $this->lead->agent : null;
 
         if ($agent === null) {
-            return $mail->line('Gracias por contactarnos. Un asesor de New Hauz se pondrá en contacto contigo a la brevedad posible.');
+            return $mail->line('Gracias por contactarnos. Un asesor de Landra se pondrá en contacto contigo a la brevedad posible.');
         }
 
         $mail->line("Gracias por contactarnos. El asesor {$agent->name} se pondrá en contacto contigo en breve.");

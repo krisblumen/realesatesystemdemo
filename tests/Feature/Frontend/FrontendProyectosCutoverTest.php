@@ -77,7 +77,7 @@ class FrontendProyectosCutoverTest extends TestCase
     {
         $html = $this->get('/proyectos')->assertOk()->getContent();
 
-        $this->assertStringContainsString('Despacho de arquitectura · New Hauz', $html);
+        $this->assertStringContainsString('Despacho de arquitectura · Landra', $html);
         $this->assertStringContainsString('A-74 lleva cada proyecto del concepto arquitectónico a la obra terminada.', $html);
         $this->assertStringContainsString('bg-[linear-gradient(180deg,#e0e0e0_0%,#f0f0f0_50%,#dcdcdc_100%)]', $html);
     }

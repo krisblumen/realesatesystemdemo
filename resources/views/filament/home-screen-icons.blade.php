@@ -3,5 +3,5 @@
 <link rel="manifest" href="{{ asset('manifest.json') }}">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="New Hauz">
-<meta name="theme-color" content="#091A5B">
+<meta name="apple-mobile-web-app-title" content="Landra">
+<meta name="theme-color" content="#2E3842">

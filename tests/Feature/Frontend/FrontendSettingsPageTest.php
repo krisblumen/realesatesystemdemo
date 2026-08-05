@@ -60,7 +60,7 @@ class FrontendSettingsPageTest extends TestCase
             ->assertSee('Favicon')
             ->assertSee('Imagen para redes')
             // With no custom media, every card shows the default-brand state.
-            ->assertSee('Marca New Hauz por defecto')
+            ->assertSee('Marca de Landra por defecto')
             // Each card states the ideal format and dimensions.
             ->assertSee('~400×120 px')
             ->assertSee('512×512 px (mín. 32×32)')
@@ -225,12 +225,12 @@ class FrontendSettingsPageTest extends TestCase
         $this->actingAs(User::factory()->withRole('owner')->create());
 
         Livewire::test(FrontendSettingsPage::class)
-            ->set('data.social_links.instagram', 'https://instagram.com/newhauz')
+            ->set('data.social_links.instagram', 'https://instagram.com/landra')
             ->call('save')
             ->assertHasNoErrors();
 
         $this->assertSame(
-            'https://instagram.com/newhauz',
+            'https://instagram.com/landra',
             FrontendSetting::current()->fresh()->social_links['instagram'] ?? null,
         );
     }

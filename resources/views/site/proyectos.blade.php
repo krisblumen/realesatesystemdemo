@@ -30,7 +30,7 @@
             <div class="mb-8 flex flex-wrap items-center gap-6 rounded-brand-lg border border-black/5 bg-white px-8 py-5 shadow-md">
                 <img src="{{ asset('images/brand/a74-arquitectura.png') }}" alt="A-74 Arquitectura" class="h-16 w-auto">
                 <div class="flex-1">
-                    <p class="eyebrow text-stone">Despacho de arquitectura · New Hauz</p>
+                    <p class="eyebrow text-stone">Despacho de arquitectura · Landra</p>
                     <h2 class="mt-1.5 font-brand-heading text-[clamp(18px,2.4vw,26px)] font-bold text-brand-primary-ink">
                         A-74 lleva cada proyecto del concepto arquitectónico a la obra terminada.
                     </h2>

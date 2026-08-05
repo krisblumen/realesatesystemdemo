@@ -2,7 +2,7 @@
     $user = auth()->user();
 @endphp
 
-@if ($user && $user->hasNewhauzMailbox())
+@if ($user && $user->hasCorporateMailbox())
     <x-filament::icon-button
         tag="a"
         href="{{ config('mail_indicator.webmail_url') }}"

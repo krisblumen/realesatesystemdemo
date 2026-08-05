@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 
 class OwnerSeeder extends Seeder
 {
-    public const DEFAULT_EMAIL = 'owner@newhauz.test';
+    public const DEFAULT_EMAIL = 'owner@landra.test';
 
     public function run(): void
     {

@@ -42,7 +42,7 @@ class LeadConfirmationNotificationTest extends TestCase
 
         $this->assertInstanceOf(MailMessage::class, $mail);
         $this->assertStringContainsString('Hola María López', $mail->greeting);
-        $this->assertStringContainsString('Un asesor de New Hauz se pondrá en contacto', implode(' ', $mail->introLines));
+        $this->assertStringContainsString('Un asesor de Landra se pondrá en contacto', implode(' ', $mail->introLines));
     }
 
     public function test_generic_message_when_property_lead_has_no_agent_resolved_yet(): void
@@ -56,7 +56,7 @@ class LeadConfirmationNotificationTest extends TestCase
 
         $mail = (new LeadConfirmationNotification($lead))->toMail($lead);
 
-        $this->assertStringContainsString('Un asesor de New Hauz se pondrá en contacto', implode(' ', $mail->introLines));
+        $this->assertStringContainsString('Un asesor de Landra se pondrá en contacto', implode(' ', $mail->introLines));
     }
 
     public function test_personalized_message_when_property_lead_has_an_agent(): void

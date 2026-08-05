@@ -19,10 +19,10 @@ class MailIndicatorTest extends TestCase
         $this->seed(PermissionSeeder::class);
     }
 
-    public function test_shows_mail_icon_with_badge_for_newhauz_users_with_unseen_mail(): void
+    public function test_shows_mail_icon_with_badge_for_landra_users_with_unseen_mail(): void
     {
         $user = User::factory()->withRole('owner')->create([
-            'email' => 'kris@newhauz.com.mx',
+            'email' => 'kris@landracore.com',
             'mail_unseen_count' => 4,
         ]);
 
@@ -30,11 +30,11 @@ class MailIndicatorTest extends TestCase
             ->get(Dashboard::getUrl())
             ->assertOk()
             ->assertSee('fi-topbar-mail-btn', false)
-            ->assertSee('webmail.newhauz.com.mx', false)
+            ->assertSee('webmail.landracore.com', false)
             ->assertSee('fi-icon-btn-badge-ctn', false);
     }
 
-    public function test_hides_mail_icon_for_users_outside_the_newhauz_domain(): void
+    public function test_hides_mail_icon_for_users_outside_the_landra_domain(): void
     {
         $user = User::factory()->withRole('owner')->create([
             'email' => 'owner@example.test',
@@ -50,7 +50,7 @@ class MailIndicatorTest extends TestCase
     public function test_mail_icon_has_no_badge_when_there_is_no_unseen_mail(): void
     {
         $user = User::factory()->withRole('owner')->create([
-            'email' => 'kris@newhauz.com.mx',
+            'email' => 'kris@landracore.com',
             'mail_unseen_count' => null,
         ]);
 

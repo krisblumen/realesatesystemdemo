@@ -77,8 +77,8 @@ class CtaResolverTest extends TestCase
 
     public function test_mailto_and_tel_are_validated(): void
     {
-        $mail = $this->resolve(['label' => 'Correo', 'type' => 'mailto', 'target' => 'hola@newhauz.com.mx']);
-        $this->assertSame('mailto:hola@newhauz.com.mx', $mail['url']);
+        $mail = $this->resolve(['label' => 'Correo', 'type' => 'mailto', 'target' => 'hola@landracore.com']);
+        $this->assertSame('mailto:hola@landracore.com', $mail['url']);
         $this->assertFalse($mail['external']);
 
         $tel = $this->resolve(['label' => 'Llamar', 'type' => 'tel', 'target' => '+52 442 272 26 23']);

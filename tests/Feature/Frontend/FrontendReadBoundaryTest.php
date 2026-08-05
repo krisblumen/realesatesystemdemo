@@ -32,7 +32,7 @@ class FrontendReadBoundaryTest extends TestCase
     {
         DB::table('frontend_settings')->updateOrInsert(
             ['singleton_key' => 'default'],
-            $columns + ['site_name' => 'New Hauz', 'created_at' => now(), 'updated_at' => now()],
+            $columns + ['site_name' => 'Landra', 'created_at' => now(), 'updated_at' => now()],
         );
     }
 
@@ -41,7 +41,7 @@ class FrontendReadBoundaryTest extends TestCase
         $this->persistRaw(['public_email' => 'not-an-email']);
 
         $this->assertSame(
-            'hola@newhauz.com.mx',
+            'hola@landracore.com',
             app(FrontendContent::class)->settings()['contact']['email'],
         );
     }
@@ -97,9 +97,9 @@ class FrontendReadBoundaryTest extends TestCase
 
         $dto = app(FrontendContent::class)->settings();
 
-        $this->assertSame('hola@newhauz.com.mx', $dto['contact']['email']);
+        $this->assertSame('hola@landracore.com', $dto['contact']['email']);
         $this->assertSame('https://wa.me/524422722623', $dto['contact']['whatsapp_href']);
-        $this->assertStringContainsString('newhauz-on-light.svg', $dto['brand']['logo_light_url']);
+        $this->assertStringContainsString('logo-on-light.svg', $dto['brand']['logo_light_url']);
     }
 
     public function test_a_store_that_throws_while_reading_degrades_to_a_direct_read(): void

@@ -13,7 +13,7 @@
 @tailwind utilities;
 @tailwind variants;
 
-:root { --nh-navy:#091A5B; --nh-orange:#F6A300; --nh-slate:#1E293B; }
+:root { --nh-navy:#2e3842; --nh-orange:#f5a624; --nh-slate:#1E293B; }
 
 h1,h2,h3,h4,
 .fi-header-heading,.fi-section-header-heading,.fi-modal-heading,.fi-simple-header-heading{

@@ -62,11 +62,11 @@ class ContratoEnvioService
 
     /**
      * Enlace wa.me prellenado (envío asistido por el agente) con folio + URL del token.
-     * No es un envío automático: New Hauz no tiene WhatsApp Business API (D-9 / DIF-2).
+     * No es un envío automático: Landra no tiene WhatsApp Business API (D-9 / DIF-2).
      */
     public function whatsappLink(ContratoIntermediacion $contrato, string $tokenUrl): string
     {
-        $texto = rawurlencode("Hola {$contrato->cliente_nombre}, aquí está tu contrato New Hauz (folio {$contrato->folio}): {$tokenUrl}");
+        $texto = rawurlencode("Hola {$contrato->cliente_nombre}, aquí está tu contrato Landra (folio {$contrato->folio}): {$tokenUrl}");
         $telefono = preg_replace('/\D/', '', (string) $contrato->cliente_telefono);
 
         return "https://wa.me/{$telefono}?text={$texto}";

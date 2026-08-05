@@ -52,7 +52,7 @@ class ContratoEnvioServiceTest extends TestCase
             'folio' => 'ABCD2345',
         ]);
 
-        $link = $this->service->whatsappLink($contrato, 'https://newhauz.test/contrato/xyz');
+        $link = $this->service->whatsappLink($contrato, 'https://landra.test/contrato/xyz');
 
         $this->assertStringStartsWith('https://wa.me/5512345678?text=', $link);
         $this->assertStringContainsString('ABCD2345', rawurldecode($link));

@@ -24,7 +24,7 @@ class FrontendNavigationServiceTest extends TestCase
     {
         DB::table('frontend_settings')->updateOrInsert(
             ['singleton_key' => 'default'],
-            array_merge(['site_name' => 'New Hauz', 'created_at' => now(), 'updated_at' => now()], array_map(
+            array_merge(['site_name' => 'Landra', 'created_at' => now(), 'updated_at' => now()], array_map(
                 fn ($v) => is_array($v) ? json_encode($v) : $v,
                 $columns,
             )),
@@ -157,7 +157,7 @@ class FrontendNavigationServiceTest extends TestCase
                     ['label' => 'Roto', 'type' => 'url', 'target' => 'javascript:alert(1)', 'enabled' => true],
                 ],
             ]],
-            'legal_text' => '© New Hauz',
+            'legal_text' => '© Landra',
         ]]);
 
         $links = $this->footer()['columns'][0]['links'];
