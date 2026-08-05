@@ -3,6 +3,7 @@
 namespace Tests\Feature\Tenancy;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Process;
 use Tests\TestCase;
 
 /**
@@ -154,6 +155,53 @@ class PlantillaTest extends TestCase
             ->count());
 
         $this->assertGreaterThan(0, $zonas, 'Una zona sin municipio ni CP no es una zona que el panel sepa crear.');
+    }
+
+    public function test_the_template_builds_from_the_real_cli_with_the_sentinel(): void
+    {
+        // EL DEFECTO QUE ESTE TEST PREVIENE, encontrado en el servidor y no acá.
+        //
+        // En producción la conexión por defecto apunta al CENTINELA: una base
+        // que no existe a propósito, para que una consulta anterior a resolver
+        // el inquilino muera ruidosamente en vez de escribir en otro lado. La
+        // construcción de la plantilla fallaba ahí, porque el almacén de caché
+        // ya estaba resuelto contra esa conexión y una migración de permisos lo
+        // vacía.
+        //
+        // SE CORRE LA CLI DE VERDAD, en un proceso aparte, y no `$this->artisan()`.
+        // Probé tres formas de reproducirlo dentro del proceso de pruebas y
+        // ninguna lo logró: el arranque del harness resuelve las cosas en otro
+        // orden. Un test que no reproduce el fallo no protege de él, por más
+        // que parezca cubrirlo — así que se paga el costo de arrancar un
+        // proceso.
+        $base = 'demo_probe_tpl_cli';
+
+        $resultado = Process::path(base_path())
+            ->env(['DB_DATABASE' => 'demo_no_existe_a_proposito', 'CACHE_STORE' => 'database'])
+            ->timeout(600)
+            ->run('php artisan demo:plantilla:construir '.$base.' --force');
+
+        DB::connection('maintenance')->statement('DROP DATABASE IF EXISTS "'.$base.'"');
+
+        $this->assertTrue(
+            $resultado->successful(),
+            "La plantilla no se construye con la conexión por defecto apuntando al centinela:\n".$resultado->output(),
+        );
+    }
+
+    private function enLaPlantillaLlamada(string $base, callable $fn): mixed
+    {
+        config(['database.connections.probe_tpl' => array_merge(
+            config('database.connections.central'),
+            ['database' => $base],
+        )]);
+        DB::purge('probe_tpl');
+
+        try {
+            return $fn(DB::connection('probe_tpl'));
+        } finally {
+            DB::purge('probe_tpl');
+        }
     }
 
     public function test_building_a_template_does_not_change_the_one_in_use(): void
