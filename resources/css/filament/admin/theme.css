@@ -42,6 +42,11 @@ h1,h2,h3,h4,
 /* La composición del acceso es HORIZONTAL y colgada sobre la tarjeta.
    Los 7rem de antes eran para el logo VERTICAL: con una composición ancha,
    esa altura la estira hasta salirse de la pantalla por arriba. */
+/* El logo del panel también entra en una CAJA.
+   La barra superior es angosta: una composición ancha la empuja, y el ancho
+   máximo es lo único que lo impide. `object-fit` evita que la caja la deforme. */
+.fi-logo{ max-width:13rem; object-fit:contain; }
+
 .fi-simple-layout .fi-logo{
   position:absolute; left:50%; top:0;
   transform:translate(-50%, calc(-100% - 1rem));

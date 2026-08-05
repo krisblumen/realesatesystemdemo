@@ -38,24 +38,21 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login(Login::class)
             ->passwordReset(resetAction: ResetPassword::class)
-            // DOS COMPOSICIONES DEL MISMO LOGO, y no es un capricho.
+            // LA COMPOSICIÓN COMPLETA EN TODAS LAS PANTALLAS.
             //
-            // El panel usa la vertical, que es la que entra en una barra
-            // superior. El acceso usa la horizontal con la bajada —«Sistema de
-            // administración inmobiliaria»— porque ahí hay espacio y es el único
-            // momento en que alguien que no conoce el producto lo está mirando.
+            // El panel es el producto que se está mostrando, así que lleva la
+            // marca de Landra —no la del inquilino—: la que sube cada cliente es
+            // para SU sitio público, que es lo que el demo existe para lucir.
             //
-            // Filament no distingue esas dos pantallas: usa el mismo logo en
-            // todas. Por eso va una función que mira la ruta, y por eso la
-            // altura también cambia — una composición horizontal a 3.5rem de
-            // alto se desborda a lo ancho.
-            ->brandLogo(fn (): string => $this->enElAcceso()
-                ? asset('images/brand/login-logo-on-light.png')
-                : asset('images/brand/logo-on-light.svg'))
-            ->darkModeBrandLogo(fn (): string => $this->enElAcceso()
-                ? asset('images/brand/login-logo-on-dark.png')
-                : asset('images/brand/logo-on-dark.svg'))
-            ->brandLogoHeight(fn (): string => $this->enElAcceso() ? '2.5rem' : '3.5rem')
+            // La vertical no se usa acá: en una barra superior queda alta y
+            // angosta, y el nombre ilegible. Sigue siendo el respaldo del sitio
+            // cuando un inquilino no subió el suyo.
+            //
+            // Lo único que cambia entre pantallas es la altura: el acceso tiene
+            // lugar de sobra, la barra superior no.
+            ->brandLogo(asset('images/brand/logo-lockup-on-light.png'))
+            ->darkModeBrandLogo(asset('images/brand/logo-lockup-on-dark.png'))
+            ->brandLogoHeight(fn (): string => $this->enElAcceso() ? '2.75rem' : '2rem')
             ->favicon(asset('images/brand/landra-core.ico'))
             ->font('Inter')
             ->theme(asset('css/filament/admin/theme.css'))

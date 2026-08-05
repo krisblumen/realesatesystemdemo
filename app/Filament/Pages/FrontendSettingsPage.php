@@ -456,7 +456,7 @@ class FrontendSettingsPage extends Page implements HasForms
                                 ->acceptedFileTypes($raster)->maxSize(3072)->maxFiles(1)->image(),
                             column: 'logo_light_media_id', collection: 'logo-light', variant: 'logo-light',
                             title: 'Logo — fondo claro', hint: 'Se usa en el encabezado y en fondos blancos.',
-                            specs: 'PNG con fondo transparente · horizontal, ~400×120 px · máx. 3 MB',
+                            specs: 'PNG con fondo transparente · cualquier forma, mínimo 200 px de lado · máx. 3 MB',
                         ),
                         $this->brandAsset(
                             NonDestructiveMediaUpload::make('logo_dark')
@@ -464,7 +464,7 @@ class FrontendSettingsPage extends Page implements HasForms
                                 ->acceptedFileTypes($raster)->maxSize(3072)->maxFiles(1)->image(),
                             column: 'logo_dark_media_id', collection: 'logo-dark', variant: 'logo-dark',
                             title: 'Logo — fondo oscuro', hint: 'Se usa en el pie de página y sobre fondos de color.',
-                            specs: 'PNG con fondo transparente · horizontal, ~400×120 px · máx. 3 MB',
+                            specs: 'PNG con fondo transparente · cualquier forma, mínimo 200 px de lado · máx. 3 MB',
                         ),
                         $this->brandAsset(
                             NonDestructiveMediaUpload::make('favicon')

@@ -239,7 +239,7 @@ class FrontendHeroRenderTest extends TestCase
         // home uses the `featured` variant, where the logo scales up to keep the
         // cover looking as it does today; the same token maps to a smaller fixed
         // class on the standard pages. Both are closed sets, never interpolated.
-        $this->assertStringContainsString('h-32 sm:h-40 lg:h-48', $html, 'xl on the featured variant.');
+        $this->assertStringContainsString('max-h-32 sm:max-h-40 lg:max-h-48', $html, 'xl on the featured variant.');
 
         $this->hero('nosotros')->update(['payload' => ['title' => 'Nosotros', 'logo_enabled' => true, 'logo_size' => 'xl']]);
         $page = $this->page('nosotros')->fresh();
@@ -250,7 +250,7 @@ class FrontendHeroRenderTest extends TestCase
         // tiene su PROPIA rampa para `xl` — 14rem fijos en `/proyectos` hoy,
         // 12rem en móvil en vez de un alto fijo. Reemplaza la rampa genérica
         // anterior, que ningún hero publicado usaba en producción.
-        $this->assertStringContainsString('h-48 sm:h-56', $this->heroHtml('/nosotros'), 'xl on the standard variant.');
+        $this->assertStringContainsString('max-h-48 sm:max-h-56', $this->heroHtml('/nosotros'), 'xl on the standard variant.');
     }
 
     public function test_the_logo_is_named_when_there_is_no_heading_to_name_the_brand(): void
