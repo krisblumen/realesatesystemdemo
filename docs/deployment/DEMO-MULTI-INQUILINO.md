@@ -114,6 +114,30 @@ interpola en DDL porque Postgres no acepta parámetros para identificadores. Si 
 sentencia fuera el mismo que atiende peticiones, un error de validación dejaría
 de ser «un inquilino ve a otro» y pasaría a ser «se pierden todos».
 
+## PostGIS va en `template1`, y no es una comodidad
+
+**Paso descubierto en el primer despliegue.** `CREATE EXTENSION postgis` exige
+superusuario, y `demo_provisioner` no lo es a propósito. Sin resolverlo, la
+primera migración de la plantilla muere en `create_zones_table`.
+
+La salida NO es hacer superusuario al rol que aprovisiona. Ese rol crea y borra
+bases; sumarle superusuario le daría además leer y escribir cualquier base de la
+instancia —incluidas `inmo_db` y el correo—, que es exactamente lo que la
+separación de dos roles existe para impedir.
+
+Se instala la extensión una vez en `template1`, con superusuario y a mano:
+
+```bash
+sudo -u postgres psql -d template1 -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+```
+
+A partir de ahí **toda base nueva la hereda**, y el `CREATE EXTENSION IF NOT
+EXISTS` de la migración pasa sin privilegios: devuelve un aviso de que ya existe
+y sigue. Verificado con un rol sin superusuario.
+
+Eso mueve el privilegio al momento correcto: una vez, en el despliegue, y nunca
+más.
+
 ## Proxy de confianza
 
 `bootstrap/app.php:27` usa `trustProxies(at: '*')`, y entre los encabezados
@@ -142,6 +166,8 @@ Confiar sólo en la dirección del proxy. CloudPanel corre en el mismo host.
 ## Checklist antes del primer inquilino
 
 - [ ] PostgreSQL 16 con PostGIS en el VPS.
+- [ ] PostGIS instalado **en `template1`**, o la plantilla no se puede construir
+      sin volver superusuario al rol que aprovisiona.
 - [ ] Rol `demo_provisioner` con `CREATEDB`, separado de `demo_app`.
 - [ ] Propiedad y permisos: `demo_app` es dueño de las bases de inquilino y
       puede leer y escribir sin tener `CREATEDB` (M-1).
