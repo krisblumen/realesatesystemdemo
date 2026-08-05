@@ -28,12 +28,38 @@ class PostalCodeAreaSeeder extends Seeder
         // Truncate primero para que sea idempotente.
         DB::statement('TRUNCATE TABLE postal_code_areas RESTART IDENTITY CASCADE');
 
-        // Filtra: comandos psql (\restrict, etc.) y set_config(search_path)
-        // que rompe el schema path para las queries siguientes de Laravel.
+        // Filtra tres cosas del prólogo de `pg_dump`:
+        //
+        // 1. Comandos de psql (`\restrict`, etc.), que no son SQL.
+        // 2. `set_config('search_path')`, que rompe el schema path de las
+        //    consultas siguientes de Laravel.
+        // 3. LOS `SET` DE TIEMPO DE ESPERA QUE DEPENDEN DE LA VERSIÓN. Este
+        //    archivo se generó con un pg_dump moderno y trae
+        //    `SET transaction_timeout`, que existe desde PostgreSQL 17. Contra
+        //    un servidor 16 —el de producción— la carga muere con
+        //    «unrecognized configuration parameter». No son datos ni afectan al
+        //    resultado: son preferencias de sesión del volcado.
+        $ignorables = [
+            'SET transaction_timeout',
+            'SET idle_in_transaction_session_timeout',
+            'SET statement_timeout',
+            'SET lock_timeout',
+        ];
+
         $content = implode("\n", array_filter(
             explode("\n", (string) file_get_contents($sql)),
-            fn (string $line): bool => ! str_starts_with(ltrim($line), '\\')
-                && ! str_contains($line, 'set_config(\'search_path\'')
+            function (string $line) use ($ignorables): bool {
+                $limpia = ltrim($line);
+
+                foreach ($ignorables as $prefijo) {
+                    if (str_starts_with($limpia, $prefijo)) {
+                        return false;
+                    }
+                }
+
+                return ! str_starts_with($limpia, '\\')
+                    && ! str_contains($line, 'set_config(\'search_path\'');
+            },
         ));
 
         DB::unprepared($content);
