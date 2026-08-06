@@ -509,9 +509,10 @@ desaparecen. Es una variable en el `.env` del demo.
       devuelven 404 sin que nada avise.
 - [ ] El dominio base sin subdominio responde (portada propia o
       `TENANCY_SITIO_PROMOCIONAL` apuntando a un sitio que EXISTE).
-- [ ] `GOOGLE_MAPS_API_KEY` autorizada para `https://*.demo.<dominio>/*`, o los
-      mapas de Zonas no cargan. **Idealmente una llave propia del demo**, no la
-      de producción.
+- [x] `GOOGLE_MAPS_API_KEY` **propia del demo** —no la de producción— autorizada
+      para `https://*.demo.<dominio>/*`. Sin el comodín los mapas de Zonas no
+      cargan; sin llave propia, el consumo del demo gasta la cuota del sitio que
+      factura y un abuso obliga a rotar la de producción.
 - [ ] DNS comodín resolviendo.
 - [x] Certificado comodín emitido con acme.sh e instalado con `--reloadcmd`.
 - [ ] Verificado que sin sesión ninguna ruta de inquilino devuelve contenido.
