@@ -7,6 +7,7 @@ use App\Models\Tenant;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 /**
@@ -58,6 +59,8 @@ class AprovisionaInquilinos
             $conexion = $this->conexionA($tenant->database);
 
             $this->verificarQueLaCopiaSirva($conexion, $tenant);
+
+            $this->copiarArchivosDeLaPlantilla($tenant);
 
             $password = $this->creadorDeOwner->crear($conexion, $email);
 
@@ -182,6 +185,42 @@ class AprovisionaInquilinos
         }
 
         throw new \RuntimeException('No se pudo generar un slug libre.');
+    }
+
+    /**
+     * Los ARCHIVOS de la plantilla, al directorio del inquilino.
+     *
+     * Copiar la base no alcanza: las filas de la librería de medios viajan, los
+     * archivos no. Y la ruta se deriva del inquilino en tiempo de LECTURA, así
+     * que un inquilino recién nacido pediría `tenants/{slug}/1/foto.jpg` mientras
+     * el archivo sigue en `plantillas/{version}/1/foto.jpg`.
+     *
+     * El síntoma sería cruel: el alta reporta éxito, el panel muestra los
+     * inmuebles publicados, y sólo las imágenes salen rotas.
+     *
+     * Espeja lo que ya hace el borrado, que elimina `tenants/{slug}`.
+     *
+     * No es fatal si la plantilla no tiene archivos: hubo plantillas sin
+     * imágenes y seguirán siendo válidas.
+     */
+    private function copiarArchivosDeLaPlantilla(Tenant $tenant): void
+    {
+        $disco = Storage::disk((string) Config::get('media-library.disk_name', 'public'));
+
+        $origen = 'plantillas/'.$tenant->template_version;
+
+        if (! $disco->directoryExists($origen)) {
+            return;
+        }
+
+        $destino = 'tenants/'.$tenant->slug;
+
+        foreach ($disco->allFiles($origen) as $archivo) {
+            $disco->writeStream(
+                $destino.mb_substr($archivo, mb_strlen($origen)),
+                $disco->readStream($archivo),
+            );
+        }
     }
 
     private function conexionA(string $base): Connection

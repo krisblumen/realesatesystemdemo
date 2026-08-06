@@ -36,16 +36,45 @@ class CreadorDeOwner
             'updated_at' => now(),
         ]);
 
-        // El rol viaja en la plantilla (`PermissionSeeder`), así que acá sólo se
-        // asigna. Si no existiera, esto falla ruidosamente — que es lo correcto:
-        // un inquilino con un owner sin rol no puede administrar nada.
-        $rolId = $conexion->table('roles')->where('name', 'owner')->value('id');
+        // DOS ROLES, Y NO ES UN DESCUIDO.
+        //
+        // `owner` para administrar, y `agente` para que la misma persona pueda
+        // ver el otro lado del sistema —la vista por zona, los leads propios,
+        // el panel recortado— sin tener que salir y entrar con otra cuenta.
+        //
+        // Quien viene a probar un demo lo hace con prisa: si para ver la mitad
+        // del producto hay que descubrir que existe un segundo usuario, esa
+        // mitad no se ve nunca.
+        //
+        // No se pisan: `Property::scopeVisibleTo` devuelve todo para `owner`,
+        // así que sumar `agente` agrega pantallas sin quitar alcance.
+        //
+        // Los roles viajan en la plantilla (`PermissionSeeder`), así que acá
+        // sólo se asignan. Si no existieran, esto falla ruidosamente — que es
+        // lo correcto: un inquilino con un owner sin rol no administra nada.
+        foreach (['owner', 'agente'] as $rol) {
+            $rolId = $conexion->table('roles')->where('name', $rol)->value('id');
 
-        $conexion->table('model_has_roles')->insert([
-            'role_id' => $rolId,
-            'model_type' => User::class,
-            'model_id' => $usuarioId,
-        ]);
+            $conexion->table('model_has_roles')->insert([
+                'role_id' => $rolId,
+                'model_type' => User::class,
+                'model_id' => $usuarioId,
+            ]);
+        }
+
+        // Un agente SIN ZONA ve una pantalla vacía, y entonces el rol no le
+        // enseña nada. Se lo asigna a la primera zona activa, que en la
+        // plantilla es el centro.
+        $zonaId = $conexion->table('zones')->orderBy('id')->value('id');
+
+        if ($zonaId !== null) {
+            $conexion->table('agent_zone')->insert([
+                'agent_id' => $usuarioId,
+                'zone_id' => $zonaId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
         return $password;
     }

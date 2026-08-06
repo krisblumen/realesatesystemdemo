@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\PropertyStatus;
 use Database\Seeders\DemoTemplateSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
@@ -149,6 +150,11 @@ class BuildDemoTemplate extends Command
             ->env([
                 'DB_DATABASE' => $nombre,
 
+                // Para que los archivos que siembre caigan bajo su propio
+                // nombre y no en el espacio común de los procesos sin
+                // inquilino. El alta los copia después al del inquilino.
+                'TENANCY_MEDIOS_DE_PLANTILLA' => $nombre,
+
                 // SE QUITAN las credenciales heredadas, para que el hijo lea las
                 // del `.env` — que son las del rol de la APLICACIÓN.
                 //
@@ -234,7 +240,59 @@ class BuildDemoTemplate extends Command
             }
         }
 
+        $this->verificarQueSeVeaAndando($resumen);
+
         return $resumen;
+    }
+
+    /**
+     * Que el inquilino abra el panel y vea el producto ANDANDO.
+     *
+     * No alcanza con que la plantilla tenga filas: un demo que arranca con todo
+     * en borrador y la portada vacía obliga a cargar datos antes de poder mirar
+     * nada, y quien viene con prisa no lo hace. El demo se juega en el primer
+     * minuto.
+     *
+     * Se verifica acá, al construir, y no en un test: una plantilla mal sembrada
+     * no falla al construirse — falla en cada inquilino que nazca de ella, y en
+     * un lugar que no señala a la plantilla.
+     *
+     * @param  array<string, int|string>  $resumen
+     */
+    private function verificarQueSeVeaAndando(array &$resumen): void
+    {
+        $publicados = DB::table('properties')->where('status', PropertyStatus::Publicado->value);
+
+        $destacados = (clone $publicados)->where('is_featured', true)->count();
+        $oportunidades = (clone $publicados)->where('is_opportunity', true)->count();
+
+        $resumen['inmuebles publicados'] = $publicados->count();
+        $resumen['destacados'] = $destacados;
+        $resumen['oportunidades'] = $oportunidades;
+
+        if ($destacados === 0 || $oportunidades === 0) {
+            throw new RuntimeException(
+                'La plantilla no tiene inmuebles destacados y de oportunidad publicados: '.
+                'la portada del inquilino nacería con bloques vacíos y parecería rota.',
+            );
+        }
+
+        // Una zona con un solo código postal no enseña para qué sirve el
+        // mecanismo — y una con ninguno deja el buscador por CP sin resultados.
+        $conVariosCodigos = DB::table('zone_postal_code')
+            ->select('zone_id')
+            ->groupBy('zone_id')
+            ->havingRaw('COUNT(*) > 1')
+            ->count();
+
+        $resumen['zonas con varios CP'] = $conVariosCodigos;
+
+        if ($conVariosCodigos === 0) {
+            throw new RuntimeException(
+                'Ninguna zona de la plantilla tiene más de un código postal asignado: '.
+                'el inquilino no ve cómo se arma una zona comercial.',
+            );
+        }
     }
 
     private function citar(string $nombre): string
