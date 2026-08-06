@@ -4,6 +4,7 @@ namespace App\Support\Frontend;
 
 use App\Tenancy\GeneradorDeSlug;
 use App\Tenancy\InquilinoActual;
+use InvalidArgumentException;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\MediaLibrary\Support\PathGenerator\DefaultPathGenerator;
 
@@ -29,6 +30,27 @@ use Spatie\MediaLibrary\Support\PathGenerator\DefaultPathGenerator;
  */
 class RutaDeMediosPorInquilino extends DefaultPathGenerator
 {
+    /**
+     * Valida el nombre de la plantilla ANTES de que sea una ruta de disco.
+     *
+     * NO se reusa `GeneradorDeSlug::validar()`: valida el formato de un slug de
+     * inquilino —minúsculas y dígitos, sin guiones bajos— y una plantilla se
+     * llama `demo_template_v3`. Reusarla habría reventado en la primera
+     * construcción.
+     *
+     * La regla propia es la del nombre de una base de Postgres, que es lo que
+     * esto es. Lo que importa es lo que RECHAZA: cualquier cosa con `/` o `..`
+     * saldría del directorio de medios.
+     */
+    private static function nombreDePlantillaSeguro(string $nombre): string
+    {
+        if (preg_match('/^[a-z][a-z0-9_]{0,62}$/', $nombre) !== 1) {
+            throw new InvalidArgumentException("Nombre de plantilla inválido para una ruta: «{$nombre}».");
+        }
+
+        return $nombre;
+    }
+
     protected function getBasePath(Media $media): string
     {
         $base = parent::getBasePath($media);
@@ -36,7 +58,15 @@ class RutaDeMediosPorInquilino extends DefaultPathGenerator
         $slug = app(InquilinoActual::class)->slug();
 
         if ($slug === null) {
-            return $base;
+            // Sin inquilino, pero puede haber PLANTILLA: construirla es un
+            // proceso de consola, y sus archivos necesitan su propio lugar o
+            // caen en `1/` junto a los de cualquier otro proceso sin inquilino.
+            // El alta después los copia a `tenants/{slug}/`.
+            $plantilla = (string) config('tenancy.medios_de_plantilla', '');
+
+            return $plantilla === ''
+                ? $base
+                : 'plantillas/'.self::nombreDePlantillaSeguro($plantilla).'/'.$base;
         }
 
         // Se valida aunque venga del padrón y ya esté validado en el alta: la

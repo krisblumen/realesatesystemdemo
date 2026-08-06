@@ -85,6 +85,27 @@ return [
 
     /*
     |---------------------------------------------------------------------------
+    | Bajo qué nombre escribe sus archivos la plantilla
+    |---------------------------------------------------------------------------
+    |
+    | La librería de medios deriva la ruta del identificador de la fila, y esos
+    | identificadores ARRANCAN EN 1 EN CADA BASE. El prefijo por inquilino sólo
+    | aplica cuando hay uno resuelto — y construir una plantilla es un proceso de
+    | consola, sin inquilino.
+    |
+    | Sin esto, la plantilla escribe en `1/` igual que cualquier otro proceso sin
+    | inquilino, y se pisan. Se comprobó en disco: `casa-jardin.jpg` de una
+    | plantilla y el logo de otra base, en la misma carpeta.
+    |
+    | Lo pone `demo:plantilla:construir` en el proceso hijo que siembra. Vacío en
+    | cualquier otro contexto.
+    |
+    */
+
+    'medios_de_plantilla' => env('TENANCY_MEDIOS_DE_PLANTILLA'),
+
+    /*
+    |---------------------------------------------------------------------------
     | Cerrojo de aprovisionamiento
     |---------------------------------------------------------------------------
     |

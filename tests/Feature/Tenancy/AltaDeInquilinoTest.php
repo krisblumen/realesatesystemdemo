@@ -154,7 +154,24 @@ class AltaDeInquilinoTest extends TestCase
             ->where('model_has_roles.model_id', $usuario->id)
             ->pluck('roles.name')->all());
 
-        $this->assertSame(['owner'], $roles);
+        // DOS ROLES, y no es un descuido del alta.
+        //
+        // `owner` para administrar, y `agente` para que la misma persona vea el
+        // otro lado del sistema —la vista por zona, los leads propios, el panel
+        // recortado— sin descubrir que hace falta un segundo usuario. Quien
+        // viene a probar un demo lo hace con prisa: esa mitad del producto, si
+        // hay que buscarla, no se ve nunca.
+        //
+        // No se pisan: `Property::scopeVisibleTo` devuelve todo para `owner`,
+        // así que sumar `agente` agrega pantallas sin quitar alcance.
+        $this->assertSame(['owner', 'agente'], $roles);
+
+        // Y con zona, porque un agente sin zona ve una pantalla vacía: el rol
+        // solo no le enseña nada.
+        $zonas = $this->enElInquilino($resultado->tenant, fn ($c) => $c->table('agent_zone')
+            ->where('agent_id', $usuario->id)->count());
+
+        $this->assertSame(1, $zonas, 'El owner-agente nace asignado a una zona.');
     }
 
     public function test_the_tenant_database_belongs_to_the_application_role_not_the_creator(): void

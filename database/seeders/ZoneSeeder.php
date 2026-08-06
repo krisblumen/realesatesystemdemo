@@ -6,6 +6,7 @@ use App\Enums\ZoneStatus;
 use App\Models\Municipality;
 use App\Models\Zone;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Zonas reales de operación en Querétaro.
@@ -26,6 +27,10 @@ class ZoneSeeder extends Seeder
                 'name' => 'CENTRO QUERETARO QRO',
                 'description' => 'Zona centro histórico y sus alrededores inmediatos.',
                 'postal_code' => '76000',
+                // Los tres del centro. Una zona con un solo código postal no
+                // muestra para qué sirve el mecanismo: el demo tiene que
+                // enseñar que una zona comercial se arma con varios.
+                'postal_codes' => ['76000', '76010', '76017'],
                 'municipality_id' => $municipioQro?->id,
                 'status' => ZoneStatus::Active,
                 'polygon' => 'SRID=4326;POLYGON((-100.3997402 20.5969589,-100.4001884 20.5965855,-100.4004578 20.5964351,-100.4010069 20.5963236,-100.4016908 20.5960811,-100.4032346 20.5960908,-100.4040428 20.5959647,-100.4053017 20.5958532,-100.4056867 20.5959654,-100.4062837 20.5959538,-100.4071653 20.5958833,-100.4070247 20.5955619,-100.404857 20.590513,-100.4032669 20.5870892,-100.4027979 20.5861001,-100.402175 20.5847655,-100.4019541 20.5843928,-100.4012901 20.5835226,-100.4002268 20.5821672,-100.3994068 20.5811531,-100.3991144 20.5808118,-100.3979907 20.5817782,-100.3981889 20.582221,-100.3987875 20.5818041,-100.3995352 20.5827623,-100.3986349 20.5833211,-100.3988988 20.583916,-100.3995661 20.5856474,-100.396569 20.5866859,-100.3956186 20.5832992,-100.3948837 20.5836756,-100.3944171 20.5838972,-100.3938962 20.5841205,-100.3887644 20.5859583,-100.3858059 20.587044,-100.3868828 20.5899741,-100.3859593 20.5903057,-100.3863325 20.5908163,-100.3865417 20.591156,-100.3868731 20.5917855,-100.3870516 20.5922148,-100.3867558 20.5921549,-100.3869233 20.592781,-100.3868521 20.5928004,-100.3868469 20.5932126,-100.3868754 20.5933447,-100.3872704 20.5941865,-100.3879271 20.5954893,-100.3876814 20.5956116,-100.3873145 20.5960714,-100.3870425 20.596263,-100.3866983 20.5963721,-100.386111 20.5965346,-100.3861869 20.5969877,-100.3863425 20.5977817,-100.3868461 20.597673,-100.3869665 20.5982669,-100.388108 20.5980522,-100.3882529 20.5986289,-100.3884214 20.59936,-100.3890461 20.5987459,-100.3894929 20.5986028,-100.3900058 20.5985325,-100.3909565 20.5984428,-100.3913139 20.5984525,-100.3917465 20.5985155,-100.3928578 20.5987168,-100.3936012 20.5987968,-100.3938499 20.5987507,-100.394083 20.5986537,-100.394557 20.5983385,-100.3949093 20.5981276,-100.3952331 20.5980088,-100.3958884 20.5979506,-100.3963961 20.5979627,-100.3968961 20.5980961,-100.3971458 20.5981326,-100.3974115 20.5981009,-100.3978545 20.5979312,-100.3986938 20.5975893,-100.3992481 20.5972935,-100.3997402 20.5969589))',
@@ -41,12 +46,28 @@ class ZoneSeeder extends Seeder
         ];
 
         foreach ($zones as $data) {
-            $data['polygon'] = self::asMultiPolygon($data['polygon']);
+            $codigos = $data['postal_codes'] ?? [];
+            unset($data['postal_codes']);
 
-            Zone::updateOrCreate(
+            // EL POLÍGONO SALE DE LOS CÓDIGOS POSTALES, no de coordenadas
+            // escritas a mano. Es lo mismo que produciría el panel si alguien
+            // los asignara, así que el demo muestra datos que el sistema podría
+            // haber generado — no datos inventados que se le parecen.
+            //
+            // Si el catálogo no está sembrado se usa el trazo de respaldo: este
+            // sembrador también corre en contextos donde la geografía no viaja.
+            $data['polygon'] = self::asMultiPolygon(
+                self::unionDeCodigosPostales($codigos) ?? $data['polygon'],
+            );
+
+            $zona = Zone::updateOrCreate(
                 ['name' => $data['name']],
                 $data,
             );
+
+            if ($codigos !== []) {
+                $zona->syncPostalCodes($codigos);
+            }
         }
 
         // Eliminar el duplicado "Centro Querétaro" creado por error en el primer ZoneSeeder.
@@ -70,6 +91,36 @@ class ZoneSeeder extends Seeder
      * Si el literal ya es MULTIPOLYGON se devuelve intacto, así agregar zonas
      * nuevas en el formato correcto no requiere tocar este helper.
      */
+    /**
+     * El contorno que resulta de unir los códigos postales dados.
+     *
+     * Devuelve null si el catálogo no tiene todos: mejor caer al trazo de
+     * respaldo que sembrar una zona con un contorno incompleto, que se vería
+     * bien en el mapa y dejaría inmuebles afuera sin que nadie lo note.
+     *
+     * @param  list<string>  $codigos
+     */
+    private static function unionDeCodigosPostales(array $codigos): ?string
+    {
+        if ($codigos === []) {
+            return null;
+        }
+
+        $encontrados = DB::table('postal_code_areas')->whereIn('postal_code', $codigos)->count();
+
+        if ($encontrados !== count($codigos)) {
+            return null;
+        }
+
+        $fila = DB::selectOne(
+            'SELECT ST_AsEWKT(ST_Multi(ST_Union(polygon))) AS wkt
+             FROM postal_code_areas WHERE postal_code IN ('.implode(',', array_fill(0, count($codigos), '?')).')',
+            $codigos,
+        );
+
+        return $fila?->wkt;
+    }
+
     private static function asMultiPolygon(string $wkt): string
     {
         if (str_contains($wkt, 'MULTIPOLYGON')) {
