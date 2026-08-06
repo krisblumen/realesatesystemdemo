@@ -72,6 +72,19 @@ return [
 
     /*
     |---------------------------------------------------------------------------
+    | Duración del enlace para mostrar el sitio
+    |---------------------------------------------------------------------------
+    |
+    | Siete días. Más que eso deja de ser «se lo muestro a mi socio» y pasa a ser
+    | un sitio público con pasos extra — que es justo lo que el entorno cerrado
+    | existe para evitar.
+    |
+    */
+
+    'dias_de_enlace' => (int) env('TENANCY_DIAS_DE_ENLACE', 7),
+
+    /*
+    |---------------------------------------------------------------------------
     | Cerrojo de aprovisionamiento
     |---------------------------------------------------------------------------
     |

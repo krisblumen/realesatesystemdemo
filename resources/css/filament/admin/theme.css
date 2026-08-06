@@ -54,6 +54,22 @@ h1,h2,h3,h4,
    dimensiones: la vertical no se estira, la muy ancha no empuja el botón. */
 .landra-marca-logo{ max-height:3.5rem; max-width:13.75rem; width:auto; object-fit:contain; }
 
+/* LOS DOS ACCESOS AL SITIO se distinguen del resto del grupo «Frontend».
+   El resto administra contenido puertas adentro; estos dos SALEN del panel hacia
+   el sitio del inquilino, y conviene que se lean como otra cosa.
+
+   Se seleccionan por destino y no por una clase propia porque Filament no deja
+   ponerle atributos a un ítem de navegación: `Compartir` por su ruta, y `Ver mi
+   sitio demo` por ser el único enlace de la barra que abre en otra pestaña.
+
+   El tono es el ámbar oscuro del manual (amber-700) sobre claro, y el ámbar
+   pleno (amber-500) sobre oscuro: el pleno sobre blanco no llega al contraste
+   mínimo para texto. */
+.fi-sidebar-item-button[href$="/frontend/compartir"] .fi-sidebar-item-label,
+.fi-sidebar-item-button[target="_blank"] .fi-sidebar-item-label{ color:#b9761a; }
+.dark .fi-sidebar-item-button[href$="/frontend/compartir"] .fi-sidebar-item-label,
+.dark .fi-sidebar-item-button[target="_blank"] .fi-sidebar-item-label{ color:#f5a624; }
+
 .fi-simple-layout .fi-logo{
   position:absolute; left:50%; top:0;
   transform:translate(-50%, calc(-100% - 1rem));

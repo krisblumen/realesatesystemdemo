@@ -3,6 +3,7 @@
 namespace Tests\Feature\Filament;
 
 use App\Enums\UserStatus;
+use App\Filament\Pages\CompartirMiSitio;
 use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Filament\Facades\Filament;
@@ -56,7 +57,7 @@ class VerMiSitioTest extends TestCase
     private function item(): ?NavigationItem
     {
         foreach (Filament::getPanel('admin')->getNavigationItems() as $item) {
-            if ($item->getLabel() === 'Ver mi sitio') {
+            if ($item->getLabel() === 'Ver mi sitio demo') {
                 return $item;
             }
         }
@@ -89,6 +90,33 @@ class VerMiSitioTest extends TestCase
         $this->actingAs($this->usuario('owner'));
 
         $this->assertTrue($this->item()?->shouldOpenUrlInNewTab());
+    }
+
+    public function test_both_shortcuts_to_the_site_sit_together_and_first(): void
+    {
+        // Los dos SALEN del panel hacia el sitio; el resto del grupo administra
+        // contenido puertas adentro. Van juntos y arriba porque son la pregunta
+        // que uno se hace primero: «¿cómo quedó?».
+        //
+        // Negativos porque ningún otro ítem del grupo declara orden: con valores
+        // positivos quedarían al final, separados por los que Filament ordena
+        // solo.
+        $this->actingAs($this->usuario('owner'));
+
+        $this->assertSame(-2, $this->item()?->getSort());
+        $this->assertSame(-1, CompartirMiSitio::getNavigationSort());
+    }
+
+    public function test_they_are_told_apart_by_colour_in_the_panel_theme(): void
+    {
+        // La misma trampa del logo del escritorio: una clase de Tailwind escrita
+        // en una vista del panel no existe, porque el panel carga su propio
+        // bundle. Acá la regla vive en el tema, y esto verifica que exista —si no,
+        // el color sería una intención sin efecto.
+        $tema = (string) file_get_contents(public_path('css/filament/admin/theme.css'));
+
+        $this->assertStringContainsString('/frontend/compartir"] .fi-sidebar-item-label', $tema);
+        $this->assertStringContainsString('[target="_blank"] .fi-sidebar-item-label', $tema);
     }
 
     public function test_an_agent_does_not_see_it(): void

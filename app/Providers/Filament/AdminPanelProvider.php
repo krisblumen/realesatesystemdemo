@@ -82,13 +82,16 @@ class AdminPanelProvider extends PanelProvider
             // Las dos cosas conviven: la vista previa sirve MIENTRAS se edita,
             // esto muestra lo publicado.
             ->navigationItems([
-                NavigationItem::make('Ver mi sitio')
+                NavigationItem::make('Ver mi sitio demo')
                     ->group('Frontend')
                     ->icon('heroicon-o-arrow-top-right-on-square')
                     ->url(fn (): string => url('/'), shouldOpenInNewTab: true)
                     // Misma condición que el resto del grupo, no una copia.
                     ->visible(fn (): bool => FrontendSettingsPage::canAccess())
-                    ->sort(-1),
+                    // Negativo para quedar ARRIBA del grupo y pegado a
+                    // «Compartir mi sitio demo»: los dos salen del panel hacia el
+                    // sitio, el resto del grupo administra contenido.
+                    ->sort(-2),
             ])
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
