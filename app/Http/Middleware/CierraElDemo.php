@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Tenancy\CompartirElSitio;
 use App\Tenancy\InquilinoActual;
 use Closure;
 use Illuminate\Http\Request;
@@ -43,6 +44,11 @@ class CierraElDemo
         // un inquilino no alcanza a otro.
         'contratos.publico.',
         'contratos.verificacion',
+
+        // El canje del enlace para mostrar el sitio. Quien llega con él todavía
+        // no tiene sesión —esta ruta es la que se la crea—, así que cerrarla
+        // haría que nadie pudiera canjear nunca.
+        'muestra.canjear',
     ];
 
     public function handle(Request $request, Closure $next): Response
@@ -51,7 +57,7 @@ class CierraElDemo
             return $next($request);
         }
 
-        if ($this->exigeSesion($request) && $request->user() === null) {
+        if ($this->exigeSesion($request) && ! $this->tienePase($request)) {
             return redirect()->guest(route('filament.admin.auth.login'));
         }
 
@@ -62,6 +68,23 @@ class CierraElDemo
         $respuesta->headers->set('X-Robots-Tag', 'noindex, nofollow');
 
         return $respuesta;
+    }
+
+    /**
+     * Quién puede ver el sitio de este inquilino.
+     *
+     * Dos formas, y la segunda no es una puerta trasera: es una decisión de
+     * quien cargó los datos. Un prospecto que armó su demo quiere enseñárselo a
+     * su socio, y sin esta salida la única alternativa sería prestarle su
+     * cuenta — peor de todas las maneras.
+     *
+     * El pase alcanza al SITIO, no al panel: no crea ningún usuario, así que la
+     * autenticación de Filament lo rechaza igual que a cualquier anónimo.
+     */
+    private function tienePase(Request $request): bool
+    {
+        return $request->user() !== null
+            || $request->session()->get(CompartirElSitio::CLAVE_DE_SESION) === true;
     }
 
     private function exigeSesion(Request $request): bool

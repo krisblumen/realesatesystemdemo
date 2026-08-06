@@ -8,12 +8,14 @@ use App\Filament\Pages\Auth\ResetPassword;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\FrontendSettingsPage;
 use App\Filament\Resources\FrontendPageResource\Pages\EditFrontendPage;
+use App\Http\Middleware\AtiendeElHostCentral;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\ResolveTenant;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Resources\Pages\CreateRecord;
@@ -65,6 +67,31 @@ class AdminPanelProvider extends PanelProvider
                 'info' => Color::hex('#233488'),
                 'brand-orange' => Color::hex('#F5A624'),
                 'brand-blue' => Color::hex('#2E3842'),
+            ])
+            // EL ATAJO AL SITIO PUBLICADO.
+            //
+            // La vista previa del CMS muestra el BORRADOR y sólo las secciones
+            // editables: los bloques con datos —destacados, oportunidades,
+            // proyectos— los arma `HomeController`, por donde no pasa. Así que
+            // desde el panel nunca se veía el sitio entero.
+            //
+            // No era una capacidad faltante sino un enlace: el entorno cerrado
+            // exige sesión, y quien está en el panel la tiene. Lo recorre
+            // completo, con el mismo render y el mismo caché que un visitante.
+            //
+            // Las dos cosas conviven: la vista previa sirve MIENTRAS se edita,
+            // esto muestra lo publicado.
+            ->navigationItems([
+                NavigationItem::make('Ver mi sitio demo')
+                    ->group('Frontend')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->url(fn (): string => url('/'), shouldOpenInNewTab: true)
+                    // Misma condición que el resto del grupo, no una copia.
+                    ->visible(fn (): bool => FrontendSettingsPage::canAccess())
+                    // Negativo para quedar ARRIBA del grupo y pegado a
+                    // «Compartir mi sitio demo»: los dos salen del panel hacia el
+                    // sitio, el resto del grupo administra contenido.
+                    ->sort(-2),
             ])
             ->databaseNotifications()
             ->databaseNotificationsPolling('30s')
@@ -143,6 +170,11 @@ class AdminPanelProvider extends PanelProvider
                 // Se descubrió en el servidor, con el panel devolviendo 500
                 // mientras la resolución funcionaba bien en el resto del sitio.
                 ResolveTenant::class,
+
+                // El panel tampoco funciona en el host central: buscaría los
+                // usuarios en una base que no tiene esa tabla. Antes daba 500;
+                // ahora cae en la portada como el resto.
+                AtiendeElHostCentral::class,
 
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

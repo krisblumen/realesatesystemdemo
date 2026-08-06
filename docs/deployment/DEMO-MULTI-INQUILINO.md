@@ -410,6 +410,37 @@ Se descubrió cuando el widget de marca del escritorio mostró una imagen rota e
 desarrollo. En el servidor el síntoma habría sido el mismo, con la diferencia de
 que quien lo sufriría es la persona invitada subiendo su logo.
 
+## Qué sirve el dominio base sin subdominio
+
+El host central apunta su conexión por defecto a la base central **a propósito**,
+para que no pueda tocar datos de ningún inquilino. Esa base tiene el padrón, las
+sesiones y la cola — no tiene páginas. Así que cualquier ruta del sitio moría ahí
+con un 500, buscando tablas del CMS que no existen ni deben existir.
+
+No era un bug: era una decisión que faltaba tomar.
+
+Ahora responde en dos niveles:
+
+1. **Una portada propia**, mínima, que no consulta base de datos, ni CMS, ni usa
+   los assets compilados. Es el piso: no puede fallar aunque el build no haya
+   corrido.
+2. **Una redirección**, si `TENANCY_SITIO_PROMOCIONAL` tiene un valor.
+
+```dotenv
+TENANCY_SITIO_PROMOCIONAL=https://www.ejemplo.com
+```
+
+**Ese orden es deliberado.** Redirigir siempre ataría el host central a que
+exista otro sitio: mientras la landing no esté lista, se cambia un 500 por el 500
+del otro dominio — y encima aparece en un dominio distinto del que lo causa, que
+es peor de diagnosticar. Con la portada de piso, la redirección es una mejora y
+no un requisito.
+
+Alcanza a **todas** las rutas de ese host, incluido `/admin` —el panel tampoco
+funciona ahí: buscaría los usuarios en una base sin esa tabla— salvo el chequeo
+de salud. El día que exista un panel de operación en la central (RFC-12), sus
+rutas se suman a esa excepción.
+
 ## Checklist antes del primer inquilino
 
 - [ ] PostgreSQL 16 con PostGIS en el VPS.
@@ -430,6 +461,8 @@ que quien lo sufriría es la persona invitada subiendo su logo.
 - [x] `trustProxies` acotado al bucle local en `bootstrap/app.php`, con test.
 - [ ] `php artisan storage:link` corrido, o las imágenes que suba un inquilino
       devuelven 404 sin que nada avise.
+- [ ] El dominio base sin subdominio responde (portada propia o
+      `TENANCY_SITIO_PROMOCIONAL` apuntando a un sitio que EXISTE).
 - [ ] DNS comodín resolviendo.
 - [x] Certificado comodín emitido con acme.sh e instalado con `--reloadcmd`.
 - [ ] Verificado que sin sesión ninguna ruta de inquilino devuelve contenido.

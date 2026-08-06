@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AtiendeElHostCentral;
 use App\Http\Middleware\CierraElDemo;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\ResolveTenant;
@@ -66,6 +67,10 @@ return Application::configure(basePath: dirname(__DIR__))
             ResolveTenant::class,
         );
 
+        // Va JUSTO DESPUÉS de resolver, porque necesita saber si el host es el
+        // central — y antes que nada más, porque su trabajo es cortar la
+        // petición. Todo lo que corra en el medio sería trabajo tirado.
+        $middleware->prependToGroup('web', AtiendeElHostCentral::class);
         $middleware->prependToGroup('web', ResolveTenant::class);
 
         // El cierre va al FINAL del grupo: necesita la ruta ya resuelta para

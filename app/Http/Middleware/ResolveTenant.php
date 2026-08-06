@@ -63,6 +63,8 @@ class ResolveTenant
             // inquilino, y lo hace cumplir el motor y no la disciplina.
             Config::set('database.default', 'central');
 
+            app(InquilinoActual::class)->marcarComoCentral();
+
             return $next($request);
         }
 

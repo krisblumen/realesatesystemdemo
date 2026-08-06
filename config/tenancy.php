@@ -54,6 +54,37 @@ return [
 
     /*
     |---------------------------------------------------------------------------
+    | Sitio promocional
+    |---------------------------------------------------------------------------
+    |
+    | A dónde mandar a quien llega al dominio base sin subdominio. Vacío mientras
+    | no exista: el host central sirve su propia página mínima, que no consulta
+    | ninguna tabla.
+    |
+    | Ese orden es deliberado. Redirigir siempre ataría el host central a que
+    | exista otro sitio, y mientras ese sitio no esté listo cambiaríamos un 500
+    | por el 500 del otro dominio. Con la página propia como piso, la redirección
+    | es una mejora y no un requisito.
+    |
+    */
+
+    'sitio_promocional' => env('TENANCY_SITIO_PROMOCIONAL'),
+
+    /*
+    |---------------------------------------------------------------------------
+    | Duración del enlace para mostrar el sitio
+    |---------------------------------------------------------------------------
+    |
+    | Siete días. Más que eso deja de ser «se lo muestro a mi socio» y pasa a ser
+    | un sitio público con pasos extra — que es justo lo que el entorno cerrado
+    | existe para evitar.
+    |
+    */
+
+    'dias_de_enlace' => (int) env('TENANCY_DIAS_DE_ENLACE', 7),
+
+    /*
+    |---------------------------------------------------------------------------
     | Cerrojo de aprovisionamiento
     |---------------------------------------------------------------------------
     |

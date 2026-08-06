@@ -14,6 +14,7 @@ use App\Http\Controllers\Public\ContratoFirmaController;
 use App\Http\Controllers\Public\ContratoPublicoController;
 use App\Http\Controllers\Public\ContratoVerificacionController;
 use App\Http\Controllers\SitemapController;
+use App\Tenancy\CompartirElSitio;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -93,3 +94,28 @@ Route::middleware('throttle:contratos-verificar')->group(function () {
 
 // Temporal (Fase 0): guía de estilo viva para validar las fundaciones del frontend.
 Route::view('/styleguide', 'styleguide');
+
+/*
+|--------------------------------------------------------------------------
+| Canje del enlace para mostrar el sitio (entorno cerrado)
+|--------------------------------------------------------------------------
+|
+| Quien llega con el enlace NO tiene sesión: esta ruta es la que se la crea.
+| Por eso queda abierta en `CierraElDemo` — si también estuviera cerrada, nadie
+| podría canjear nunca. Es el mismo defecto que tuvo el transporte de Livewire.
+|
+| Con límite de frecuencia porque un token es adivinable por fuerza bruta si se
+| deja probar sin freno.
+|
+*/
+
+Route::middleware(['web', 'throttle:10,1'])
+    ->get('/muestra/{token}', function (string $token) {
+        if (app(CompartirElSitio::class)->canjear($token)) {
+            session([CompartirElSitio::CLAVE_DE_SESION => true]);
+        }
+
+        // Se redirige SIEMPRE al mismo lugar, sirva o no el token: una respuesta
+        // distinta le confirmaría a quien prueba al azar cuándo acertó.
+        return redirect('/');
+    })->name('muestra.canjear');
