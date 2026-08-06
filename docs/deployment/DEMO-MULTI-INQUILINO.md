@@ -441,6 +441,52 @@ funciona ahí: buscaría los usuarios en una base sin esa tabla— salvo el cheq
 de salud. El día que exista un panel de operación en la central (RFC-12), sus
 rutas se suman a esa excepción.
 
+## La llave de Google Maps y el comodín
+
+Los mapas de Zonas mueren con:
+
+```
+Google Maps JavaScript API error: RefererNotAllowedMapError
+```
+
+La llave está restringida por referente HTTP, y **cada inquilino vive en un
+subdominio distinto y generado al azar**. No se pueden enumerar: hay que
+autorizar el comodín.
+
+En Google Cloud Console → Credenciales → la llave → Referentes HTTP:
+
+```
+https://*.demo.<dominio>/*
+```
+
+Tarda unos minutos en propagar. Y ojo con el diagnóstico: que la llave esté en el
+`.env` no significa que la aplicación la vea —una configuración cacheada devuelve
+null—, así que conviene separar las dos preguntas:
+
+```bash
+php artisan tinker --execute='echo config("services.google_maps.key") ? "la app la ve" : "la app NO la ve", PHP_EOL;'
+```
+
+Si la app no la ve, el propio componente lo dice en pantalla («Configura
+GOOGLE_MAPS_API_KEY»). Si la ve, el rechazo es de Google y el motivo está en la
+consola del navegador.
+
+### Conviene una llave APARTE para el demo
+
+Una llave de Maps JS **siempre es pública**: viaja en el HTML de cada página. Lo
+único que la protege es la restricción por dominio. Al sumarle los subdominios del
+demo, la llave de producción empieza a funcionar también desde ahí.
+
+Tres consecuencias, y ninguna aparece hasta que duele:
+
+- El consumo del demo gasta la **cuota de producción**.
+- Un abuso en el demo obliga a rotar la llave, y eso **se lleva puesto al sitio
+  que factura**.
+- La superficie autorizada de la llave de producción crece sin necesidad.
+
+Con una llave propia restringida sólo a `*.demo.<dominio>/*`, los tres
+desaparecen. Es una variable en el `.env` del demo.
+
 ## Checklist antes del primer inquilino
 
 - [ ] PostgreSQL 16 con PostGIS en el VPS.
@@ -463,6 +509,9 @@ rutas se suman a esa excepción.
       devuelven 404 sin que nada avise.
 - [ ] El dominio base sin subdominio responde (portada propia o
       `TENANCY_SITIO_PROMOCIONAL` apuntando a un sitio que EXISTE).
+- [ ] `GOOGLE_MAPS_API_KEY` autorizada para `https://*.demo.<dominio>/*`, o los
+      mapas de Zonas no cargan. **Idealmente una llave propia del demo**, no la
+      de producción.
 - [ ] DNS comodín resolviendo.
 - [x] Certificado comodín emitido con acme.sh e instalado con `--reloadcmd`.
 - [ ] Verificado que sin sesión ninguna ruta de inquilino devuelve contenido.
