@@ -6,6 +6,8 @@
             <p class="mt-1 text-sm text-slate-500">Folio <span class="font-mono">{{ $folio }}</span></p>
         </header>
 
+        @include('contratos._aviso-demo', ['clase' => 'mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900'])
+
         @if ($resultado !== null)
             @if ($resultado['integro'])
                 <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-center">

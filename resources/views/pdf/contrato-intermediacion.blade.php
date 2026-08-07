@@ -37,9 +37,22 @@
             border: 1.5px solid #B8860B; background: #fdf7e7; color: #7a5c00;
             border-radius: 6px; padding: 7px 10px; margin-bottom: 12px; font-size: 10px;
         }
+        /* Mismo tratamiento que la marca de borrador: se ve de lejos y
+           sobrevive a una fotocopia. En ámbar y no en el gris de la marca para
+           que se distingan si un borrador del demo lleva las dos. */
+        .marca-demo {
+            position: fixed; top: 62%; left: 0; width: 100%; text-align: center;
+            font-size: 54px; font-weight: bold; color: #b9761a; opacity: 0.12;
+            transform: rotate(-24deg); letter-spacing: 6px; z-index: 0;
+        }
+        .aviso-demo {
+            border: 1.5px solid #b9761a; background: #fef7eb; color: #7a4d0a;
+            border-radius: 6px; padding: 7px 10px; margin-bottom: 12px; font-size: 10px;
+        }
     </style>
 </head>
 <body>
+    @include('contratos._aviso-demo', ['comoMarcaDeAgua' => true])
     @if ($borrador ?? false)
         {{-- Doble aviso a propósito: la marca de agua se ve de lejos y en una
              fotocopia, y el recuadro dice POR QUÉ no sirve como contrato. --}}
