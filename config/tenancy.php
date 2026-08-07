@@ -106,6 +106,55 @@ return [
 
     /*
     |---------------------------------------------------------------------------
+    | Límites de alta (RFC-10)
+    |---------------------------------------------------------------------------
+    |
+    | EL NÚMERO NO SE ELIGE, SE DERIVA:
+    |
+    |     inquilinos simultáneos ≈ registros por día × días de vida
+    |
+    | Si la instancia sostiene 200 bases y llegan 50 registros diarios, el plazo
+    | no puede pasar de cuatro días. No es una decisión de producto: es una
+    | división. Elegir el plazo primero y descubrir el techo después es cómo se
+    | llena un disco un domingo.
+    |
+    | El techo real de este VPS NO es el disco (18 MB por inquilino, ~3.000 por
+    | espacio) sino las 100 conexiones de Postgres, compartidas con la producción
+    | de New Hauz y con el correo. Ver `docs/deployment/DEMO-MULTI-INQUILINO.md`.
+    |
+    | Están en configuración para poder bajarlos sin desplegar.
+    |
+    */
+
+    'limites' => [
+
+        /*
+         * La sal del hash de origen. FIJA Y CON DUEÑO: si rota, los límites se
+         * pierden en silencio —nadie se entera— que es peor que no tenerlos.
+         *
+         * Sin ella el sistema NO hashea con cadena vacía: se niega. Un límite
+         * que parece funcionar y no protege es peor que ninguno.
+         */
+        'sal' => env('TENANCY_SAL_DE_ORIGEN'),
+
+        /*
+         * El tope duro. Cuenta las bases VIVAS —todo lo que no está borrado—
+         * porque un inquilino expirado sigue ocupando disco y conexiones hasta
+         * que el barrido pase. Existe siempre, aunque el plazo sea corto: es la
+         * última red antes de quedarnos sin conexiones.
+         *
+         * Conservador a propósito hasta medir el comportamiento real con gente
+         * adentro.
+         */
+        'tope_ocupados' => (int) env('TENANCY_TOPE_OCUPADOS', 20),
+
+        /* Altas por origen dentro de la ventana. */
+        'por_origen' => (int) env('TENANCY_ALTAS_POR_ORIGEN', 3),
+        'ventana_horas' => (int) env('TENANCY_VENTANA_HORAS', 24),
+    ],
+
+    /*
+    |---------------------------------------------------------------------------
     | Cerrojo de aprovisionamiento
     |---------------------------------------------------------------------------
     |

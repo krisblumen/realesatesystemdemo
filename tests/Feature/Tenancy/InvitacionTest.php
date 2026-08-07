@@ -73,6 +73,26 @@ class InvitacionTest extends TestCase
         $this->assertSame(TenantEstado::Activo, $tenant->estado);
     }
 
+    public function test_the_hard_cap_stops_the_invitation_too(): void
+    {
+        // El tope duro protege la INSTANCIA —las 100 conexiones compartidas con
+        // la producción de New Hauz y el correo— y eso no depende de por dónde
+        // entró el alta. Si sólo frenara el registro público, el camino de
+        // invitación sería una puerta abierta al mismo riesgo.
+        config(['tenancy.limites.tope_ocupados' => 1]);
+
+        $this->artisan('demo:invitar', ['email' => 'primero@ejemplo.com'])
+            ->assertSuccessful();
+
+        $this->artisan('demo:invitar', ['email' => 'segundo@ejemplo.com'])
+            ->assertFailed();
+
+        $this->assertNull(
+            Tenant::query()->firstWhere('email', 'segundo@ejemplo.com'),
+            'Un alta frenada por el tope no deja fila en el padrón.',
+        );
+    }
+
     public function test_the_invitation_says_which_template_it_used(): void
     {
         // EL DEFECTO QUE ESTE TEST PREVIENE, y pasó en producción.

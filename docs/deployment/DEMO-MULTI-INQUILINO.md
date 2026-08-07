@@ -487,6 +487,47 @@ Tres consecuencias, y ninguna aparece hasta que duele:
 Con una llave propia restringida sólo a `*.demo.<dominio>/*`, los tres
 desaparecen. Es una variable en el `.env` del demo.
 
+## Los topes que hacen seguro abrir el demo (RFC-10)
+
+**El número no se elige, se deriva:**
+
+```
+inquilinos simultáneos ≈ registros por día × días de vida
+```
+
+Si la instancia sostiene 200 bases y llegan 50 registros diarios, el plazo no
+puede pasar de cuatro días. Elegir el plazo primero y descubrir el techo después
+es cómo se llena un disco un domingo.
+
+**El techo real de este VPS no es el disco.** Son 18 MB por inquilino y ~3.000
+por espacio libre — pero las **100 conexiones de Postgres** se comparten con la
+producción de New Hauz y con el correo. Ese es el límite, y por eso el tope
+duro existe aunque el plazo de vida sea corto.
+
+```dotenv
+TENANCY_SAL_DE_ORIGEN=<una cadena larga, fija, con dueño>
+TENANCY_TOPE_OCUPADOS=20
+TENANCY_ALTAS_POR_ORIGEN=3
+TENANCY_VENTANA_HORAS=24
+```
+
+### Tres cosas que no son obvias
+
+**El tope cuenta bases VIVAS, no inquilinos «activos».** Un expirado ya no
+atiende a nadie pero su base sigue ahí hasta que el barrido de las 3:30 la borre,
+ocupando disco y conexiones igual. Contar sólo `activo` daría un cupo que no
+existe, y el síntoma sería quedarse sin conexiones con el padrón diciendo que hay
+lugar.
+
+**La sal es fija y tiene dueño.** Si rota, los límites por origen se pierden en
+silencio y nadie se entera — peor que no tenerlos. Sin sal configurada el sistema
+**se niega** a hashear en vez de usar cadena vacía: un límite que parece
+funcionar y no protege es peor que ninguno.
+
+**El tope duro también frena la invitación por consola.** El límite por origen no
+—a quien invita lo limita ser el operador— pero el tope protege la instancia, y
+eso no depende de por dónde entró el alta.
+
 ## Checklist antes del primer inquilino
 
 - [ ] PostgreSQL 16 con PostGIS en el VPS.
@@ -513,6 +554,8 @@ desaparecen. Es una variable en el `.env` del demo.
       para `https://*.demo.<dominio>/*`. Sin el comodín los mapas de Zonas no
       cargan; sin llave propia, el consumo del demo gasta la cuota del sitio que
       factura y un abuso obliga a rotar la de producción.
+- [ ] `TENANCY_SAL_DE_ORIGEN` puesta y anotada quién es su dueño. NO rota.
+- [ ] `TENANCY_TOPE_OCUPADOS` con un número DERIVADO de la medición, no elegido.
 - [ ] DNS comodín resolviendo.
 - [x] Certificado comodín emitido con acme.sh e instalado con `--reloadcmd`.
 - [ ] Verificado que sin sesión ninguna ruta de inquilino devuelve contenido.

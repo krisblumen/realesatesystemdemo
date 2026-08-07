@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Enums\TenantEstado;
 use App\Models\Tenant;
 use App\Tenancy\AprovisionaInquilinos;
+use App\Tenancy\LimiteAlcanzado;
+use App\Tenancy\LimiteDeAltas;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
 
@@ -26,7 +28,7 @@ class InvitarADemo extends Command
 
     protected $description = 'Da de alta un inquilino de demo y muestra su acceso';
 
-    public function handle(AprovisionaInquilinos $alta): int
+    public function handle(AprovisionaInquilinos $alta, LimiteDeAltas $limites): int
     {
         $email = (string) $this->argument('email');
 
@@ -45,6 +47,25 @@ class InvitarADemo extends Command
 
         if ($dias = $this->option('dias')) {
             config(['tenancy.dias_de_vida' => (int) $dias]);
+        }
+
+        // EL TOPE SE COMPRUEBA ACÁ Y NO ADENTRO DEL ALTA (RFC-10, regla 1).
+        //
+        // Cuando el registro público pase a la cola, `crear()` va a correr
+        // dentro del trabajo — y ahí los límites no deben aplicarse: encolar
+        // altas que van a fallar es acumular basura. El lugar del límite es el
+        // registro, antes de encolar.
+        //
+        // La invitación no pasa origen: no lo tiene, y a quien invita lo limita
+        // ser el operador. Lo que sí aplica es el tope duro, porque protege la
+        // INSTANCIA —las 100 conexiones compartidas con producción— y eso no
+        // depende de por dónde entró el alta.
+        try {
+            $limites->verificar();
+        } catch (LimiteAlcanzado $e) {
+            $this->components->error($e->getMessage());
+
+            return self::FAILURE;
         }
 
         $resultado = $alta->crear($email);
