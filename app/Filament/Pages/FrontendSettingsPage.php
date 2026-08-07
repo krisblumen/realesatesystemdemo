@@ -272,6 +272,45 @@ class FrontendSettingsPage extends Page implements HasForms
                             ->helperText($this->currentValueHint('legal_name', 'Razón social')),
                     ])->columns(2),
 
+                Section::make('Marca')
+                    ->description('Cada imagen muestra lo que se ve hoy en el sitio. Toca «Cambiar imagen» para subir una nueva; la anterior nunca se borra, solo deja de usarse. Sin imagen propia, se usa la marca de Landra por defecto.')
+                    ->schema([
+                        $this->brandAsset(
+                            NonDestructiveMediaUpload::make('logo_light')
+                                ->collection('logo-light')->uuidColumn('logo_light_media_id')
+                                ->acceptedFileTypes($raster)->maxSize(3072)->maxFiles(1)->image(),
+                            column: 'logo_light_media_id', collection: 'logo-light', variant: 'logo-light',
+                            title: 'Logo — fondo claro', hint: 'Se usa en el encabezado y en fondos blancos.',
+                            specs: 'PNG con fondo transparente · cualquier forma, mínimo 200 px de lado · máx. 3 MB',
+                        ),
+                        $this->brandAsset(
+                            NonDestructiveMediaUpload::make('logo_dark')
+                                ->collection('logo-dark')->uuidColumn('logo_dark_media_id')
+                                ->acceptedFileTypes($raster)->maxSize(3072)->maxFiles(1)->image(),
+                            column: 'logo_dark_media_id', collection: 'logo-dark', variant: 'logo-dark',
+                            title: 'Logo — fondo oscuro', hint: 'Se usa en el pie de página y sobre fondos de color.',
+                            specs: 'PNG con fondo transparente · cualquier forma, mínimo 200 px de lado · máx. 3 MB',
+                        ),
+                        $this->brandAsset(
+                            NonDestructiveMediaUpload::make('favicon')
+                                ->collection('favicon')->uuidColumn('favicon_media_id')
+                                ->acceptedFileTypes(['image/png', 'image/x-icon', 'image/vnd.microsoft.icon'])
+                                ->maxSize(1024)->maxFiles(1),
+                            column: 'favicon_media_id', collection: 'favicon', variant: 'favicon',
+                            title: 'Favicon', hint: 'El ícono chico de la pestaña del navegador.',
+                            specs: 'PNG o ICO cuadrado · 512×512 px (mín. 32×32) · máx. 1 MB',
+                        ),
+                        $this->brandAsset(
+                            NonDestructiveMediaUpload::make('og_image')
+                                ->collection('default-og-image')->uuidColumn('og_image_media_id')
+                                ->acceptedFileTypes($raster)->maxSize(3072)->maxFiles(1)->image()
+                                ->rules(['dimensions:min_width=1200,min_height=630']),
+                            column: 'og_image_media_id', collection: 'default-og-image', variant: 'og',
+                            title: 'Imagen para redes', hint: 'La vista previa al compartir el sitio en WhatsApp, Facebook o LinkedIn.',
+                            specs: 'JPG o PNG · 1200×630 px (proporción 1.91:1) · máx. 3 MB',
+                        ),
+                    ])->columns(2),
+
                 Section::make('Contacto')
                     ->description('Estos datos se muestran en el sitio público y en el footer.')
                     ->schema([
@@ -446,45 +485,6 @@ class FrontendSettingsPage extends Page implements HasForms
                                 $this->socialField('facebook', 'Facebook', 'https://facebook.com/tu_pagina'),
                             ]),
                     ]),
-
-                Section::make('Marca')
-                    ->description('Cada imagen muestra lo que se ve hoy en el sitio. Toca «Cambiar imagen» para subir una nueva; la anterior nunca se borra, solo deja de usarse. Sin imagen propia, se usa la marca de Landra por defecto.')
-                    ->schema([
-                        $this->brandAsset(
-                            NonDestructiveMediaUpload::make('logo_light')
-                                ->collection('logo-light')->uuidColumn('logo_light_media_id')
-                                ->acceptedFileTypes($raster)->maxSize(3072)->maxFiles(1)->image(),
-                            column: 'logo_light_media_id', collection: 'logo-light', variant: 'logo-light',
-                            title: 'Logo — fondo claro', hint: 'Se usa en el encabezado y en fondos blancos.',
-                            specs: 'PNG con fondo transparente · cualquier forma, mínimo 200 px de lado · máx. 3 MB',
-                        ),
-                        $this->brandAsset(
-                            NonDestructiveMediaUpload::make('logo_dark')
-                                ->collection('logo-dark')->uuidColumn('logo_dark_media_id')
-                                ->acceptedFileTypes($raster)->maxSize(3072)->maxFiles(1)->image(),
-                            column: 'logo_dark_media_id', collection: 'logo-dark', variant: 'logo-dark',
-                            title: 'Logo — fondo oscuro', hint: 'Se usa en el pie de página y sobre fondos de color.',
-                            specs: 'PNG con fondo transparente · cualquier forma, mínimo 200 px de lado · máx. 3 MB',
-                        ),
-                        $this->brandAsset(
-                            NonDestructiveMediaUpload::make('favicon')
-                                ->collection('favicon')->uuidColumn('favicon_media_id')
-                                ->acceptedFileTypes(['image/png', 'image/x-icon', 'image/vnd.microsoft.icon'])
-                                ->maxSize(1024)->maxFiles(1),
-                            column: 'favicon_media_id', collection: 'favicon', variant: 'favicon',
-                            title: 'Favicon', hint: 'El ícono chico de la pestaña del navegador.',
-                            specs: 'PNG o ICO cuadrado · 512×512 px (mín. 32×32) · máx. 1 MB',
-                        ),
-                        $this->brandAsset(
-                            NonDestructiveMediaUpload::make('og_image')
-                                ->collection('default-og-image')->uuidColumn('og_image_media_id')
-                                ->acceptedFileTypes($raster)->maxSize(3072)->maxFiles(1)->image()
-                                ->rules(['dimensions:min_width=1200,min_height=630']),
-                            column: 'og_image_media_id', collection: 'default-og-image', variant: 'og',
-                            title: 'Imagen para redes', hint: 'La vista previa al compartir el sitio en WhatsApp, Facebook o LinkedIn.',
-                            specs: 'JPG o PNG · 1200×630 px (proporción 1.91:1) · máx. 3 MB',
-                        ),
-                    ])->columns(2),
             ]);
     }
 
