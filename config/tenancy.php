@@ -126,6 +126,22 @@ return [
     |
     */
 
+    /*
+    |---------------------------------------------------------------------------
+    | A quién se avisa de cada alta
+    |---------------------------------------------------------------------------
+    |
+    | El acuse para quien opera: se entregó un demo, a quién y hasta cuándo. NO
+    | lleva la contraseña — para eso están `demo:padron` y
+    | `demo:reemitir-acceso`, y duplicar una credencial no agrega comodidad sino
+    | superficie.
+    |
+    | Vacío desactiva el aviso sin romper nada.
+    |
+    */
+
+    'aviso_de_altas' => env('TENANCY_AVISO_DE_ALTAS'),
+
     'limites' => [
 
         /*

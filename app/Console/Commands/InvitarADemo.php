@@ -4,11 +4,15 @@ namespace App\Console\Commands;
 
 use App\Enums\TenantEstado;
 use App\Models\Tenant;
+use App\Notifications\AltaDeDemoEntregada;
+use App\Notifications\InvitacionAlDemo;
 use App\Tenancy\AprovisionaInquilinos;
 use App\Tenancy\LimiteAlcanzado;
 use App\Tenancy\LimiteDeAltas;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
+use Throwable;
 
 /**
  * Invita a alguien al demo: aprovisiona su inquilino e imprime el acceso.
@@ -72,6 +76,8 @@ class InvitarADemo extends Command
 
         $this->mostrarAcceso($resultado->tenant, $resultado->password);
 
+        $this->avisar($resultado->tenant, $resultado->password);
+
         return self::SUCCESS;
     }
 
@@ -81,6 +87,36 @@ class InvitarADemo extends Command
             ->where('email', $email)
             ->whereIn('estado', [TenantEstado::Activo->value, TenantEstado::Aprovisionando->value])
             ->exists();
+    }
+
+    /**
+     * Los dos correos, DESPUÉS de mostrar el acceso en pantalla.
+     *
+     * El orden importa y viene de RFC-11: el correo va ADEMÁS, no en lugar de.
+     * Es el eslabón que no controlamos —cae en spam, se demora, rebota— y si su
+     * fallo tumbara el alta, cada problema de correo dejaría un inquilino
+     * aprovisionado y a nadie adentro. Con el acceso ya impreso, quien invitó
+     * puede entregarlo a mano.
+     *
+     * Por eso se atrapa y se avisa, en vez de dejar reventar.
+     */
+    private function avisar(Tenant $tenant, string $password): void
+    {
+        $operador = (string) config('tenancy.aviso_de_altas', '');
+
+        try {
+            Notification::route('mail', $tenant->email)
+                ->notify(new InvitacionAlDemo($tenant, $password));
+
+            if ($operador !== '') {
+                Notification::route('mail', $operador)
+                    ->notify(new AltaDeDemoEntregada($tenant));
+            }
+        } catch (Throwable $e) {
+            $this->newLine();
+            $this->components->warn('El inquilino se creó, pero el correo no salió: '.$e->getMessage());
+            $this->line('  El acceso de arriba sigue siendo válido. Entregalo a mano.');
+        }
     }
 
     private function mostrarAcceso(Tenant $tenant, string $password): void

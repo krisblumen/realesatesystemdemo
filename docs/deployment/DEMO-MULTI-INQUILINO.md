@@ -528,6 +528,88 @@ funcionar y no protege es peor que ninguno.
 —a quien invita lo limita ser el operador— pero el tope protege la instancia, y
 eso no depende de por dónde entró el alta.
 
+## El correo del demo, con identidad propia
+
+El demo envía como `no-reply@landracore.com` y **no depende de la identidad de
+correo de New Hauz**, aunque salga por la misma máquina. Conviene separar las dos
+cosas:
+
+| | Qué es | Valor |
+|---|---|---|
+| `MAIL_HOST` | Por dónde SALE. Infraestructura | `mail.newhauz.com.mx` — el nombre para el que existe el certificado |
+| `MAIL_FROM_ADDRESS` | La identidad que se VE | `no-reply@landracore.com` |
+
+Quien recibe nunca ve por qué máquina pasó: ve el remitente, y verifica el DNS de
+ese dominio.
+
+```
+MAIL_HOST=mail.newhauz.com.mx
+MAIL_PORT=587
+MAIL_ENCRYPTION=tls
+MAIL_USERNAME=no-reply@landracore.com
+MAIL_PASSWORD=<la casilla en PostfixAdmin>
+MAIL_FROM_ADDRESS=no-reply@landracore.com
+MAIL_FROM_NAME=Landra
+TENANCY_AVISO_DE_ALTAS=<tu correo>
+```
+
+### Los tres errores que aparecieron, en orden
+
+**1. `Peer certificate CN=mail.newhauz.com.mx did not match expected CN=127.0.0.1`**
+El `.env` apuntaba a `127.0.0.1` y el servidor presenta un certificado con su
+nombre. Se arregla apuntando al nombre, **no** desactivando la verificación.
+
+**2. `454 4.7.1 Relay access denied`**
+Sin autenticar, un servidor de correo sólo acepta mensajes para sus propios
+dominios — si no, sería un relay abierto. Faltaban `MAIL_USERNAME`/`MAIL_PASSWORD`,
+y el puerto 25 (servidor a servidor) suele tener la autenticación deshabilitada:
+va el **587**.
+
+**3. El que no da error: caer en spam.**
+`landracore.com` no tenía SPF, DKIM ni DMARC. El mensaje habría salido sin
+problema y aterrizado en la carpeta equivocada — que es el fallo que RFC-11
+describe: alguien que quería probar el producto y no pudo, con un inquilino ya
+aprovisionado ocupando lugar.
+
+### El DNS que hace verificable la identidad
+
+| Registro | Contenido |
+|---|---|
+| `@` TXT | `v=spf1 ip4:<IP del VPS> ~all` |
+| `default._domainkey` TXT | La llave pública que genera OpenDKIM |
+| `_dmarc` TXT | `v=DMARC1; p=none; rua=mailto:dmarc@<dominio>; fo=1` |
+| `@` MX | `10 mail.newhauz.com.mx.` |
+
+**DKIM lo firma OpenDKIM, no PostfixAdmin** — PostfixAdmin administra dominios y
+casillas, nada más. La llave se genera así:
+
+```bash
+mkdir -p /etc/opendkim/keys/<dominio>
+opendkim-genkey -b 2048 -d <dominio> -D /etc/opendkim/keys/<dominio> -s default -v
+chown -R opendkim:opendkim /etc/opendkim/keys/<dominio>
+chmod 600 /etc/opendkim/keys/<dominio>/default.private
+```
+
+Y se registra agregando —con `>>`, sin pisar lo que hay— una línea a
+`/etc/opendkim/key.table` y otra a `/etc/opendkim/signing.table`, con el formato
+que ya usa el dominio existente.
+
+**Respaldar esas dos tablas antes de tocarlas.** Si OpenDKIM no arranca después
+del reinicio, el correo del OTRO dominio deja de firmarse — y eso no avisa.
+
+### Cómo se comprueba que quedó bien
+
+En Gmail, «Mostrar original». Tienen que decir las tres:
+
+```
+SPF:   PASS
+DKIM:  PASS con el dominio <el tuyo>
+DMARC: PASS
+```
+
+Lo importante es el «**con el dominio**» del DKIM: si la firma fuera del dominio
+del servidor y no del remitente, no alinean y DMARC falla.
+
 ## Checklist antes del primer inquilino
 
 - [ ] PostgreSQL 16 con PostGIS en el VPS.
@@ -554,6 +636,8 @@ eso no depende de por dónde entró el alta.
       para `https://*.demo.<dominio>/*`. Sin el comodín los mapas de Zonas no
       cargan; sin llave propia, el consumo del demo gasta la cuota del sitio que
       factura y un abuso obliga a rotar la de producción.
+- [ ] Correo probado de punta a punta, con SPF, DKIM y DMARC en PASS. Que el
+      envío no dé error NO alcanza: lo que importa es en qué carpeta cae.
 - [ ] `TENANCY_SAL_DE_ORIGEN` puesta y anotada quién es su dueño. NO rota.
 - [ ] `TENANCY_TOPE_OCUPADOS` con un número DERIVADO de la medición, no elegido.
 - [ ] DNS comodín resolviendo.
