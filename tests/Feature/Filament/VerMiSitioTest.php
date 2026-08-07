@@ -109,14 +109,28 @@ class VerMiSitioTest extends TestCase
 
     public function test_they_are_told_apart_by_colour_in_the_panel_theme(): void
     {
-        // La misma trampa del logo del escritorio: una clase de Tailwind escrita
-        // en una vista del panel no existe, porque el panel carga su propio
-        // bundle. Acá la regla vive en el tema, y esto verifica que exista —si no,
-        // el color sería una intención sin efecto.
+        // El color vive en el tema y no en una utilidad porque Filament no deja
+        // ponerle atributos ni clases propias a un ítem de navegación: hay que
+        // seleccionarlos por destino.
+        //
+        // Y esto verifica el COMPILADO, no la fuente: es el que sirve el panel, y
+        // se regenera con `npm run build`. Si alguien cambia la fuente y no
+        // reconstruye, el color sería una intención sin efecto y este test lo
+        // ve.
         $tema = (string) file_get_contents(public_path('css/filament/admin/theme.css'));
 
-        $this->assertStringContainsString('/frontend/compartir"] .fi-sidebar-item-label', $tema);
-        $this->assertStringContainsString('[target="_blank"] .fi-sidebar-item-label', $tema);
+        // Las comillas del selector son opcionales en CSS y el minificador las
+        // quita: `[target=_blank]`. Se comprueba con expresión regular para no
+        // atar el test a una decisión de formato del compilador.
+        $this->assertMatchesRegularExpression(
+            '/frontend\/compartir"?\]\s*\.fi-sidebar-item-label/',
+            $tema,
+        );
+
+        $this->assertMatchesRegularExpression(
+            '/\[target=["\x27]?_blank["\x27]?\]\s*\.fi-sidebar-item-label/',
+            $tema,
+        );
     }
 
     public function test_an_agent_does_not_see_it(): void

@@ -1,3 +1,3 @@
-<div class="nh-auth-footer">
+<div class="landra-auth-footer">
     Landra © {{ date('Y') }} <b>By GESIF</b>
 </div>

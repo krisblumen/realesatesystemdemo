@@ -13,7 +13,7 @@
 @tailwind utilities;
 @tailwind variants;
 
-:root { --nh-navy:#2e3842; --nh-orange:#f5a624; --nh-slate:#1E293B; }
+:root { --theme-navy:#2e3842; --theme-orange:#f5a624; --theme-slate:#1E293B; }
 
 h1,h2,h3,h4,
 .fi-header-heading,.fi-section-header-heading,.fi-modal-heading,.fi-simple-header-heading{
@@ -47,11 +47,18 @@ h1,h2,h3,h4,
    máximo es lo único que lo impide. `object-fit` evita que la caja la deforme. */
 .fi-logo{ max-width:13rem; object-fit:contain; }
 /* La caja del logo del inquilino en el escritorio.
-   Va acá y NO como utilidades de Tailwind en la vista: el panel carga su propio
-   bundle, y `max-h-14` / `max-w-[220px]` / `object-contain` no existen en él.
-   Escritas en el Blade son texto muerto — y encima pasan un test que sólo mire
-   el HTML. El logo lo sube el cliente, así que la caja acota las DOS
-   dimensiones: la vertical no se estira, la muy ancha no empuja el botón. */
+
+   Podría escribirse con utilidades de Tailwind en la vista: el tema del panel
+   escanea `resources/views/filament/**`. Vive acá porque es una regla de
+   componente y se lee de una sola vez, no porque las utilidades no sirvan.
+
+   LO QUE NO HAY QUE HACER es editar `public/css/filament/admin/theme.css` a
+   mano. Es un artefacto de build: `npm run build` lo regenera con el CLI de
+   Tailwind v3 (`build:filament`), y cualquier parche manual se pierde en la
+   próxima compilación. Esto se aprendió por las malas.
+
+   El logo lo sube el cliente, así que la caja acota las DOS dimensiones: la
+   vertical no se estira, la muy ancha no empuja el botón. */
 .landra-marca-logo{ max-height:3.5rem; max-width:13.75rem; width:auto; object-fit:contain; }
 
 /* LOS DOS ACCESOS AL SITIO se distinguen del resto del grupo «Frontend».
@@ -77,14 +84,14 @@ h1,h2,h3,h4,
   filter:drop-shadow(0 10px 22px rgba(0,0,0,.18));
 }
 .fi-input-wrp{ border-radius:12px; }
-.fi-input-wrp:focus-within{ box-shadow:0 0 0 3px rgba(245, 166, 36,.22); border-color:var(--nh-orange); }
+.fi-input-wrp:focus-within{ box-shadow:0 0 0 3px rgba(245, 166, 36,.22); border-color:var(--theme-orange); }
 .fi-btn{ border-radius:12px; transition:transform .2s ease, box-shadow .2s ease, background-color .2s ease; }
 .fi-btn:hover{ transform:translateY(-1px); }
 .fi-section{ transition:box-shadow .2s ease; }
 
-.nh-auth-footer{ margin-top:1.5rem; text-align:center; font-family:'Inter',ui-sans-serif,system-ui,sans-serif; font-size:12px; color:#94A3B8; }
-.nh-auth-footer b{ font-weight:600; color:var(--nh-navy); }
-.dark .nh-auth-footer b{ color:#7C9BE8; }
+.landra-auth-footer{ margin-top:1.5rem; text-align:center; font-family:'Inter',ui-sans-serif,system-ui,sans-serif; font-size:12px; color:#94A3B8; }
+.landra-auth-footer b{ font-weight:600; color:var(--theme-navy); }
+.dark .landra-auth-footer b{ color:#7C9BE8; }
 
 .dark .fi-fo-field-wrp-error-message{ color:#FCA5A5; }
 

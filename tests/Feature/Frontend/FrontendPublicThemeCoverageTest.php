@@ -230,7 +230,7 @@ class FrontendPublicThemeCoverageTest extends TestCase
     #[DataProvider('publicViews')]
     public function test_no_public_control_keeps_a_fixed_focus_or_accent_role(string $view): void
     {
-        // M-B3: `focus:ring-orange/20` ignores `--nh-focus`; the composited ring
+        // M-B3: `focus:ring-orange/20` ignores `--theme-focus`; the composited ring
         // reaches ~1.16:1 on white, below the 3:1 of RFC-072:138. Focus rings,
         // outlines and control accents must resolve the runtime token so the
         // service's guaranteed focus colour actually reaches the control.
@@ -243,7 +243,7 @@ class FrontendPublicThemeCoverageTest extends TestCase
                 '/(?:(?:hover|focus|focus-visible|group-hover):)?'.preg_quote($role, '/').'(?:\/\d+)?(?![-\w])/',
                 $source,
                 "{$view} keeps the fixed control role `{$role}`; use the runtime `brand-focus`/`brand-accent` "
-                .'token so `--nh-focus` reaches the control (M-B3).'
+                .'token so `--theme-focus` reaches the control (M-B3).'
             );
         }
     }
@@ -397,7 +397,7 @@ class FrontendPublicThemeCoverageTest extends TestCase
             );
         }
 
-        $this->assertStringContainsString('--nh-primary: #0f766e', $html, $route);
+        $this->assertStringContainsString('--theme-primary: #0f766e', $html, $route);
     }
 
     public static function publicRoutes(): array
@@ -418,7 +418,7 @@ class FrontendPublicThemeCoverageTest extends TestCase
             $this->assertNoFixedBrandRole($class, $html, "property detail renders `{$class}`.");
         }
 
-        $this->assertStringContainsString('--nh-primary: #0f766e', $html);
+        $this->assertStringContainsString('--theme-primary: #0f766e', $html);
     }
 
     public function test_the_project_detail_route_is_fully_themed(): void
@@ -432,7 +432,7 @@ class FrontendPublicThemeCoverageTest extends TestCase
             $this->assertNoFixedBrandRole($class, $html, "detail renders `{$class}`.");
         }
 
-        $this->assertStringContainsString('--nh-accent: #be123c', $html);
+        $this->assertStringContainsString('--theme-accent: #be123c', $html);
     }
 
     public function test_the_guaranteed_foreground_actually_clears_aa_for_a_hostile_theme(): void

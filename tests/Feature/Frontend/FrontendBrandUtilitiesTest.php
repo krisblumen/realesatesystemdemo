@@ -6,7 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * §16.5: declaring `--nh-*` is useless if components keep resolving compiled
+ * §16.5: declaring `--theme-*` is useless if components keep resolving compiled
  * constants. Brand-critical roles must use the semantic utilities, and the two
  * patterns the design bans by name — `text-white` on a CTA and `bg-navy-900`
  * as a brand surface — must be gone.

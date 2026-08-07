@@ -149,7 +149,7 @@ class FrontendWhatsappCtaTest extends TestCase
         $css = file_get_contents(resource_path('css/app.css'));
 
         $this->assertMatchesRegularExpression(
-            '/--shadow-cta:.*?var\(--nh-accent/s',
+            '/--shadow-cta:.*?var\(--theme-accent/s',
             $css,
             'El resplandor del CTA volvió a un color fijo.',
         );

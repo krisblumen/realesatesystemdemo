@@ -6,7 +6,7 @@
 
 @php
     // Roles de marca vía utilities semánticas (Épica 12, §16.5): resuelven en
-    // runtime contra las --nh-* que inyecta el layout. Los tonos de hover y las
+    // runtime contra las --theme-* que inyecta el layout. Los tonos de hover y las
     // sombras siguen fijos a propósito: son decoración, no rol configurable.
     $base = 'inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 ease-[var(--ease-out-expo)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-focus disabled:cursor-not-allowed disabled:opacity-50';
 
