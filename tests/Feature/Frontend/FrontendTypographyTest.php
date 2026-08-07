@@ -93,8 +93,8 @@ class FrontendTypographyTest extends TestCase
 
         $vars = app(FrontendThemeService::class)->cssVariables();
 
-        $this->assertSame('Montserrat', $vars['--nh-font-heading']);
-        $this->assertSame('Montserrat', $vars['--nh-font-eyebrow']);
+        $this->assertSame('Montserrat', $vars['--theme-font-heading']);
+        $this->assertSame('Montserrat', $vars['--theme-font-eyebrow']);
     }
 
     public function test_a_font_name_reaches_the_page_unescaped(): void
@@ -107,8 +107,8 @@ class FrontendTypographyTest extends TestCase
 
         $html = $this->get('/')->assertOk()->getContent();
 
-        $this->assertStringContainsString('--nh-font-heading: Playfair Display;', $html);
-        $this->assertStringContainsString('--nh-font-eyebrow: Space Grotesk;', $html);
+        $this->assertStringContainsString('--theme-font-heading: Playfair Display;', $html);
+        $this->assertStringContainsString('--theme-font-eyebrow: Space Grotesk;', $html);
         $this->assertStringNotContainsString('&#039;', $html);
     }
 
@@ -123,7 +123,7 @@ class FrontendTypographyTest extends TestCase
 
         $html = $this->get('/')->assertOk()->getContent();
 
-        $this->assertStringContainsString('--nh-font-heading: Caveat;', $html);
+        $this->assertStringContainsString('--theme-font-heading: Caveat;', $html);
         $this->assertMatchesRegularExpression('/@font-face\s*\{[^}]*Caveat/i', $html, 'La página declara Caveat pero no la carga: saldría con la tipografía del sistema.');
         $this->assertStringContainsString('as="font"', $html, 'Faltan los preload de las tipografías.');
     }
@@ -176,8 +176,8 @@ class FrontendTypographyTest extends TestCase
 
         $vars = app(FrontendThemeService::class)->cssVariables();
 
-        $this->assertSame('400', $vars['--nh-weight-heading']);
-        $this->assertSame('700', $vars['--nh-weight-eyebrow']);
+        $this->assertSame('400', $vars['--theme-weight-heading']);
+        $this->assertSame('700', $vars['--theme-weight-eyebrow']);
     }
 
     public function test_the_eyebrow_no_longer_borrows_the_title_font(): void
@@ -189,8 +189,8 @@ class FrontendTypographyTest extends TestCase
 
         $vars = app(FrontendThemeService::class)->cssVariables();
 
-        $this->assertSame('Caveat', $vars['--nh-font-heading']);
-        $this->assertSame('Lora', $vars['--nh-font-eyebrow']);
+        $this->assertSame('Caveat', $vars['--theme-font-heading']);
+        $this->assertSame('Lora', $vars['--theme-font-eyebrow']);
 
         $css = (string) file_get_contents(resource_path('css/app.css'));
         $this->assertStringContainsString('font-family: var(--font-brand-eyebrow);', $css);
@@ -243,11 +243,11 @@ class FrontendTypographyTest extends TestCase
         $this->assertNotSame('', $css, 'Falta compilar los assets: corré `npm run build`.');
 
         $this->assertStringContainsString('font-weight-heading', $css, 'La utility del peso heredado no está compilada.');
-        $this->assertMatchesRegularExpression('/font-weight:\s*var\(--nh-weight-heading/', $css);
+        $this->assertMatchesRegularExpression('/font-weight:\s*var\(--theme-weight-heading/', $css);
 
         // El antetítulo hereda por `eyebrow`, no por una clase propia: su peso
         // tiene que salir de la variable dentro de esa utility.
-        $this->assertMatchesRegularExpression('/font-weight:\s*var\(--nh-weight-eyebrow/', $css);
+        $this->assertMatchesRegularExpression('/font-weight:\s*var\(--theme-weight-eyebrow/', $css);
     }
 
     // ------------------------------------------------ guardado y schema --
@@ -329,10 +329,10 @@ class FrontendTypographyTest extends TestCase
         app()->forgetInstance(FrontendThemeService::class);
         $vars = app(FrontendThemeService::class)->cssVariables();
 
-        $this->assertSame('Playfair Display', $vars['--nh-font-heading']);
-        $this->assertSame('400', $vars['--nh-weight-heading']);
-        $this->assertSame('Caveat', $vars['--nh-font-eyebrow']);
-        $this->assertSame('700', $vars['--nh-weight-eyebrow']);
+        $this->assertSame('Playfair Display', $vars['--theme-font-heading']);
+        $this->assertSame('400', $vars['--theme-weight-heading']);
+        $this->assertSame('Caveat', $vars['--theme-font-eyebrow']);
+        $this->assertSame('700', $vars['--theme-weight-eyebrow']);
     }
 
     public function test_the_settings_page_rejects_a_font_outside_the_list(): void

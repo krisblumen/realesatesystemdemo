@@ -7,9 +7,9 @@
                 <div class="flex items-center gap-4">
                     {{--
                         La caja vive en el tema del panel (`.landra-marca-logo`)
-                        y no en utilidades de Tailwind: el panel carga SU PROPIO
-                        bundle, y las de la aplicación no existen ahí. Escritas en
-                        el Blade serían texto muerto.
+                        porque es una regla de componente. Las utilidades de
+                        Tailwind también funcionarían acá — el tema escanea estas
+                        vistas — pero sólo DESPUÉS de `npm run build`.
                     --}}
                     <img src="{{ $marca['logo'] }}" alt="{{ $marca['nombre'] }}"
                          class="landra-marca-logo">

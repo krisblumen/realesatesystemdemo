@@ -458,7 +458,7 @@ class FrontendCtaBulletsTest extends TestCase
         $css = file_get_contents(resource_path('css/app.css'));
 
         $this->assertMatchesRegularExpression(
-            '/@utility brand-glow \{.*?radial-gradient\(.*?at 67% 33%.*?var\(--nh-accent.*?20%, transparent.*?\}/s',
+            '/@utility brand-glow \{.*?radial-gradient\(.*?at 67% 33%.*?var\(--theme-accent.*?20%, transparent.*?\}/s',
             $css,
             'El brillo dejó de nacer donde debe, de ser del acento, o de apagarse.',
         );
@@ -500,7 +500,7 @@ class FrontendCtaBulletsTest extends TestCase
         $css = file_get_contents(resource_path('css/app.css'));
 
         $this->assertMatchesRegularExpression(
-            '/@utility brand-glow-light \{.*?color-mix\(in srgb, color-mix\(in srgb, var\(--nh-accent[^)]*\) 45%, #ffffff\) 20%, transparent\).*?\}/s',
+            '/@utility brand-glow-light \{.*?color-mix\(in srgb, color-mix\(in srgb, var\(--theme-accent[^)]*\) 45%, #ffffff\) 20%, transparent\).*?\}/s',
             $css,
         );
     }

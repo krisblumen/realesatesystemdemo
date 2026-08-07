@@ -20,6 +20,8 @@
         {{-- Clausulado dinámico (varía según operación y exclusividad). --}}
         <section class="mb-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 class="mb-4 text-base font-semibold text-slate-900">Contenido del contrato</h2>
+            @include('contratos._aviso-demo', ['clase' => 'mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900'])
+
             @include('public.contratos._clausulado')
         </section>
 

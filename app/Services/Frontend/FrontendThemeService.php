@@ -21,7 +21,7 @@ use Throwable;
  * the style tag simply fails validation and never gets emitted.
  *
  * The stored radius preset is expanded server-side into three fixed values;
- * there is no singular `--nh-radius` in the emitted contract.
+ * there is no singular `--theme-radius` in the emitted contract.
  */
 class FrontendThemeService
 {
@@ -72,7 +72,7 @@ class FrontendThemeService
     }
 
     /**
-     * The `--nh-*` custom properties injected into `:root` by the public layout.
+     * The `--theme-*` custom properties injected into `:root` by the public layout.
      *
      * @return array<string, string>
      */
@@ -81,33 +81,33 @@ class FrontendThemeService
         $theme = $this->theme();
 
         return [
-            '--nh-primary' => $theme['primary'],
-            '--nh-on-primary' => $theme['on_primary'],
-            '--nh-accent' => $theme['accent'],
-            '--nh-on-accent' => $theme['on_accent'],
-            '--nh-bg' => $theme['background'],
-            '--nh-text' => $theme['text'],
+            '--theme-primary' => $theme['primary'],
+            '--theme-on-primary' => $theme['on_primary'],
+            '--theme-accent' => $theme['accent'],
+            '--theme-on-accent' => $theme['on_accent'],
+            '--theme-bg' => $theme['background'],
+            '--theme-text' => $theme['text'],
             // SIN comillas, aunque haya familias con espacio («Playfair Display»,
             // «Space Grotesk»). El layout emite estos valores con `{{ }}`, que
             // escapa la comilla simple a `&#039;` y deja el `font-family` entero
             // inválido: el navegador descarta la declaración y el sitio cae a la
             // tipografía heredada. CSS acepta el nombre como secuencia de
             // identificadores, y la lista cerrada garantiza que no entre nada más.
-            '--nh-font-heading' => $theme['heading_font'],
-            '--nh-font-body' => $theme['body_font'],
-            '--nh-font-eyebrow' => $theme['eyebrow_font'],
+            '--theme-font-heading' => $theme['heading_font'],
+            '--theme-font-body' => $theme['body_font'],
+            '--theme-font-eyebrow' => $theme['eyebrow_font'],
             // El peso viaja como número y no como clase: es UN default que el
             // sitio entero hereda, y una sección puede pisarlo con su propia
             // clase sin que esto tenga que saberlo.
-            '--nh-weight-heading' => $theme['heading_bold'] ? '700' : '400',
-            '--nh-weight-eyebrow' => $theme['eyebrow_bold'] ? '700' : '600',
-            '--nh-focus' => $theme['focus'],
-            '--nh-accent-on-primary' => $theme['accent_on_primary'],
-            '--nh-primary-ink' => $theme['primary_ink'],
-            '--nh-accent-ink' => $theme['accent_ink'],
-            '--nh-radius-md' => $theme['radius_scale']['md'],
-            '--nh-radius-lg' => $theme['radius_scale']['lg'],
-            '--nh-radius-xl' => $theme['radius_scale']['xl'],
+            '--theme-weight-heading' => $theme['heading_bold'] ? '700' : '400',
+            '--theme-weight-eyebrow' => $theme['eyebrow_bold'] ? '700' : '600',
+            '--theme-focus' => $theme['focus'],
+            '--theme-accent-on-primary' => $theme['accent_on_primary'],
+            '--theme-primary-ink' => $theme['primary_ink'],
+            '--theme-accent-ink' => $theme['accent_ink'],
+            '--theme-radius-md' => $theme['radius_scale']['md'],
+            '--theme-radius-lg' => $theme['radius_scale']['lg'],
+            '--theme-radius-xl' => $theme['radius_scale']['xl'],
         ];
     }
 

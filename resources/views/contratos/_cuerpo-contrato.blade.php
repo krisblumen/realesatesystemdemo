@@ -32,9 +32,16 @@
      `XAXX010101000` es el RFC genérico nacional del SAT: no pertenece a ningún
      contribuyente, así que no puede colisionar con nadie.
 
-     LO QUE FALTA: estos datos tienen que salir de la configuración del inquilino.
-     `legal_name` ya existe en `frontend_settings`; el RFC no. Mientras no se
-     haga, cada inquilino firma con el mismo relleno.
+     Y SE QUEDAN GENÉRICOS A PROPÓSITO. La tentación es sacarlos de la
+     configuración de cada inquilino —`legal_name` ya existe en
+     `frontend_settings`— y sería un error: el demo sirve para MOSTRAR el
+     sistema, no para operar con él. Con los datos reales del inquilino, alguien
+     podría generar desde un entorno que vence en quince días un documento que
+     parece un contrato de verdad, con su sello digital y su página pública de
+     verificación.
+
+     Un relleno evidente se delata solo. Esa es la protección, y por eso no es
+     una carencia pendiente sino una decisión tomada.
 --}}
 <h3>Declaraciones</h3>
 <p><strong>I. Declara “EL PROFESIONAL INMOBILIARIO”.</strong> Que INMOBILIARIA DEMO,

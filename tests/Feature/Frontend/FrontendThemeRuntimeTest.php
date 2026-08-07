@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
- * T-8c: the theme must actually reach the browser. Declaring `--nh-*` changes
+ * T-8c: the theme must actually reach the browser. Declaring `--theme-*` changes
  * nothing on its own — the public layout has to emit them into `:root`, and
  * app.css has to bridge them to semantic utilities so components resolve the
  * runtime value instead of a compiled constant.
@@ -39,15 +39,15 @@ class FrontendThemeRuntimeTest extends TestCase
         $html = $this->get('/')->assertOk()->getContent();
 
         foreach ([
-            '--nh-primary', '--nh-on-primary', '--nh-accent', '--nh-on-accent',
-            '--nh-bg', '--nh-text', '--nh-font-heading', '--nh-font-body',
-            '--nh-radius-md', '--nh-radius-lg', '--nh-radius-xl',
+            '--theme-primary', '--theme-on-primary', '--theme-accent', '--theme-on-accent',
+            '--theme-bg', '--theme-text', '--theme-font-heading', '--theme-font-body',
+            '--theme-radius-md', '--theme-radius-lg', '--theme-radius-xl',
         ] as $token) {
             $this->assertStringContainsString($token, $html, "Missing runtime token {$token}.");
         }
 
         // §16.5 forbids a singular radius token: only the expanded three exist.
-        $this->assertStringNotContainsString('--nh-radius:', $html);
+        $this->assertStringNotContainsString('--theme-radius:', $html);
     }
 
     public function test_a_saved_palette_reaches_the_public_html(): void
@@ -56,7 +56,7 @@ class FrontendThemeRuntimeTest extends TestCase
 
         $html = $this->get('/')->assertOk()->getContent();
 
-        $this->assertStringContainsString('--nh-primary: #123456', $html);
+        $this->assertStringContainsString('--theme-primary: #123456', $html);
     }
 
     public function test_each_radius_preset_expands_to_its_exact_three_values(): void
@@ -74,9 +74,9 @@ class FrontendThemeRuntimeTest extends TestCase
 
             $html = $this->get('/')->assertOk()->getContent();
 
-            $this->assertStringContainsString("--nh-radius-md: {$md}", $html, "preset {$preset}");
-            $this->assertStringContainsString("--nh-radius-lg: {$lg}", $html, "preset {$preset}");
-            $this->assertStringContainsString("--nh-radius-xl: {$xl}", $html, "preset {$preset}");
+            $this->assertStringContainsString("--theme-radius-md: {$md}", $html, "preset {$preset}");
+            $this->assertStringContainsString("--theme-radius-lg: {$lg}", $html, "preset {$preset}");
+            $this->assertStringContainsString("--theme-radius-xl: {$xl}", $html, "preset {$preset}");
         }
     }
 
@@ -88,7 +88,7 @@ class FrontendThemeRuntimeTest extends TestCase
         $html = $this->get('/')->assertOk()->getContent();
 
         $this->assertStringNotContainsString('alert(1)', $html);
-        $this->assertStringContainsString('--nh-primary: #2e3842', $html, 'It must fall back to the default.');
+        $this->assertStringContainsString('--theme-primary: #2e3842', $html, 'It must fall back to the default.');
     }
 
     public function test_the_brand_ink_served_for_a_hostile_light_theme_clears_aa(): void
@@ -107,7 +107,7 @@ class FrontendThemeRuntimeTest extends TestCase
 
         $html = $this->get('/')->assertOk()->getContent();
 
-        foreach (['--nh-primary-ink', '--nh-accent-ink'] as $token) {
+        foreach (['--theme-primary-ink', '--theme-accent-ink'] as $token) {
             preg_match('/'.preg_quote($token, '/').':\s*(#[0-9a-f]{6})/i', $html, $m);
             $this->assertNotEmpty($m, "The HTML must serve {$token}.");
             $this->assertTrue(
@@ -117,8 +117,8 @@ class FrontendThemeRuntimeTest extends TestCase
         }
 
         // The raw pale brand colours must never be served as a text foreground.
-        $this->assertStringNotContainsString('--nh-primary-ink: #fef08a', $html);
-        $this->assertStringNotContainsString('--nh-accent-ink: #fde68a', $html);
+        $this->assertStringNotContainsString('--theme-primary-ink: #fef08a', $html);
+        $this->assertStringNotContainsString('--theme-accent-ink: #fde68a', $html);
     }
 
     public function test_app_css_bridges_the_runtime_tokens_to_semantic_utilities(): void
@@ -128,19 +128,19 @@ class FrontendThemeRuntimeTest extends TestCase
         $css = file_get_contents(resource_path('css/app.css'));
 
         foreach ([
-            '--color-brand-primary: var(--nh-primary',
-            '--color-on-brand-primary: var(--nh-on-primary',
-            '--color-brand-accent: var(--nh-accent',
-            '--color-on-brand-accent: var(--nh-on-accent',
-            '--color-site-background: var(--nh-bg',
-            '--color-site-text: var(--nh-text',
-            '--color-brand-primary-ink: var(--nh-primary-ink',
-            '--color-brand-accent-ink: var(--nh-accent-ink',
-            '--font-brand-heading: var(--nh-font-heading',
-            '--font-brand-body: var(--nh-font-body',
-            '--radius-brand-md: var(--nh-radius-md',
-            '--radius-brand-lg: var(--nh-radius-lg',
-            '--radius-brand-xl: var(--nh-radius-xl',
+            '--color-brand-primary: var(--theme-primary',
+            '--color-on-brand-primary: var(--theme-on-primary',
+            '--color-brand-accent: var(--theme-accent',
+            '--color-on-brand-accent: var(--theme-on-accent',
+            '--color-site-background: var(--theme-bg',
+            '--color-site-text: var(--theme-text',
+            '--color-brand-primary-ink: var(--theme-primary-ink',
+            '--color-brand-accent-ink: var(--theme-accent-ink',
+            '--font-brand-heading: var(--theme-font-heading',
+            '--font-brand-body: var(--theme-font-body',
+            '--radius-brand-md: var(--theme-radius-md',
+            '--radius-brand-lg: var(--theme-radius-lg',
+            '--radius-brand-xl: var(--theme-radius-xl',
         ] as $bridge) {
             $this->assertStringContainsString($bridge, $css, "Missing bridge: {$bridge}");
         }

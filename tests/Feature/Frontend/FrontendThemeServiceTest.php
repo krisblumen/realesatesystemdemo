@@ -134,12 +134,12 @@ class FrontendThemeServiceTest extends TestCase
 
         $variables = app(FrontendThemeService::class)->cssVariables();
 
-        $this->assertSame('8px', $variables['--nh-radius-md']);
-        $this->assertSame('12px', $variables['--nh-radius-lg']);
-        $this->assertSame('16px', $variables['--nh-radius-xl']);
-        $this->assertArrayNotHasKey('--nh-radius', $variables, '§16.5 forbids a singular radius token.');
+        $this->assertSame('8px', $variables['--theme-radius-md']);
+        $this->assertSame('12px', $variables['--theme-radius-lg']);
+        $this->assertSame('16px', $variables['--theme-radius-xl']);
+        $this->assertArrayNotHasKey('--theme-radius', $variables, '§16.5 forbids a singular radius token.');
 
-        foreach (['--nh-primary', '--nh-on-primary', '--nh-accent', '--nh-on-accent', '--nh-bg', '--nh-text', '--nh-font-heading', '--nh-font-body'] as $token) {
+        foreach (['--theme-primary', '--theme-on-primary', '--theme-accent', '--theme-on-accent', '--theme-bg', '--theme-text', '--theme-font-heading', '--theme-font-body'] as $token) {
             $this->assertArrayHasKey($token, $variables);
         }
     }
@@ -177,7 +177,7 @@ class FrontendThemeServiceTest extends TestCase
 
     public function test_the_focus_variable_is_emitted(): void
     {
-        $this->assertArrayHasKey('--nh-focus', app(FrontendThemeService::class)->cssVariables());
+        $this->assertArrayHasKey('--theme-focus', app(FrontendThemeService::class)->cssVariables());
     }
 
     public function test_brand_ink_stays_the_brand_colour_when_it_reads_on_the_background(): void
@@ -219,8 +219,8 @@ class FrontendThemeServiceTest extends TestCase
     {
         $variables = app(FrontendThemeService::class)->cssVariables();
 
-        $this->assertArrayHasKey('--nh-primary-ink', $variables);
-        $this->assertArrayHasKey('--nh-accent-ink', $variables);
+        $this->assertArrayHasKey('--theme-primary-ink', $variables);
+        $this->assertArrayHasKey('--theme-accent-ink', $variables);
     }
 
     public function test_a_cache_entry_from_a_previous_release_cannot_break_the_site(): void

@@ -77,17 +77,20 @@ class MarcaDelInquilinoWidgetTest extends TestCase
 
     public function test_the_logo_is_drawn_inside_a_box_that_actually_exists(): void
     {
-        // ESTE TEST NACIÓ VERDE Y NO PROTEGÍA.
+        // LO QUE ESTE TEST VIGILA: que la caja EXISTA, no que esté escrita.
         //
-        // La primera versión escribía `max-h-14 max-w-[220px] object-contain` en
-        // el Blade y verificaba que estuvieran en el HTML. Estaban — y no hacían
-        // NADA: el panel de Filament carga su propio bundle de CSS, y esas
-        // utilidades no existen ahí. El logo se dibujaba a tamaño natural y
-        // tapaba media pantalla, con el test en verde.
+        // La primera versión ponía `max-h-14 max-w-[220px] object-contain` en el
+        // Blade y verificaba que estuvieran en el HTML. Estaban, y el logo se
+        // dibujaba igual a tamaño natural, tapando media pantalla — con el test
+        // en verde.
         //
-        // Por eso ahora se comprueban las dos mitades: que la imagen lleve la
-        // clase, y que el tema del panel la DEFINA acotando las dos dimensiones.
-        // Una sola de las dos vuelve a mentir.
+        // La causa no era que esas utilidades no sirvan en el panel: sirven, el
+        // tema escanea estas vistas. Era que el CSS compilado del panel estaba
+        // VIEJO, porque nadie había corrido `npm run build`.
+        //
+        // De ahí la segunda mitad de este test: comprueba que el tema compilado
+        // defina la regla. Eso lo hace, además, un detector de compilado sin
+        // reconstruir — que es el defecto de fondo y no el que yo creía.
         $this->actingAs($this->usuario('owner'));
 
         $setting = FrontendSetting::current();
@@ -105,14 +108,22 @@ class MarcaDelInquilinoWidgetTest extends TestCase
 
         $tema = (string) file_get_contents(public_path('css/filament/admin/theme.css'));
 
-        preg_match('/\.landra-marca-logo\{([^}]*)\}/', $tema, $regla);
+        // TODAS las reglas de esa clase juntas, y no la primera: el minificador
+        // parte la declaración en varias —separa los prefijos de proveedor— así
+        // que mirar sólo una encuentra media caja y falla por su cuenta.
+        preg_match_all('/\.landra-marca-logo\{([^}]*)\}/', $tema, $reglas);
 
-        $this->assertNotEmpty($regla, 'El tema del panel tiene que definir `.landra-marca-logo`, o la clase no hace nada.');
+        $this->assertNotEmpty(
+            $reglas[1],
+            'El tema COMPILADO tiene que definir `.landra-marca-logo`. Si no está, falta `npm run build`.',
+        );
+
+        $declarado = implode(';', $reglas[1]);
 
         foreach (['max-height', 'max-width', 'object-fit:contain'] as $propiedad) {
             $this->assertStringContainsString(
                 $propiedad,
-                $regla[1],
+                $declarado,
                 "Sin «{$propiedad}» la caja no acota: un logo vertical se estira o uno ancho empuja el botón.",
             );
         }

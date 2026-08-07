@@ -571,7 +571,7 @@ class FrontendCapabilityCardsTest extends TestCase
         $servicio = file_get_contents(app_path('Services/Frontend/BrandPalette.php'));
 
         foreach ([['-d2', '55%', '0.55'], ['-d1', '78%', '0.78'], ['-l1', '55%', '0.55'], ['-l2', '25%', '0.25']] as [$variante, $enCss, $enPhp]) {
-            $this->assertStringContainsString("--color-brand-accent{$variante}: color-mix(in srgb, var(--nh-accent, #f5a624) {$enCss}", $css);
+            $this->assertStringContainsString("--color-brand-accent{$variante}: color-mix(in srgb, var(--theme-accent, #f5a624) {$enCss}", $css);
             $this->assertStringContainsString("'{$variante}' => [{$enPhp},", $servicio);
         }
     }
