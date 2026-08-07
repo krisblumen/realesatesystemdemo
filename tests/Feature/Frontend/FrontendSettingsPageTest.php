@@ -33,6 +33,33 @@ class FrontendSettingsPageTest extends TestCase
         $this->seed(PermissionSeeder::class);
     }
 
+    public function test_the_brand_section_comes_right_after_identity(): void
+    {
+        // El escritorio tiene un botón «Subir mi logo» que trae acá. Con la
+        // sección de Marca al final, ese botón cumplía a medias: dejaba a la
+        // persona al principio de una pantalla larga, buscando.
+        //
+        // Segunda y no primera: antes va Identidad —el nombre de la inmobiliaria—
+        // porque el logo se entiende en relación con el nombre, no al revés.
+        $html = $this->actingAs(User::factory()->withRole('owner')->create())
+            ->get(FrontendSettingsPage::getUrl())
+            ->assertOk()
+            ->getContent();
+
+        $orden = [];
+
+        foreach (['Identidad', 'Marca', 'Contacto'] as $seccion) {
+            $posicion = mb_strpos($html, $seccion);
+
+            $this->assertNotFalse($posicion, "Falta la sección «{$seccion}».");
+
+            $orden[$seccion] = $posicion;
+        }
+
+        $this->assertLessThan($orden['Marca'], $orden['Identidad'], 'Identidad va primero.');
+        $this->assertLessThan($orden['Contacto'], $orden['Marca'], 'Marca va antes que el resto.');
+    }
+
     public function test_owner_reaches_the_page_and_other_roles_get_a_real_403(): void
     {
         $url = FrontendSettingsPage::getUrl();
