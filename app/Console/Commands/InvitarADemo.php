@@ -74,6 +74,17 @@ class InvitarADemo extends Command
             ['Usuario', $tenant->email],
             ['Contraseña', $password],
             ['Vence', $tenant->expira_en->format('Y-m-d')],
+
+            // DE QUÉ PLANTILLA NACIÓ, y no es un dato de curiosidad.
+            //
+            // Pasó en producción: se construyó una plantilla nueva, se apuntó el
+            // `.env` sin limpiar la caché de configuración, y el alta siguió
+            // usando la anterior. El comando dijo «inquilino listo» y el error se
+            // descubrió recién al abrir el panel y ver contenido viejo.
+            //
+            // El dato ya existía —el padrón lo guarda— pero llegaba tarde:
+            // después de haber invitado a alguien. Acá se ve en el momento.
+            ['Plantilla', $tenant->template_version],
         ]);
 
         // Se muestra UNA sola vez: en la base ya quedó hasheada. Si se pierde no

@@ -73,6 +73,23 @@ class InvitacionTest extends TestCase
         $this->assertSame(TenantEstado::Activo, $tenant->estado);
     }
 
+    public function test_the_invitation_says_which_template_it_used(): void
+    {
+        // EL DEFECTO QUE ESTE TEST PREVIENE, y pasó en producción.
+        //
+        // Se construyó una plantilla nueva, se apuntó el `.env` sin limpiar la
+        // caché de configuración, y el alta siguió usando la anterior. El
+        // comando dijo «inquilino listo» y el error se descubrió recién al abrir
+        // el panel y ver contenido viejo.
+        //
+        // El dato ya existía —el padrón lo guarda— pero llegaba tarde: después
+        // de haber invitado a alguien. Un dato que sólo sirve para la autopsia
+        // no es un dato, es un consuelo.
+        $this->artisan('demo:invitar', ['email' => 'invitado@ejemplo.com'])
+            ->expectsOutputToContain(self::PLANTILLA)
+            ->assertSuccessful();
+    }
+
     public function test_the_invitation_warns_about_what_can_be_uploaded(): void
     {
         // El límite aceptado en RFC-14: la media publicada se sirve por el
