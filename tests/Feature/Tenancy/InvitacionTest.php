@@ -4,7 +4,12 @@ namespace Tests\Feature\Tenancy;
 
 use App\Enums\TenantEstado;
 use App\Models\Tenant;
+use App\Notifications\AltaDeDemoEntregada;
+use App\Notifications\InvitacionAlDemo;
+use Illuminate\Contracts\Notifications\Dispatcher;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Tests\Concerns\UsaBaseCentral;
 use Tests\TestCase;
 
@@ -21,6 +26,8 @@ class InvitacionTest extends TestCase
 
     private const PLANTILLA = 'demo_probe_inv_tpl';
 
+    private const OPERADOR = 'operador@ejemplo.com';
+
     private static bool $plantillaLista = false;
 
     private array $creadas = [];
@@ -36,6 +43,9 @@ class InvitacionTest extends TestCase
         }
 
         config(['tenancy.plantilla_vigente' => self::PLANTILLA]);
+        config(['tenancy.aviso_de_altas' => self::OPERADOR]);
+
+        Notification::fake();
     }
 
     protected function tearDown(): void
@@ -148,5 +158,87 @@ class InvitacionTest extends TestCase
         $this->artisan('demo:invitar', ['email' => 'no-es-un-correo'])->assertFailed();
 
         $this->assertSame(0, Tenant::query()->count());
+    }
+
+    private function invitar(string $email = 'invitado@ejemplo.com'): void
+    {
+        $this->artisan('demo:invitar', ['email' => $email])->assertSuccessful();
+    }
+
+    public function test_the_guest_receives_everything_needed_to_get_in(): void
+    {
+        $this->invitar();
+
+        Notification::assertSentTo(
+            new AnonymousNotifiable,
+            InvitacionAlDemo::class,
+            function (InvitacionAlDemo $aviso, array $canales, AnonymousNotifiable $a): bool {
+                $correo = $aviso->toMail($a)->render();
+
+                return $a->routes['mail'] === 'invitado@ejemplo.com'
+                    && str_contains($correo, $aviso->password)
+                    && str_contains($correo, 'invitado@ejemplo.com');
+            },
+        );
+    }
+
+    public function test_the_operator_gets_the_receipt_without_the_password(): void
+    {
+        // LO QUE ESTE TEST CUIDA. La contraseña en la bandeja del operador no
+        // aporta nada —tiene el padrón y puede reemitir— y queda ahí para
+        // siempre, protegiendo datos reales que el invitado va a cargar.
+        $this->invitar();
+
+        Notification::assertSentTo(
+            new AnonymousNotifiable,
+            AltaDeDemoEntregada::class,
+            function (AltaDeDemoEntregada $aviso, array $canales, AnonymousNotifiable $a): bool {
+                $correo = $aviso->toMail($a)->render();
+                $password = Tenant::query()->firstWhere('email', 'invitado@ejemplo.com')?->slug;
+
+                return $a->routes['mail'] === self::OPERADOR
+                    && str_contains($correo, 'invitado@ejemplo.com')
+                    && ! str_contains($correo, 'Contraseña');
+            },
+        );
+    }
+
+    public function test_without_an_operator_address_only_the_guest_is_notified(): void
+    {
+        config(['tenancy.aviso_de_altas' => null]);
+
+        $this->invitar();
+
+        // Se pregunta por la NOTIFICACIÓN y no por el destinatario:
+        // `AnonymousNotifiable` no distingue rutas, así que aserciones por
+        // destinatario darían igual para los dos correos.
+        Notification::assertSentTo(new AnonymousNotifiable, InvitacionAlDemo::class);
+        Notification::assertNotSentTo(new AnonymousNotifiable, AltaDeDemoEntregada::class);
+    }
+
+    public function test_a_failing_mail_does_not_lose_the_alta_nor_the_access(): void
+    {
+        // EL CASO QUE IMPORTA (RFC-11). El correo es el eslabón que no controlamos:
+        // cae en spam, se demora, rebota. Si su fallo tumbara el alta, cada
+        // problema de correo dejaría un inquilino aprovisionado y a nadie
+        // adentro.
+        //
+        // El acceso se muestra EN PANTALLA de todos modos, así que quien invitó
+        // puede entregarlo a mano. El correo va además, no en lugar de.
+        Notification::fake();
+
+        $this->mock(Dispatcher::class, function ($mock): void {
+            $mock->shouldReceive('send')->andThrow(new \RuntimeException('smtp caído'));
+            $mock->shouldReceive('sendNow')->andThrow(new \RuntimeException('smtp caído'));
+        });
+
+        $this->artisan('demo:invitar', ['email' => 'invitado@ejemplo.com'])
+            ->expectsOutputToContain('invitado@ejemplo.com')
+            ->assertSuccessful();
+
+        $this->assertNotNull(
+            Tenant::query()->firstWhere('email', 'invitado@ejemplo.com'),
+            'El inquilino se creó igual: el correo no manda sobre el alta.',
+        );
     }
 }
