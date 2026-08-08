@@ -10,6 +10,7 @@ use App\Filament\Pages\FrontendSettingsPage;
 use App\Filament\Resources\FrontendPageResource\Pages\EditFrontendPage;
 use App\Http\Middleware\AtiendeElHostCentral;
 use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\RegistraElUso;
 use App\Http\Middleware\ResolveTenant;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -189,6 +190,11 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 EnsureUserIsActive::class,
                 Authenticate::class,
+
+                // DESPUÉS de autenticar, y por eso va acá y no en la lista de
+                // arriba: lo que se anota es que el DUEÑO entró, no que alguien
+                // pasó por la pantalla de login.
+                RegistraElUso::class,
             ]);
     }
 

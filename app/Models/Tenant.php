@@ -33,6 +33,7 @@ class Tenant extends Model
         return [
             'estado' => TenantEstado::class,
             'expira_en' => 'datetime',
+            'ultimo_acceso_en' => 'datetime',
             'borrado_en' => 'datetime',
         ];
     }
