@@ -328,6 +328,68 @@ Una línea, como el usuario del sitio y desde el directorio de producción:
 * * * * * cd /home/<usuario>/htdocs/<dominio> && DB_DATABASE=demo_central php artisan schedule:run >> /dev/null 2>&1
 ```
 
+## El demo al que nadie entra se suelta antes
+
+Con el registro público la mayoría de las altas no vuelve nunca: alguien deja su
+correo, mira dos pantallas y se va. Esa base ocupa disco y conexiones durante
+todo su plazo, igual que una que se usa — y el recurso escaso no son los
+inquilinos activos, son las bases vivas.
+
+`demo:expirar` ahora corta por dos motivos, y lo dice cuál fue:
+
+| Motivo | Cuándo |
+|---|---|
+| `venció su plazo` | Pasó `expira_en`, el plazo que se le prometió |
+| `nadie entró` | Nadie abrió el panel en `TENANCY_DIAS_SIN_USO` días (5 por defecto) |
+
+**Sólo acorta.** `expira_en` se fija al crear y nada lo mueve: usar el demo no
+compra más tiempo del original.
+
+«Uso» es una petición AUTENTICADA al panel — no el sitio público del inquilino.
+El enlace para compartir se lo puede pasar a diez personas, y diez desconocidos
+mirando una portada no significan que su dueño lo esté usando. Tampoco cuenta la
+pantalla de login, o un robot golpeándola mantendría vivo un demo muerto.
+
+`TENANCY_DIAS_SIN_USO=0` apaga la regla. Es una salida explícita, no un efecto
+del cero: sin ella, «sin uso desde hace 0 días» sería todo lo activo, y el
+interruptor de apagado sería el botón de demolición.
+
+El número es de producto, no técnico: bajarlo cuando falte cupo no requiere
+desplegar. `demo:padron` muestra la columna **Último uso** («hoy», «hace 3 d»,
+«nunca») para poder calibrarlo mirando datos y no intuición.
+
+Los inquilinos que ya existían al desplegar esto arrancan con cuerda: la
+migración les pone `ultimo_acceso_en = now()`. Nadie los había usado, es cierto,
+pero la regla no existía cuando se crearon — aplicarla hacia atrás sería cambiar
+el trato después de haber invitado.
+
+## El registro público vive en `/guest` del host central
+
+`https://demo.landracore.com/guest`. La dirección es discreta a propósito
+mientras el demo se asienta, y **eso no es lo que la protege**: una dirección se
+comparte, se filtra y se adivina. Lo que la protege son los topes de RFC-10, que
+se aplican igual ahora que cuando la publiquemos.
+
+| Capa | Qué frena |
+|---|---|
+| `throttle:10,1` | Que martillen el endpoint. No protege la instancia, sólo la puerta |
+| Tope duro (RFC-10) | Que el demo se lleve las 100 conexiones que compartimos con la producción vecina |
+| Tope por origen (RFC-10) | Que una sola persona se lleve el cupo de todos. Tres por día |
+| Correo ya registrado | Un segundo demo para quien ya tiene uno |
+| Señuelo | Robots que llenan todos los campos que encuentran |
+
+Los topes se comprueban **antes de encolar**. Encolar altas que van a fallar es
+acumular basura: la cola las levanta, el alta revienta contra el tope, y queda
+una fila fallida por cada intento.
+
+`/guest` está exceptuada en `AtiendeElHostCentral`. Sin esa excepción el host
+central la redirigiría al sitio promocional y la única puerta de entrada al demo
+quedaría inalcanzable — con un 302, no con un error.
+
+**La cola `altas` deja de ser opcional acá.** Con `demo:invitar` el alta corría
+en el momento y la cola no hacía falta. Desde el registro público, si el worker
+no está andando, la persona ve «en un minuto te llega» y no le llega nunca.
+
 ### Y una SEGUNDA línea, sólo para las altas
 
 El alta de un inquilino no viaja por esa cola: va por la suya, `altas`, atendida

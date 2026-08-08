@@ -52,7 +52,7 @@ class PadronDeInquilinos extends Command
         // eso se pide, y no viene puesto.
         $conCorreos = (bool) $this->option('correos');
 
-        $encabezados = ['Slug', 'Estado', 'Nació', 'Vence', 'Plantilla', 'Intentos', 'Motivo de falla'];
+        $encabezados = ['Slug', 'Estado', 'Nació', 'Último uso', 'Vence', 'Plantilla', 'Intentos', 'Motivo de falla'];
 
         if ($conCorreos) {
             array_splice($encabezados, 1, 0, ['Correo']);
@@ -65,6 +65,13 @@ class PadronDeInquilinos extends Command
                     $t->slug,
                     $t->estado->value,
                     $t->created_at?->format('Y-m-d'),
+
+                    // SIN ESTE DATO, una expiración temprana es un misterio.
+                    // Un demo puede cortarse por su fecha o porque nadie entró
+                    // en `tenancy.dias_sin_uso` días, y desde el padrón las dos
+                    // se ven igual: «expirado». Acá se distinguen de un vistazo.
+                    $this->ultimoUso($t),
+
                     $t->expira_en?->format('Y-m-d'),
                     $t->template_version,
                     // Distingue «falló recién» de «lleva noches fallando».
@@ -84,5 +91,23 @@ class PadronDeInquilinos extends Command
         $this->components->info("{$activos} activo(s) de {$inquilinos->count()} registrado(s).");
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Hace cuánto que alguien entró, en días.
+     *
+     * En días y no con la fecha exacta porque la pregunta que uno se hace
+     * mirando el padrón es «¿este está por caerse?», y eso se responde con un
+     * número chico al lado del tope, no con un calendario.
+     */
+    private function ultimoUso(Tenant $t): string
+    {
+        if ($t->ultimo_acceso_en === null) {
+            return 'nunca';
+        }
+
+        $dias = (int) $t->ultimo_acceso_en->diffInDays(now());
+
+        return $dias === 0 ? 'hoy' : "hace {$dias} d";
     }
 }

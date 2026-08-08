@@ -196,6 +196,26 @@ return [
 
     /*
     |---------------------------------------------------------------------------
+    | Días sin uso antes de expirar
+    |---------------------------------------------------------------------------
+    |
+    | Un demo al que nadie entra ocupa lo mismo que uno que se usa: disco y
+    | conexiones de las 100 que compartimos con la producción vecina. Con el
+    | registro público la mayoría de las altas no vuelve nunca.
+    |
+    | Se cuenta desde el último ingreso AL PANEL, o desde el alta si nunca hubo
+    | ninguno. Sólo acorta: un demo usado sigue venciendo en su fecha, nunca
+    | después.
+    |
+    | Es un número de producto, no técnico, y por eso vive acá: bajarlo cuando
+    | falta cupo no debería requerir un despliegue. Cero lo apaga.
+    |
+    */
+
+    'dias_sin_uso' => (int) env('TENANCY_DIAS_SIN_USO', 5),
+
+    /*
+    |---------------------------------------------------------------------------
     | Dominio base
     |---------------------------------------------------------------------------
     |

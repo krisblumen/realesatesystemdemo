@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Tenancy\AprovisionaInquilinos;
+use App\Tenancy\EntregaElAcceso;
 use App\Tenancy\ResultadoDeAlta;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -52,8 +53,16 @@ class AprovisionaUnInquilino implements ShouldQueue
         $this->onQueue('altas');
     }
 
-    public function handle(AprovisionaInquilinos $alta): ResultadoDeAlta
+    public function handle(AprovisionaInquilinos $alta, EntregaElAcceso $entrega): ResultadoDeAlta
     {
-        return $alta->crear($this->email, $this->origenHash);
+        $resultado = $alta->crear($this->email, $this->origenHash);
+
+        // LA ENTREGA VA ACÁ ADENTRO, y no en quien despacha. Desde el registro
+        // público nadie está mirando una terminal: el correo no acompaña al
+        // acceso, ES el acceso. Si viviera afuera, el camino encolado crearía
+        // inquilinos a los que su dueño no puede entrar.
+        return $resultado->conFalloDeCorreo(
+            $entrega->entregar($resultado->tenant, $resultado->password),
+        );
     }
 }

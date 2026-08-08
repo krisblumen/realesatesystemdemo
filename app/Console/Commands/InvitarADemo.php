@@ -2,19 +2,14 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\TenantEstado;
 use App\Jobs\AprovisionaUnInquilino;
 use App\Models\Tenant;
-use App\Notifications\AltaDeDemoEntregada;
-use App\Notifications\InvitacionAlDemo;
 use App\Tenancy\AprovisionaInquilinos;
 use App\Tenancy\LimiteAlcanzado;
 use App\Tenancy\LimiteDeAltas;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
-use Throwable;
 
 /**
  * Invita a alguien al demo: aprovisiona su inquilino e imprime el acceso.
@@ -44,7 +39,7 @@ class InvitarADemo extends Command
             return self::FAILURE;
         }
 
-        if ($this->yaTieneUnoActivo($email)) {
+        if (Tenant::hayUnoActivoPara($email)) {
             $this->components->error("Ya hay un inquilino activo para «{$email}».");
             $this->line('  Si hace falta uno nuevo, hay que expirar el anterior primero.');
 
@@ -91,47 +86,20 @@ class InvitarADemo extends Command
 
         $this->mostrarAcceso($resultado->tenant, $resultado->password);
 
-        $this->avisar($resultado->tenant, $resultado->password);
-
-        return self::SUCCESS;
-    }
-
-    private function yaTieneUnoActivo(string $email): bool
-    {
-        return Tenant::query()
-            ->where('email', $email)
-            ->whereIn('estado', [TenantEstado::Activo->value, TenantEstado::Aprovisionando->value])
-            ->exists();
-    }
-
-    /**
-     * Los dos correos, DESPUÉS de mostrar el acceso en pantalla.
-     *
-     * El orden importa y viene de RFC-11: el correo va ADEMÁS, no en lugar de.
-     * Es el eslabón que no controlamos —cae en spam, se demora, rebota— y si su
-     * fallo tumbara el alta, cada problema de correo dejaría un inquilino
-     * aprovisionado y a nadie adentro. Con el acceso ya impreso, quien invitó
-     * puede entregarlo a mano.
-     *
-     * Por eso se atrapa y se avisa, en vez de dejar reventar.
-     */
-    private function avisar(Tenant $tenant, string $password): void
-    {
-        $operador = (string) config('tenancy.aviso_de_altas', '');
-
-        try {
-            Notification::route('mail', $tenant->email)
-                ->notify(new InvitacionAlDemo($tenant, $password));
-
-            if ($operador !== '') {
-                Notification::route('mail', $operador)
-                    ->notify(new AltaDeDemoEntregada($tenant));
-            }
-        } catch (Throwable $e) {
+        // EL CORREO YA SALIÓ, adentro del trabajo — o no salió, y acá se dice.
+        //
+        // El orden se invirtió respecto de RFC-11 y la garantía sigue en pie: lo
+        // que esa regla protege es que un problema de correo no deje un
+        // inquilino aprovisionado y a nadie adentro. Eso ahora lo sostiene la
+        // entrega, que devuelve el fallo en vez de lanzarlo. El acceso de arriba
+        // se imprimió igual.
+        if ($resultado->falloDeCorreo !== null) {
             $this->newLine();
-            $this->components->warn('El inquilino se creó, pero el correo no salió: '.$e->getMessage());
+            $this->components->warn('El inquilino se creó, pero el correo no salió: '.$resultado->falloDeCorreo->getMessage());
             $this->line('  El acceso de arriba sigue siendo válido. Entregalo a mano.');
         }
+
+        return self::SUCCESS;
     }
 
     private function mostrarAcceso(Tenant $tenant, string $password): void
