@@ -43,6 +43,11 @@ class AtiendeElHostCentral
      */
     private const PROPIAS = [
         'up',
+
+        // El registro público de un demo (fase 2). Sin esta excepción, el host
+        // central redirigiría al sitio promocional y la única puerta de entrada
+        // al demo quedaría inalcanzable.
+        'guest',
     ];
 
     public function handle(Request $request, Closure $next): Response

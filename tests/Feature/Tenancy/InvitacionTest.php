@@ -7,7 +7,6 @@ use App\Jobs\AprovisionaUnInquilino;
 use App\Models\Tenant;
 use App\Notifications\AltaDeDemoEntregada;
 use App\Notifications\InvitacionAlDemo;
-use App\Tenancy\AprovisionaInquilinos;
 use App\Tenancy\LimiteDeAltas;
 use Illuminate\Contracts\Notifications\Dispatcher;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -266,7 +265,9 @@ class InvitacionTest extends TestCase
 
         $trabajo = new AprovisionaUnInquilino('invitado@ejemplo.com', $hash);
 
-        $resultado = $trabajo->handle(app(AprovisionaInquilinos::class));
+        // Se resuelve por el contenedor, igual que lo hace la cola: así el test
+        // no queda atado a la firma de `handle()`.
+        $resultado = app()->call([$trabajo, 'handle']);
 
         $this->assertSame(TenantEstado::Activo, $resultado->tenant->estado);
 
@@ -321,5 +322,45 @@ class InvitacionTest extends TestCase
         $this->assertNull(
             Tenant::query()->firstWhere('email', 'invitado@ejemplo.com')?->origen_hash,
         );
+    }
+
+    public function test_the_queued_path_delivers_the_access_by_mail(): void
+    {
+        // LO QUE FALTABA PARA QUE EL REGISTRO PÚBLICO SIRVA DE ALGO.
+        //
+        // Los correos vivían en `demo:invitar`. Un alta encolada creaba la base,
+        // el owner y la contraseña — y no avisaba a nadie. La contraseña sólo
+        // existe en memoria: el inquilino quedaba con dueño que no puede entrar.
+        //
+        // Se corre el trabajo SOLO, sin comando, que es como corre en el worker.
+        Notification::fake();
+
+        $trabajo = new AprovisionaUnInquilino('invitado@ejemplo.com');
+
+        app()->call([$trabajo, 'handle']);
+
+        Notification::assertSentOnDemand(
+            InvitacionAlDemo::class,
+            fn ($n, $canales, AnonymousNotifiable $a) => $a->routes['mail'] === 'invitado@ejemplo.com',
+        );
+    }
+
+    public function test_a_queued_alta_survives_a_mail_that_does_not_go_out(): void
+    {
+        // El correo es el eslabón que no controlamos, y acá NADIE está mirando:
+        // si su fallo tumbara el trabajo, el alta se marcaría fallida y la base
+        // recién creada se borraría — por un problema de SMTP.
+        //
+        // El fallo viaja como dato. El inquilino queda activo y se puede reemitir
+        // el acceso con `demo:reemitir-acceso`.
+        $this->mock(Dispatcher::class, function ($mock): void {
+            $mock->shouldReceive('send')->andThrow(new \RuntimeException('smtp caído'));
+            $mock->shouldReceive('sendNow')->andThrow(new \RuntimeException('smtp caído'));
+        });
+
+        $resultado = app()->call([new AprovisionaUnInquilino('invitado@ejemplo.com'), 'handle']);
+
+        $this->assertSame(TenantEstado::Activo, $resultado->tenant->estado);
+        $this->assertNotNull($resultado->falloDeCorreo, 'El fallo tiene que llegar a quien despachó, no perderse.');
     }
 }

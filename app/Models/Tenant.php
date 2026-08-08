@@ -81,6 +81,22 @@ class Tenant extends Model
     /**
      * Los inquilinos a los que hay que correrles las tareas programadas.
      */
+    /**
+     * ¿Este correo ya tiene un demo con base viva?
+     *
+     * VIVE EN EL MODELO porque lo preguntan dos caminos —la consola y el
+     * registro público— y la respuesta tiene que ser la misma. Cuenta también
+     * los que están APROVISIONANDO: dos altas simultáneas para el mismo correo
+     * dejarían dos bases y sólo una accesible.
+     */
+    public static function hayUnoActivoPara(string $email): bool
+    {
+        return self::query()
+            ->where('email', $email)
+            ->whereIn('estado', [TenantEstado::Activo->value, TenantEstado::Aprovisionando->value])
+            ->exists();
+    }
+
     public function scopeQueRecibenTareas(Builder $query): Builder
     {
         $estados = array_values(array_filter(

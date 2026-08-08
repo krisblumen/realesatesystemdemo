@@ -328,6 +328,33 @@ Una línea, como el usuario del sitio y desde el directorio de producción:
 * * * * * cd /home/<usuario>/htdocs/<dominio> && DB_DATABASE=demo_central php artisan schedule:run >> /dev/null 2>&1
 ```
 
+## El registro público vive en `/guest` del host central
+
+`https://demo.landracore.com/guest`. La dirección es discreta a propósito
+mientras el demo se asienta, y **eso no es lo que la protege**: una dirección se
+comparte, se filtra y se adivina. Lo que la protege son los topes de RFC-10, que
+se aplican igual ahora que cuando la publiquemos.
+
+| Capa | Qué frena |
+|---|---|
+| `throttle:10,1` | Que martillen el endpoint. No protege la instancia, sólo la puerta |
+| Tope duro (RFC-10) | Que el demo se lleve las 100 conexiones que compartimos con la producción vecina |
+| Tope por origen (RFC-10) | Que una sola persona se lleve el cupo de todos. Tres por día |
+| Correo ya registrado | Un segundo demo para quien ya tiene uno |
+| Señuelo | Robots que llenan todos los campos que encuentran |
+
+Los topes se comprueban **antes de encolar**. Encolar altas que van a fallar es
+acumular basura: la cola las levanta, el alta revienta contra el tope, y queda
+una fila fallida por cada intento.
+
+`/guest` está exceptuada en `AtiendeElHostCentral`. Sin esa excepción el host
+central la redirigiría al sitio promocional y la única puerta de entrada al demo
+quedaría inalcanzable — con un 302, no con un error.
+
+**La cola `altas` deja de ser opcional acá.** Con `demo:invitar` el alta corría
+en el momento y la cola no hacía falta. Desde el registro público, si el worker
+no está andando, la persona ve «en un minuto te llega» y no le llega nunca.
+
 ### Y una SEGUNDA línea, sólo para las altas
 
 El alta de un inquilino no viaja por esa cola: va por la suya, `altas`, atendida

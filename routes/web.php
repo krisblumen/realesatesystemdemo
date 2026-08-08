@@ -13,9 +13,28 @@ use App\Http\Controllers\PropertyPdfController;
 use App\Http\Controllers\Public\ContratoFirmaController;
 use App\Http\Controllers\Public\ContratoPublicoController;
 use App\Http\Controllers\Public\ContratoVerificacionController;
+use App\Http\Controllers\RegistroDeDemoController;
 use App\Http\Controllers\SitemapController;
 use App\Tenancy\CompartirElSitio;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Registro público de un demo (EPICA-DEMO fase 2)
+|--------------------------------------------------------------------------
+|
+| Sólo lo atiende el HOST CENTRAL; el controlador lo hace cumplir. En un
+| subdominio de inquilino da 404, porque ahí no significa nada.
+|
+| El `throttle` no reemplaza a los topes de RFC-10: protege el endpoint de que
+| lo martillen, los topes protegen la instancia de quedarse sin conexiones. Son
+| dos problemas distintos y ninguno cubre al otro.
+|
+*/
+Route::get('/guest', [RegistroDeDemoController::class, 'show'])->name('registro.formulario');
+Route::post('/guest', [RegistroDeDemoController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('registro.enviar');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
