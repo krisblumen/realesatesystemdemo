@@ -31,7 +31,14 @@ class AprovisionaInquilinos
 
     public function __construct(private readonly CreadorDeOwner $creadorDeOwner) {}
 
-    public function crear(string $email): ResultadoDeAlta
+    /**
+     * @param  string|null  $origenHash  Hash con sal del origen, para el límite
+     *                                   por origen (RFC-10). Nulo desde la
+     *                                   invitación por consola: no hay origen que
+     *                                   contar, y uno inventado ensuciaría el
+     *                                   conteo del registro público.
+     */
+    public function crear(string $email, ?string $origenHash = null): ResultadoDeAlta
     {
         $slug = $this->slugLibre();
 
@@ -42,6 +49,7 @@ class AprovisionaInquilinos
             'template_version' => Config::get('tenancy.plantilla_vigente'),
             'expira_en' => now()->addDays((int) Config::get('tenancy.dias_de_vida', 30)),
             'estado' => TenantEstado::Aprovisionando,
+            'origen_hash' => $origenHash,
         ]);
 
         try {

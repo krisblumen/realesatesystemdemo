@@ -3,13 +3,18 @@
 namespace Tests\Feature\Tenancy;
 
 use App\Enums\TenantEstado;
+use App\Jobs\AprovisionaUnInquilino;
 use App\Models\Tenant;
 use App\Notifications\AltaDeDemoEntregada;
 use App\Notifications\InvitacionAlDemo;
+use App\Tenancy\AprovisionaInquilinos;
+use App\Tenancy\LimiteDeAltas;
 use Illuminate\Contracts\Notifications\Dispatcher;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 use Tests\Concerns\UsaBaseCentral;
 use Tests\TestCase;
 
@@ -35,6 +40,8 @@ class InvitacionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        config(['tenancy.limites.sal' => 'una-sal-de-prueba']);
 
         if (! self::$plantillaLista) {
             $this->artisan('demo:plantilla:construir', ['nombre' => self::PLANTILLA, '--force' => true])
@@ -244,6 +251,75 @@ class InvitacionTest extends TestCase
         $this->assertNotNull(
             Tenant::query()->firstWhere('email', 'invitado@ejemplo.com'),
             'El inquilino se creó igual: el correo no manda sobre el alta.',
+        );
+    }
+
+    public function test_the_job_run_on_its_own_leaves_a_tenant_that_works(): void
+    {
+        // EL TRABAJO CORRIDO SOLO, que es como va a correr desde el registro
+        // público: sin comando, sin nadie mirando, adentro del worker.
+        //
+        // Es lo único que prueba que la contraseña que devuelve sirve de verdad.
+        // Un alta que crea la base pero deja al owner sin poder entrar termina
+        // igual: alguien esperando un correo con un acceso que no abre nada.
+        $hash = app(LimiteDeAltas::class)->hashDe('203.0.113.7');
+
+        $trabajo = new AprovisionaUnInquilino('invitado@ejemplo.com', $hash);
+
+        $resultado = $trabajo->handle(app(AprovisionaInquilinos::class));
+
+        $this->assertSame(TenantEstado::Activo, $resultado->tenant->estado);
+
+        // EL ORIGEN TIENE QUE LLEGAR HASTA LA FILA, y no basta con que el
+        // trabajo lo lleve en una propiedad: el límite por origen (RFC-10)
+        // cuenta filas del padrón. Si el trabajo lo recibiera y no lo pasara al
+        // alta, el registro público quedaría sin freno por origen y nada avisaría.
+        $this->assertSame($hash, $resultado->tenant->fresh()->origen_hash);
+
+        // Conexión propia y efímera, nunca reapuntando la por defecto: el mismo
+        // cuidado de `AltaDeInquilinoTest`, y por el mismo motivo.
+        config(['database.connections.probe_alta' => array_merge(
+            config('database.connections.pgsql'),
+            ['database' => $resultado->tenant->database],
+        )]);
+        DB::purge('probe_alta');
+
+        try {
+            $usuario = DB::connection('probe_alta')
+                ->table('users')->where('email', 'invitado@ejemplo.com')->first();
+        } finally {
+            DB::purge('probe_alta');
+        }
+
+        $this->assertNotNull($usuario, 'El inquilino nace con su owner adentro.');
+        $this->assertTrue(
+            Hash::check($resultado->password, $usuario->password),
+            'La contraseña que devuelve el trabajo tiene que ser con la que se entra.',
+        );
+    }
+
+    public function test_the_invitation_runs_it_now_and_shows_the_access(): void
+    {
+        // La invitación NO encola: la corre en el momento. Quien está en la
+        // terminal se entera ahí si funcionó.
+        Queue::fake();
+
+        $this->artisan('demo:invitar', ['email' => 'invitado@ejemplo.com'])
+            ->assertSuccessful();
+
+        Queue::assertNothingPushed();
+    }
+
+    public function test_a_tenant_created_without_origin_leaves_the_column_empty(): void
+    {
+        // La invitación por consola no tiene origen: a quien invita lo limita
+        // ser el operador. Un hash inventado ahí ensuciaría el conteo del
+        // registro público.
+        $this->artisan('demo:invitar', ['email' => 'invitado@ejemplo.com'])
+            ->assertSuccessful();
+
+        $this->assertNull(
+            Tenant::query()->firstWhere('email', 'invitado@ejemplo.com')?->origen_hash,
         );
     }
 }
