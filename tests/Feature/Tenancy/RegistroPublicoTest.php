@@ -6,6 +6,7 @@ use App\Enums\TenantEstado;
 use App\Jobs\AprovisionaUnInquilino;
 use App\Models\Tenant;
 use App\Tenancy\LimiteDeAltas;
+use Illuminate\Cache\RateLimiter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Testing\TestResponse;
@@ -191,5 +192,58 @@ class RegistroPublicoTest extends TestCase
             $robot->baseResponse->getSession()?->get('registro.listo'),
         );
         $robot->assertSessionHasNoErrors();
+    }
+
+    public function test_the_rate_limiter_does_not_die_against_the_sentinel(): void
+    {
+        // EL 500 QUE ESTO CIERRA, y salió en producción a los diez minutos de
+        // desplegar el registro público.
+        //
+        // `AppServiceProvider::boot()` llama a `RateLimiter::for()` para los
+        // contratos públicos. Eso construye el SINGLETON del limitador durante
+        // el arranque —antes de que corra un solo middleware— y su almacén de
+        // caché se queda con la conexión que había en ese momento: la por
+        // defecto, o sea el centinela.
+        //
+        // `ResolveTenant` reapunta la conexión después, pero el limitador ya
+        // tiene la suya guardada y no se entera nunca. Cualquier ruta con
+        // `throttle` muere con «database demo_sin_resolver does not exist».
+        //
+        // No es sólo esta ruta: los contratos públicos tienen el mismo defecto
+        // desde antes, y nadie lo había visto porque su correo nunca llegaba.
+        config([
+            // LA CONFIGURACIÓN DE PRODUCCIÓN, puesta a mano. La suite corre con
+            // `array` en los dos —caché y limitador— para que cada test arranque
+            // limpio, y por eso este defecto pasó todos los tests: con `array`
+            // no hay ninguna base contra la cual fallar.
+            'cache.default' => 'database',
+            'cache.limiter' => 'limitador',
+            'database.connections.pgsql.database' => 'demo_centinela_de_prueba',
+        ]);
+        DB::purge('pgsql');
+
+        // El arranque, simulado: el limitador se ata acá.
+        $this->app->forgetInstance(RateLimiter::class);
+        $this->app->make(RateLimiter::class);
+
+        Queue::fake();
+
+        $this->registrar()->assertRedirect();
+
+        Queue::assertPushed(AprovisionaUnInquilino::class);
+    }
+
+    public function test_the_shipped_config_points_the_limiter_at_its_own_store(): void
+    {
+        // GUARDA DE CABLEADO, y lo digo porque es más débil que el test de
+        // arriba: `phpunit.xml` fuerza `CACHE_LIMITER=array` para aislar los
+        // tests, así que en la suite nunca se lee el valor real. Sin esta
+        // comprobación, alguien podría quitar el default de `config/cache.php`
+        // y todo seguiría en verde mientras producción vuelve al 500.
+        $this->assertStringContainsString(
+            "'limiter' => env('CACHE_LIMITER', 'limitador')",
+            (string) file_get_contents(config_path('cache.php')),
+            'Sin un almacén propio, el limitador hereda el del arranque: el centinela.',
+        );
     }
 }

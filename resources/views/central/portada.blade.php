@@ -6,6 +6,6 @@
 
     <p>
         Cada demo vive en su propia dirección, y llega por invitación.
-        Si ya tenés la tuya, entrá por ahí.
+        Si ya tienes la tuya, entra por ahí.
     </p>
 @endsection

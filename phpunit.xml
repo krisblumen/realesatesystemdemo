@@ -26,6 +26,15 @@
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
+
+        <!-- El limitador también en memoria, por AISLAMIENTO y no por comodidad.
+             En producción vive en la central (ver `config/cache.php`), que es una
+             base de verdad: los intentos de login se acumularían entre tests hasta
+             que el propio limitador de Filament los corte, y caerían nueve tests de
+             Auth por una razón que no tiene nada que ver con lo que prueban.
+             `ColaDelInquilinoTest` y `RegistroPublicoTest` vuelven a la
+             configuración real cuando necesitan probarla. -->
+        <env name="CACHE_LIMITER" value="array"/>
         <env name="DB_CONNECTION" value="pgsql"/>
         <env name="DB_DATABASE" value="demo_test"/>
         <env name="DB_CENTRAL_DATABASE" value="demo_test_central"/>

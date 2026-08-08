@@ -106,7 +106,7 @@ class ReemitirAcceso extends Command
             ['Vence', $tenant->expira_en?->format('Y-m-d')],
         ]);
 
-        $this->components->warn('La contraseña no se vuelve a mostrar. Copiala ahora.');
+        $this->components->warn('La contraseña no se vuelve a mostrar. Cópiala ahora.');
         $this->line('  La anterior dejó de servir, y las sesiones recordadas también.');
     }
 }

@@ -35,7 +35,7 @@
                         Todavía no subiste tu logo
                     </p>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Mientras tanto tu sitio muestra una marca genérica. Subí la tuya
+                        Mientras tanto tu sitio muestra una marca genérica. Sube la tuya
                         y aparece en el encabezado, el pie y al compartir el enlace.
                     </p>
                 </div>

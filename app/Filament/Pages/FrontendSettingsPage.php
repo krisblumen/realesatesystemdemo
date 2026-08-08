@@ -326,7 +326,7 @@ class FrontendSettingsPage extends Page implements HasForms
                     ])->columns(2),
 
                 Section::make('Cómo se ve tu sitio al compartirlo (SEO)')
-                    ->description('Cuando alguien comparte el enlace de tu sitio en WhatsApp, Facebook o LinkedIn, o lo encuentra en Google, se muestra un título, una descripción y la imagen de redes. Escribí los textos y mirá abajo la vista previa en vivo. Si una página define los suyos, esos ganan; si no, se usan estos.')
+                    ->description('Cuando alguien comparte el enlace de tu sitio en WhatsApp, Facebook o LinkedIn, o lo encuentra en Google, se muestra un título, una descripción y la imagen de redes. Escribe los textos y revisa abajo la vista previa en vivo. Si una página define los suyos, esos ganan; si no, se usan estos.')
                     ->schema([
                         Fieldset::make('En buscadores (Google)')->columns(1)->schema([
                             TextInput::make('default_meta_title')->label('Título')->maxLength(255)->live(onBlur: true)
@@ -336,9 +336,9 @@ class FrontendSettingsPage extends Page implements HasForms
                         ]),
                         Fieldset::make('Al compartir en redes (WhatsApp, Facebook…)')->columns(1)->schema([
                             TextInput::make('default_og_title')->label('Título')->maxLength(255)->live(onBlur: true)
-                                ->helperText('Si lo dejás vacío, se usa el título de buscadores.'),
+                                ->helperText('Si lo dejas vacío, se usa el título de buscadores.'),
                             Textarea::make('default_og_description')->label('Descripción')->maxLength(300)->rows(2)->live(onBlur: true)
-                                ->helperText('Si la dejás vacía, se usa la descripción de buscadores.'),
+                                ->helperText('Si la dejas vacía, se usa la descripción de buscadores.'),
                         ]),
                         Placeholder::make('seo_preview')
                             ->label('Vista previa al compartir el enlace')
@@ -414,12 +414,12 @@ class FrontendSettingsPage extends Page implements HasForms
                     ])->columns(2),
 
                 Section::make('Navegación principal')
-                    ->description('Cada fila: la página, su etiqueta (vacío = nombre por defecto) y si está visible. Arrastrá para reordenar. Solo se pueden elegir páginas existentes; si dejás todo oculto, no se podrá guardar. Sin configuración, el menú muestra las siete páginas actuales.')
+                    ->description('Cada fila: la página, su etiqueta (vacío = nombre por defecto) y si está visible. Arrastra para reordenar. Solo se pueden elegir páginas existentes; si dejas todo oculto, no se podrá guardar. Sin configuración, el menú muestra las siete páginas actuales.')
                     ->schema([
                         Repeater::make('navigation')
                             ->hiddenLabel()
                             ->schema([
-                                Select::make('key')->hiddenLabel()->prefix('Página')->placeholder('Elegí una')
+                                Select::make('key')->hiddenLabel()->prefix('Página')->placeholder('Elige una')
                                     ->options($this->navigationOptions())->required()->distinct()->native(false)
                                     ->columnSpan(['default' => 1, 'sm' => 5]),
                                 TextInput::make('label')->hiddenLabel()->prefix('Etiqueta')->placeholder('Nombre por defecto')->maxLength(40)
@@ -534,16 +534,16 @@ class FrontendSettingsPage extends Page implements HasForms
                 const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
                 const p = ctx.getImageData(cx, cy, 1, 1).data;
                 this.picked = '#' + [p[0], p[1], p[2]].map(v => v.toString(16).padStart(2, '0')).join(''); this.copied = false;
-            } catch (err) { alert('No se pudo leer el color de esta imagen. Probá el botón Cuentagotas.'); }
+            } catch (err) { alert('No se pudo leer el color de esta imagen. Prueba el botón Cuentagotas.'); }
         },
         async eyedrop() {
-            if (!window.EyeDropper) { alert('El cuentagotas necesita Chrome o Edge. También podés hacer clic sobre el logo para tomar un color.'); return; }
+            if (!window.EyeDropper) { alert('El cuentagotas necesita Chrome o Edge. También puedes hacer clic sobre el logo para tomar un color.'); return; }
             try { const res = await new EyeDropper().open(); this.picked = res.sRGBHex; this.copied = false; } catch (e) {}
         },
         copy() { if (this.picked) { navigator.clipboard.writeText(this.picked); this.copied = true; } }
     }" style="border:1px solid #e5e7eb;border-radius:12px;padding:14px">
     <div style="font-size:13px;font-weight:600;color:#111827">Tu logotipo guardado</div>
-    <div style="font-size:12px;color:#6b7280;margin-top:2px">Hacé clic en cualquier parte de un logo para tomar ese color, o usá el cuentagotas.</div>
+    <div style="font-size:12px;color:#6b7280;margin-top:2px">Haz clic en cualquier parte de un logo para tomar ese color, o usa el cuentagotas.</div>
     <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px">
         <div style="flex:1;min-width:160px;background:#ffffff;border:1px solid #f3f4f6;border-radius:10px;padding:16px;display:flex;align-items:center;justify-content:center">
             <img src="{$light}" alt="Logo fondo claro" @click="sample(\$event)" style="max-height:56px;max-width:90%;object-fit:contain;cursor:crosshair">

@@ -335,7 +335,7 @@ class PropertyResource extends Resource
                         ->imageEditor()
                         ->maxSize(self::MAX_FOTO_KB)
                         ->imageEditorAspectRatios([null, '16:9', '4:3', '3:2', '1:1'])
-                        ->helperText('Obligatoria para publicar el inmueble. Podés recortarla libremente o elegir una proporción fija.'),
+                        ->helperText('Obligatoria para publicar el inmueble. Puedes recortarla libremente o elegir una proporción fija.'),
                     SpatieMediaLibraryFileUpload::make('gallery')
                         ->label('Galería')
                         ->collection('gallery')

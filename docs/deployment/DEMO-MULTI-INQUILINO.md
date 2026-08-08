@@ -328,6 +328,33 @@ Una línea, como el usuario del sitio y desde el directorio de producción:
 * * * * * cd /home/<usuario>/htdocs/<dominio> && DB_DATABASE=demo_central php artisan schedule:run >> /dev/null 2>&1
 ```
 
+## El limitador de peticiones vive en la central
+
+Un 500 en producción a los diez minutos de abrir `/guest`, y la causa vale más
+que el arreglo.
+
+`RateLimiter` es un **singleton** que Laravel construye la primera vez que
+alguien lo toca. En esta aplicación eso pasa en `AppServiceProvider::boot()`,
+donde se declaran los límites de los contratos públicos — o sea **antes de que
+corra un solo middleware**. Su almacén de caché se queda con la conexión que
+hubiera en ese momento: la por defecto sin inquilino resuelto, el centinela.
+
+`ResolveTenant` la reapunta después, pero el limitador ya guardó la suya. El
+resultado era `FATAL: database "demo_sin_resolver" does not exist` en **toda**
+ruta con `throttle` — incluidas las de firma de contratos, que arrastraban el
+defecto desde antes. Nadie lo había visto porque su correo nunca llegaba.
+
+Por eso `config/cache.php` define un almacén `limitador` con la conexión
+DECLARADA a la central, y `'limiter'` apunta ahí. La central es la única base
+que existe y es correcta en el arranque, cuando todavía no hay petición. Y encaja
+con lo que un limitador cuenta: los intentos son por dirección IP, no por
+inquilino — un mismo atacante contra tres demos es un solo balde, no tres.
+
+La suite corre con `CACHE_LIMITER=array` por aislamiento: en una base de verdad
+los intentos de login se acumulan entre tests. Esa es también la razón por la que
+el defecto pasó 1775 tests — con `array` no hay ninguna base contra la cual
+fallar.
+
 ## El demo al que nadie entra se suelta antes
 
 Con el registro público la mayoría de las altas no vuelve nunca: alguien deja su
