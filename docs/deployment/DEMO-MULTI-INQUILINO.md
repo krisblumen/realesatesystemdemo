@@ -357,6 +357,29 @@ aplicación entera — un secreto en un archivo del usuario del sitio contra un
 privilegio permanente en el rol que atiende peticiones. El intercambio conviene,
 pero es un intercambio.
 
+### Un trabajo encolado vuelve solo a su inquilino
+
+Un worker no tiene subdominio del cual deducir de quién es el trabajo que
+levanta. Lo resuelve `app/Tenancy/InquilinoEnLaCola.php`: al encolar se sella la
+base del inquilino en el PAYLOAD, y al procesar se apunta la conexión desde el
+evento `JobProcessing`.
+
+**Tiene que ser el payload y tiene que ser ese evento**, y se descubrió con un
+fallo real del 2026-08-07. Las notificaciones de Laravel usan `SerializesModels`,
+así que el modelo no viaja entero: viaja como identificador y se re-consulta al
+DESERIALIZAR, dentro de `CallQueuedHandler::getCommand()`. Eso ocurre antes de
+que exista una instancia del trabajo, así que un middleware de trabajo —que es lo
+que había— llegaba tarde por diseño. El payload se lee sin deserializar nada, y
+`JobProcessing` se dispara antes.
+
+El síntoma era invisible desde el panel: un agente enviaba el contrato a su
+cliente, la notificación se encolaba, el worker moría con
+«relation "contratos_intermediacion" does not exist» y el agente creía que lo
+había mandado.
+
+Un trabajo SIN inquilino no se sella ni se toca: el alta de un inquilino corre
+cuando su base todavía no existe, y el registro público vive en el host central.
+
 ### El fallo del fallo
 
 `failed_jobs` y `job_batches` están fijados a la conexión `central` en
