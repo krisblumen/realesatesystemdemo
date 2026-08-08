@@ -33,6 +33,6 @@ class CreateServiceType extends CreateRecord
         return Notification::make()
             ->success()
             ->title('Tipo de servicio creado')
-            ->body('Andá a «Servicios del sitio» para escribirle el contenido y activarlo — por ahora no se muestra en el sitio.');
+            ->body('Ve a «Servicios del sitio» para escribirle el contenido y activarlo — por ahora no se muestra en el sitio.');
     }
 }

@@ -35,7 +35,7 @@
             <p>
                 Hay un enlace activo. Vence el
                 <strong>{{ $vigente->expira_en->translatedFormat('j \d\e F \d\e Y') }}</strong>,
-                y podés revocarlo antes desde el botón de arriba.
+                y puedes revocarlo antes desde el botón de arriba.
             </p>
             <p class="fi-fo-field-wrp-hint">
                 No se puede volver a mostrar, porque no se guarda: si lo perdiste,

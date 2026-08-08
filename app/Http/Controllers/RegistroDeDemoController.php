@@ -50,7 +50,7 @@ class RegistroDeDemoController extends Controller
             'email' => ['required', 'string', 'email:rfc', 'max:190'],
         ], [
             'email.required' => 'Hace falta un correo para mandarte el acceso.',
-            'email.email' => 'Ese correo no parece válido. Revisalo y probá de nuevo.',
+            'email.email' => 'Ese correo no parece válido. Revísalo e inténtalo de nuevo.',
         ]);
 
         // EL SEÑUELO SE ATIENDE EN SILENCIO. Contestar «error» le enseña al robot
@@ -69,7 +69,7 @@ class RegistroDeDemoController extends Controller
         // intentos por día, así que no sirve para recorrer una lista.
         if (Tenant::hayUnoActivoPara($email)) {
             return back()->withInput()->withErrors([
-                'email' => 'Ya hay un demo activo para ese correo. Revisá tu bandeja, y el spam.',
+                'email' => 'Ya hay un demo activo para ese correo. Revisa tu bandeja de entrada y la carpeta de spam.',
             ]);
         }
 
@@ -96,7 +96,7 @@ class RegistroDeDemoController extends Controller
     {
         return back()->with(
             'registro.listo',
-            'Listo. En un minuto te llega un correo con tu acceso. Si no aparece, mirá el spam.',
+            'Listo. En un minuto te llega un correo con tu acceso. Si no aparece, revisa la carpeta de spam.',
         );
     }
 

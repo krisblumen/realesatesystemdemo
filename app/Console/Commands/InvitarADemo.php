@@ -96,7 +96,7 @@ class InvitarADemo extends Command
         if ($resultado->falloDeCorreo !== null) {
             $this->newLine();
             $this->components->warn('El inquilino se creó, pero el correo no salió: '.$resultado->falloDeCorreo->getMessage());
-            $this->line('  El acceso de arriba sigue siendo válido. Entregalo a mano.');
+            $this->line('  El acceso de arriba sigue siendo válido. Entrégalo a mano.');
         }
 
         return self::SUCCESS;
@@ -129,7 +129,7 @@ class InvitarADemo extends Command
 
         // Se muestra UNA sola vez: en la base ya quedó hasheada. Si se pierde no
         // hay forma de recuperarla, sólo de regenerarla.
-        $this->components->warn('La contraseña no se vuelve a mostrar. Copiala ahora.');
+        $this->components->warn('La contraseña no se vuelve a mostrar. Cópiala ahora.');
         $this->line("  Si se pierde: `php artisan demo:reemitir-acceso {$tenant->slug}`.");
 
         $this->newLine();

@@ -283,7 +283,7 @@ class SectionsRelationManager extends RelationManager
                         Fieldset::make('Botón secundario (opcional)')->columns(3)->schema(CtaFields::make('payload.secondary_cta')),
                         Repeater::make('payload.bullets')
                             ->label('Datos destacados (opcional)')
-                            ->helperText('Van a la derecha, al lado del texto. Hasta 5. Si no cargás ninguno, el bloque se ve centrado y a todo el ancho, como hasta ahora. A partir del cuarto se muestran más chicos para que la tarjeta no crezca de alto.')
+                            ->helperText('Van a la derecha, al lado del texto. Hasta 5. Si no cargas ninguno, el bloque se ve centrado y a todo el ancho, como hasta ahora. A partir del cuarto se muestran más chicos para que la tarjeta no crezca de alto.')
                             ->schema([
                                 // Ocho caracteres: el dato comparte el renglón con
                                 // su explicación, y uno largo se comería el ancho
@@ -368,7 +368,7 @@ class SectionsRelationManager extends RelationManager
                                         ->needsDarkText($get('payload.icon_bg_color') ?? 'navy')
                                             ? 'primary'
                                             : 'neutral-0')
-                                    ->helperText('Si no elegís, se ajusta solo para que se vea sobre la placa.'),
+                                    ->helperText('Si no eliges, se ajusta solo para que se vea sobre la placa.'),
                             ]),
 
                         // La galería va ARRIBA de la lista y es sólo referencia
@@ -421,7 +421,7 @@ class SectionsRelationManager extends RelationManager
                                 ->needsDarkText($get('payload.background_color') ?? 'navy')
                                     ? 'primary'
                                     : 'neutral-0')
-                            ->helperText('Sólo el número grande. Si no elegís, se ajusta solo para que se lea sobre la tarjeta. El texto que explica la cifra siempre se ajusta solo.'),
+                            ->helperText('Sólo el número grande. Si no eliges, se ajusta solo para que se lea sobre la tarjeta. El texto que explica la cifra siempre se ajusta solo.'),
                     ]),
 
                 Repeater::make('payload.items')
@@ -483,7 +483,7 @@ class SectionsRelationManager extends RelationManager
                                 ->needsDarkText($get('payload.icon_bg_color') ?? 'navy')
                                     ? 'primary'
                                     : 'neutral-0')
-                            ->helperText('Si no elegís, se ajusta solo para que se vea sobre la placa.'),
+                            ->helperText('Si no eliges, se ajusta solo para que se vea sobre la placa.'),
                     ]),
 
                 // La galería va ARRIBA del repeater y es sólo de referencia: el
@@ -1221,7 +1221,7 @@ class SectionsRelationManager extends RelationManager
                         ->label('Color del borde')
                         ->view('filament.forms.color-palette')
                         ->default('accent')
-                        ->helperText('Los dos colores de tu marca, con dos variantes más oscuras y dos más claras. Si cambiás tu paleta en la configuración del sitio, el borde te sigue.')
+                        ->helperText('Los dos colores de tu marca, con dos variantes más oscuras y dos más claras. Si cambias tu paleta en la configuración del sitio, el borde te sigue.')
                         ->visible(fn (Get $get): bool => (bool) $get('payload.card_border'))
                         ->columnSpanFull(),
                 ]),

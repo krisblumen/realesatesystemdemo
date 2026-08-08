@@ -19,6 +19,31 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Almacén del limitador de peticiones
+    |--------------------------------------------------------------------------
+    |
+    | SE SEPARA DEL POR DEFECTO, Y NO ES ORGANIZACIÓN. El limitador es un
+    | SINGLETON que Laravel construye la primera vez que alguien lo toca, y en
+    | esta aplicación eso pasa en `AppServiceProvider::boot()` —donde se
+    | declaran los límites de los contratos públicos—, o sea ANTES de que corra
+    | un solo middleware.
+    |
+    | Su almacén se queda con la conexión que hubiera en ese momento, que es la
+    | por defecto sin inquilino resuelto: el centinela. `ResolveTenant` la
+    | reapunta después, pero el limitador ya guardó la suya y no se entera
+    | nunca. El resultado era un 500 en TODA ruta con `throttle`.
+    |
+    | Se apunta a la central porque es la única base que existe y es correcta en
+    | el arranque, cuando todavía no hay petición. Y encaja con lo que un
+    | limitador debe contar: los intentos son por dirección IP, no por
+    | inquilino — un mismo atacante contra tres demos es un solo balde, no tres.
+    |
+    */
+
+    'limiter' => env('CACHE_LIMITER', 'limitador'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Cache Stores
     |--------------------------------------------------------------------------
     |
@@ -37,6 +62,17 @@ return [
         'array' => [
             'driver' => 'array',
             'serialize' => false,
+        ],
+
+        // El almacén del limitador: mismo driver y misma tabla que el de arriba,
+        // pero con la conexión DECLARADA en vez de heredada. Ver la nota de
+        // `limiter`.
+        'limitador' => [
+            'driver' => 'database',
+            'connection' => env('DB_QUEUE_CONNECTION', 'central'),
+            'table' => env('DB_CACHE_TABLE', 'cache'),
+            'lock_connection' => env('DB_QUEUE_CONNECTION', 'central'),
+            'lock_table' => env('DB_CACHE_LOCK_TABLE'),
         ],
 
         'database' => [

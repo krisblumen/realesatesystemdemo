@@ -60,7 +60,7 @@ class InvitacionAlDemo extends Notification
             // fácil de copiar sin equivocarse.
             ->line("**Usuario:** `{$this->tenant->email}`")
             ->line("**Contraseña:** `{$this->password}`")
-            ->line('Guardá esta contraseña: no se vuelve a enviar.')
+            ->line('Guarda esta contraseña: no se vuelve a enviar.')
             ->line("Tu demo está disponible hasta el {$this->tenant->expira_en->translatedFormat('j \d\e F \d\e Y')}. Después se borra completo, con todo lo que hayas cargado.")
             // El límite de RFC-14, dicho a quien lo necesita saber. Un límite
             // conocido que no llega a quien sube los archivos no es un límite

@@ -9,13 +9,13 @@
 --}}
 @extends('central.layout')
 
-@section('titulo', 'Probá Landra')
+@section('titulo', 'Prueba Landra Core')
 
 @section('contenido')
-    <h1>Probá Landra con tu propio demo</h1>
+    <h1>Prueba Landra Core, un demo construido exclusivamente para ti</h1>
 
     <p>
-        Dejanos tu correo y te mandamos tu acceso: un sitio inmobiliario completo,
+        Déjanos tu correo y te enviamos tu acceso: un sitio inmobiliario completo,
         con su panel, cargado con datos de ejemplo para que lo recorras.
     </p>
 

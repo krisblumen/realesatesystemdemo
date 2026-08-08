@@ -68,7 +68,7 @@ class ProjectResource extends Resource
                         ->imageEditor()
                         ->maxSize(PropertyResource::MAX_FOTO_KB)
                         ->imageEditorAspectRatios([null, '16:9', '4:3', '3:2', '1:1'])
-                        ->helperText('Es la portada que se muestra en la vista pública. Podés recortarla libremente o elegir una proporción fija.'),
+                        ->helperText('Es la portada que se muestra en la vista pública. Puedes recortarla libremente o elegir una proporción fija.'),
                     SpatieMediaLibraryFileUpload::make('gallery')
                         ->label('Fotografías del proyecto')
                         ->collection('gallery')

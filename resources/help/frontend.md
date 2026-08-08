@@ -16,11 +16,11 @@ el sitio sigue mostrando exactamente el contenido actual (fallback), así que nu
   navegación, footer y CTAs) y la **disponibilidad de servicios** se aplican al guardar, tras pasar las
   validaciones. Su "vista previa" es el sitio en vivo.
 - **Borrador → Publicado**: las **páginas institucionales** guardan un borrador que solo llega al público
-  cuando pulsas **Publicar**. Podés revisar el borrador con **Vista previa** antes de publicar.
+  cuando pulsas **Publicar**. Puedes revisar el borrador con **Vista previa** antes de publicar.
 
 ## Vista previa
 
-En **Frontend → Vista previa** elegís una de las cinco páginas y ves su **borrador sin publicar** dentro
+En **Frontend → Vista previa** eliges una de las cinco páginas y ves su **borrador sin publicar** dentro
 del layout público real, con un banner que aclara que no es el sitio en vivo. La vista previa:
 
 - Solo es visible para el owner (nadie más puede abrirla).
@@ -30,7 +30,7 @@ del layout público real, con un banner que aclara que no es el sitio en vivo. L
 ## Publicar una página
 
 1. Editá la página y sus secciones desde su editor.
-2. Revisá el resultado en **Vista previa**.
+2. Revisa el resultado en **Vista previa**.
 3. Pulsá **Publicar**. El sistema valida la página (por ejemplo, exige que el encabezado/hero esté
    activo como H1) y, si otra persona editó el borrador desde que abriste la pantalla, rechaza la
    publicación para que recargues y no pises su cambio.
