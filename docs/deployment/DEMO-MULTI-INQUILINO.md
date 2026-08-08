@@ -320,14 +320,54 @@ el panel pisa el vhost y se lleva la excepción puesta a mano.
 **No hace falta un servicio de systemd para la cola.** El programa de tareas ya
 agenda `queue:work --stop-when-empty --max-time=55` cada minuto: drena la cola y
 sale. Un worker permanente sería una pieza más para vigilar a cambio de ahorrar
-como mucho un minuto de latencia — y el camino crítico, el alta de un inquilino,
-es síncrono y no pasa por la cola.
+como mucho un minuto de latencia.
 
 Una línea, como el usuario del sitio y desde el directorio de producción:
 
 ```cron
 * * * * * cd /home/<usuario>/htdocs/<dominio> && DB_DATABASE=demo_central php artisan schedule:run >> /dev/null 2>&1
 ```
+
+### Y una SEGUNDA línea, sólo para las altas
+
+El alta de un inquilino no viaja por esa cola: va por la suya, `altas`, atendida
+por un proceso aparte. **No es organización, es privilegio.**
+
+Crear una base exige `CREATEDB`, que tiene `demo_provisioner` y no `demo_app` —el
+rol con el que corre la aplicación, a propósito—. Si el alta cayera en la cola
+general, o el worker general llevaría `CREATEDB` (y entonces cualquier trabajo
+podría crear bases), o el alta moriría con «permission denied to create
+database». Una cola aparte deja ese privilegio en un solo proceso.
+
+```cron
+* * * * * cd /home/<usuario>/htdocs/<dominio> && DB_DATABASE=demo_central DB_USERNAME=demo_provisioner DB_PASSWORD='<clave del provisionador>' php artisan queue:work --queue=altas --stop-when-empty --max-time=55 >> storage/logs/altas.log 2>&1
+```
+
+Tres cosas de esa línea, que no son adorno:
+
+| Parte | Por qué |
+|---|---|
+| `--queue=altas` | Un worker sin `--queue` atiende `default` y nunca vería estos trabajos. El de arriba tampoco toma los de `altas`: las dos líneas no se pisan |
+| `DB_USERNAME` / `DB_PASSWORD` | La conexión de mantenimiento —la que corre `CREATE DATABASE`— los lee del entorno. Es el único lugar del despliegue donde aparece el provisionador |
+| `>> storage/logs/altas.log` | El otro cron va a `/dev/null` porque su salida es ruido. Acá no: si un alta falla, esto y la tabla `failed_jobs` son todo lo que queda |
+
+**La contraseña queda en el crontab**, y eso hay que saberlo en vez de
+descubrirlo: `crontab -l` la muestra. Es el precio de no darle `CREATEDB` a la
+aplicación entera — un secreto en un archivo del usuario del sitio contra un
+privilegio permanente en el rol que atiende peticiones. El intercambio conviene,
+pero es un intercambio.
+
+### El fallo del fallo
+
+`failed_jobs` y `job_batches` están fijados a la conexión `central` en
+`config/queue.php`, igual que la cola. Por defecto Laravel los deja heredando la
+conexión POR DEFECTO — que en un worker es el centinela, porque no hay subdominio
+que resolver.
+
+El resultado sería el peor modo de falla posible: un alta revienta, el sistema
+intenta anotar el fallo, y **anotarlo falla también**. Del inquilino que no se
+pudo crear no quedaría ni una fila que lo diga. Pesa el doble acá porque el
+trabajo no reintenta (`tries = 1`): un alta que falla va derecho a esa tabla.
 
 ### `DB_DATABASE=demo_central` no es opcional
 
@@ -624,6 +664,8 @@ del servidor y no del remitente, no alinean y DMARC falla.
 - [ ] Plantilla construida, y **ninguna** conexión de la aplicación apuntándole.
 - [ ] Línea de cron con `DB_DATABASE=demo_central php artisan schedule:run` como
       el usuario del sitio (no hace falta worker de systemd: el programa ya
+- [ ] Segunda línea de cron para la cola `altas`, con las credenciales del
+      provisionador. Sin ella el registro público encola y nada las atiende
       agenda la cola cada minuto). Sin esa variable el programador no arranca.
 - [ ] `demo_central` con las tablas `cache` y `cache_locks`, o los cerrojos del
       programador fallan y `demo:borrar` no corre.

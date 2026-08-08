@@ -111,12 +111,16 @@ img {
 
 /* Logo */
 
+/* La caja tiene que respetar la PROPORCIÓN del archivo (380x95, o sea 4:1).
+   Los clientes de correo no calculan proporciones: se les da ancho y alto, y lo
+   que entre ahí entra deformado si no coinciden. El logo anterior era casi
+   cuadrado dentro de una caja de 1.40 y se veía estirado en cada invitación. */
 .logo {
-    height: 114px;
+    height: 48px;
     margin-top: 15px;
     margin-bottom: 10px;
-    max-height: 114px;
-    width: 160px;
+    max-height: 48px;
+    width: 190px;
 }
 
 /* Body */

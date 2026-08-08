@@ -46,8 +46,20 @@ class InvitacionAlDemo extends Notification
             ->greeting('Hola')
             ->line('Preparamos un sistema completo para que lo pruebes: es tuyo, con tus propios datos, y nadie más lo ve.')
             ->action('Entrar a mi demo', $url)
-            ->line("**Usuario:** {$this->tenant->email}")
-            ->line("**Contraseña:** {$this->password}")
+            // ENTRE ACENTOS GRAVES, y no es un adorno tipográfico.
+            //
+            // El cuerpo se escribe en markdown, y `Str::password()` genera
+            // símbolos que markdown interpreta: `* _ [ ] \ < >`. Una contraseña
+            // con `ab*cd*ef` llegaba como `abcdef`, con «cd» en cursiva.
+            //
+            // El síntoma era cruel: quien invita ve la contraseña correcta en
+            // pantalla, el invitado recibe otra, y ninguno sabe por qué no entra.
+            //
+            // El acento grave NO está en ese alfabeto, así que sirve de
+            // delimitador seguro. Y de paso queda en monoespaciada, que es más
+            // fácil de copiar sin equivocarse.
+            ->line("**Usuario:** `{$this->tenant->email}`")
+            ->line("**Contraseña:** `{$this->password}`")
             ->line('Guardá esta contraseña: no se vuelve a enviar.')
             ->line("Tu demo está disponible hasta el {$this->tenant->expira_en->translatedFormat('j \d\e F \d\e Y')}. Después se borra completo, con todo lo que hayas cargado.")
             // El límite de RFC-14, dicho a quien lo necesita saber. Un límite

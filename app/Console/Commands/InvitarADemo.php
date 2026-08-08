@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Enums\TenantEstado;
+use App\Jobs\AprovisionaUnInquilino;
 use App\Models\Tenant;
 use App\Notifications\AltaDeDemoEntregada;
 use App\Notifications\InvitacionAlDemo;
@@ -10,6 +11,7 @@ use App\Tenancy\AprovisionaInquilinos;
 use App\Tenancy\LimiteAlcanzado;
 use App\Tenancy\LimiteDeAltas;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
@@ -72,7 +74,20 @@ class InvitarADemo extends Command
             return self::FAILURE;
         }
 
-        $resultado = $alta->crear($email);
+        // SE DESPACHA EL TRABAJO, no se llama al alta directo — y en el momento,
+        // no a la cola.
+        //
+        // El registro público encolará este MISMO trabajo: no puede sostener una
+        // petición HTTP mientras se copia una base. Acá hay alguien frente a una
+        // terminal que quiere saber si funcionó y ver el acceso, así que se
+        // corre ya. Una línea de diferencia, una sola implementación del alta.
+        //
+        // `dispatchNow` Y NO `dispatchSync`, que parece el nombre correcto y no
+        // lo es. Con un trabajo `ShouldQueue`, `dispatchSync()` no llama a
+        // `handle()`: lo empuja al driver `sync` de la cola (Dispatcher:102) y
+        // devuelve lo que devuelva la cola, que es `null`. El acceso se perdía
+        // en el camino y el comando reventaba con «property on null».
+        $resultado = Bus::dispatchNow(new AprovisionaUnInquilino($email));
 
         $this->mostrarAcceso($resultado->tenant, $resultado->password);
 

@@ -108,7 +108,9 @@ return [
     */
 
     'batching' => [
-        'database' => env('DB_CONNECTION', 'sqlite'),
+        // A la central, por el mismo motivo que la cola: heredar la conexión por
+        // defecto la deja resolviendo el centinela.
+        'database' => env('DB_QUEUE_CONNECTION', 'central'),
         'table' => 'job_batches',
     ],
 
@@ -127,7 +129,19 @@ return [
 
     'failed' => [
         'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
-        'database' => env('DB_CONNECTION', 'sqlite'),
+
+        // A LA CENTRAL, Y ES LO QUE MÁS IMPORTA DE LAS TRES.
+        //
+        // El registro de fallos es lo único que queda cuando un trabajo revienta
+        // en un proceso que nadie está mirando. Heredando la conexión por
+        // defecto —el centinela, porque un worker no tiene subdominio que
+        // resolver— el intento de anotar el fallo falla ÉL TAMBIÉN, y con eso se
+        // pierde el rastro del original.
+        //
+        // Pesa el doble desde que el alta corre en la cola: `tries = 1`, así que
+        // un alta que falla va derecho acá. Sin esta línea, un inquilino que no
+        // se pudo crear no dejaría ni una fila que lo diga.
+        'database' => env('DB_QUEUE_CONNECTION', 'central'),
         'table' => 'failed_jobs',
     ],
 
