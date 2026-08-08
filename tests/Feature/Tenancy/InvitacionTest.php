@@ -175,9 +175,14 @@ class InvitacionTest extends TestCase
             function (InvitacionAlDemo $aviso, array $canales, AnonymousNotifiable $a): bool {
                 $correo = $aviso->toMail($a)->render();
 
+                // Se compara sobre el texto VISIBLE y no sobre el HTML: la
+                // contraseña va en un bloque de código, así que `<` y `&`
+                // aparecen como entidades. Lo que importa es lo que se lee.
+                $visible = html_entity_decode(strip_tags($correo), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
                 return $a->routes['mail'] === 'invitado@ejemplo.com'
-                    && str_contains($correo, $aviso->password)
-                    && str_contains($correo, 'invitado@ejemplo.com');
+                    && str_contains($visible, $aviso->password)
+                    && str_contains($visible, 'invitado@ejemplo.com');
             },
         );
     }

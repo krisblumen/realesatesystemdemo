@@ -6,7 +6,6 @@ use App\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
  * Crea el usuario `owner` DENTRO de la base del inquilino.
@@ -24,7 +23,7 @@ class CreadorDeOwner
      */
     public function crear(Connection $conexion, string $email): string
     {
-        $password = Str::password(16);
+        $password = (new GeneradorDeClave)->generar();
 
         $usuarioId = $conexion->table('users')->insertGetId([
             'name' => 'Owner',

@@ -4,7 +4,6 @@ namespace App\Tenancy;
 
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
  * Le devuelve el acceso al `owner` de un inquilino que ya existe.
@@ -31,7 +30,7 @@ class ReemiteAcceso
             return null;
         }
 
-        $password = Str::password(16);
+        $password = (new GeneradorDeClave)->generar();
 
         $conexion->table('users')->where('id', $usuarioId)->update([
             'password' => Hash::make($password),

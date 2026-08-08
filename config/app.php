@@ -13,7 +13,14 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    /*
+     * El nombre por defecto es el del PRODUCTO, no «Laravel».
+     *
+     * Firma cada correo y aparece en su pie. Con el default genérico, una
+     * instalación que no defina la variable manda invitaciones firmadas por el
+     * framework — y quien las recibe no sabe qué es eso.
+     */
+    'name' => env('APP_NAME', 'Landra'),
 
     /*
     |--------------------------------------------------------------------------
@@ -78,7 +85,19 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    /*
+     * ESPAÑOL POR DEFECTO, y no por el `.env`.
+     *
+     * El producto está escrito en español —el panel, el sitio, los correos— así
+     * que el idioma es una propiedad de la aplicación, no de dónde se despliega.
+     * Con el default en `en`, cualquier instalación que no defina la variable
+     * manda correos mitad en español y mitad en inglés: el cuerpo lo escribimos
+     * nosotros, la despedida y el pie los pone Laravel.
+     *
+     * Se notó en la invitación al demo, que es el primer mensaje que recibe
+     * alguien que no conoce el producto.
+     */
+    'locale' => env('APP_LOCALE', 'es'),
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 

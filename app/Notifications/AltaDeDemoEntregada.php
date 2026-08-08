@@ -33,8 +33,10 @@ class AltaDeDemoEntregada extends Notification
         return (new MailMessage)
             ->subject("Demo entregado a {$this->tenant->email}")
             ->line('Se creó un demo y se envió la invitación.')
-            ->line("**Para:** {$this->tenant->email}")
-            ->line("**Dirección:** {$this->tenant->slug}")
+            // Mismo motivo que en la invitación: un correo con guiones bajos
+            // —que son legales— se rompería igual.
+            ->line("**Para:** `{$this->tenant->email}`")
+            ->line("**Dirección:** `{$this->tenant->slug}`")
             ->line("**Vence:** {$this->tenant->expira_en->translatedFormat('j \d\e F \d\e Y')}")
             ->line('El acceso no viaja en este mensaje. Si hace falta reemitirlo: `php artisan demo:reemitir-acceso '.$this->tenant->slug.'`.');
     }
