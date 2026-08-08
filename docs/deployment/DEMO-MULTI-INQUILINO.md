@@ -357,6 +357,29 @@ aplicación entera — un secreto en un archivo del usuario del sitio contra un
 privilegio permanente en el rol que atiende peticiones. El intercambio conviene,
 pero es un intercambio.
 
+### Un trabajo encolado vuelve solo a su inquilino
+
+Un worker no tiene subdominio del cual deducir de quién es el trabajo que
+levanta. Lo resuelve `app/Tenancy/InquilinoEnLaCola.php`: al encolar se sella la
+base del inquilino en el PAYLOAD, y al procesar se apunta la conexión desde el
+evento `JobProcessing`.
+
+**Tiene que ser el payload y tiene que ser ese evento**, y se descubrió con un
+fallo real del 2026-08-07. Las notificaciones de Laravel usan `SerializesModels`,
+así que el modelo no viaja entero: viaja como identificador y se re-consulta al
+DESERIALIZAR, dentro de `CallQueuedHandler::getCommand()`. Eso ocurre antes de
+que exista una instancia del trabajo, así que un middleware de trabajo —que es lo
+que había— llegaba tarde por diseño. El payload se lee sin deserializar nada, y
+`JobProcessing` se dispara antes.
+
+El síntoma era invisible desde el panel: un agente enviaba el contrato a su
+cliente, la notificación se encolaba, el worker moría con
+«relation "contratos_intermediacion" does not exist» y el agente creía que lo
+había mandado.
+
+Un trabajo SIN inquilino no se sella ni se toca: el alta de un inquilino corre
+cuando su base todavía no existe, y el registro público vive en el host central.
+
 ### El fallo del fallo
 
 `failed_jobs` y `job_batches` están fijados a la conexión `central` en
@@ -364,10 +387,17 @@ pero es un intercambio.
 conexión POR DEFECTO — que en un worker es el centinela, porque no hay subdominio
 que resolver.
 
-El resultado sería el peor modo de falla posible: un alta revienta, el sistema
-intenta anotar el fallo, y **anotarlo falla también**. Del inquilino que no se
-pudo crear no quedaría ni una fila que lo diga. Pesa el doble acá porque el
-trabajo no reintenta (`tries = 1`): un alta que falla va derecho a esa tabla.
+Hoy eso NO estaba roto, y vale decirlo con precisión: el worker general hereda
+`DB_DATABASE=demo_central` de la línea de cron del programador, así que `pgsql`
+ya resolvía a la central en ese proceso. Hay un fallo anotado del 2026-08-07 que
+lo demuestra.
+
+Se fija igual porque **la garantía no debería depender de una variable de
+entorno**. Bastaba que alguien agregara una línea de cron sin ella —o un servicio
+de systemd— para caer en el peor modo de falla posible: un trabajo revienta, el
+sistema intenta anotar el fallo, y anotarlo falla también. Pesa más desde que el
+alta corre en la cola, porque no reintenta (`tries = 1`): un alta que falla va
+derecho a esa tabla y es todo lo que queda de ella.
 
 ### `DB_DATABASE=demo_central` no es opcional
 

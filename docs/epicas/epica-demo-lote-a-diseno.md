@@ -229,7 +229,7 @@ reconocible y distinto del de producción, y un comando que borra lo que quedó.
 | `database/migrations/central/…_create_tenants_table.php` | |
 | `app/Models/Tenant.php` | |
 | `app/Enums/TenantEstado.php` | |
-| `app/Jobs/Middleware/UsaConexionDeInquilino.php` | |
+| ~~`app/Jobs/Middleware/UsaConexionDeInquilino.php`~~ | **Reemplazado.** Un middleware de trabajo corre DESPUÉS de deserializar, y las notificaciones rehidratan su modelo al deserializar: llegaba tarde por diseño. Hoy lo resuelve `app/Tenancy/InquilinoEnLaCola.php`, que sella el inquilino en el payload y apunta la conexión en `JobProcessing` |
 | `app/Console/Commands/DemoBuildTestTemplate.php` | |
 | `app/Console/Commands/DemoSweepTestDatabases.php` | |
 | `tests/TenantTestCase.php` | |

@@ -53,6 +53,7 @@ use App\Services\Frontend\Media\PromotableMediaOwners;
 use App\Services\Frontend\Media\ServiceMediaReference;
 use App\Services\Frontend\PublishedMediaReference;
 use App\Tenancy\InquilinoActual;
+use App\Tenancy\InquilinoEnLaCola;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -109,6 +110,11 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
+
+        // Un trabajo encolado vuelve solo a la base de su inquilino. Se registra
+        // acá y no en cada trabajo porque el mecanismo tiene que actuar ANTES de
+        // deserializar, donde el trabajo todavía no existe como objeto.
+        InquilinoEnLaCola::registrar();
 
         Gate::policy(User::class, UserPolicy::class);
         Gate::policy(Zone::class, ZonePolicy::class);
