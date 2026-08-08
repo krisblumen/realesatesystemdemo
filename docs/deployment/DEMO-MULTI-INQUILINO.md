@@ -364,10 +364,17 @@ pero es un intercambio.
 conexión POR DEFECTO — que en un worker es el centinela, porque no hay subdominio
 que resolver.
 
-El resultado sería el peor modo de falla posible: un alta revienta, el sistema
-intenta anotar el fallo, y **anotarlo falla también**. Del inquilino que no se
-pudo crear no quedaría ni una fila que lo diga. Pesa el doble acá porque el
-trabajo no reintenta (`tries = 1`): un alta que falla va derecho a esa tabla.
+Hoy eso NO estaba roto, y vale decirlo con precisión: el worker general hereda
+`DB_DATABASE=demo_central` de la línea de cron del programador, así que `pgsql`
+ya resolvía a la central en ese proceso. Hay un fallo anotado del 2026-08-07 que
+lo demuestra.
+
+Se fija igual porque **la garantía no debería depender de una variable de
+entorno**. Bastaba que alguien agregara una línea de cron sin ella —o un servicio
+de systemd— para caer en el peor modo de falla posible: un trabajo revienta, el
+sistema intenta anotar el fallo, y anotarlo falla también. Pesa más desde que el
+alta corre en la cola, porque no reintenta (`tries = 1`): un alta que falla va
+derecho a esa tabla y es todo lo que queda de ella.
 
 ### `DB_DATABASE=demo_central` no es opcional
 
