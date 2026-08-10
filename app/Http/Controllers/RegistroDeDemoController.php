@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\AprovisionaUnInquilino;
-use App\Models\Tenant;
 use App\Tenancy\InquilinoActual;
 use App\Tenancy\LimiteAlcanzado;
-use App\Tenancy\LimiteDeAltas;
+use App\Tenancy\SolicitaUnAlta;
+use App\Tenancy\YaHayUnDemo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
@@ -42,7 +41,7 @@ class RegistroDeDemoController extends Controller
         ]);
     }
 
-    public function store(Request $request, LimiteDeAltas $limites): RedirectResponse
+    public function store(Request $request, SolicitaUnAlta $altas): RedirectResponse
     {
         $this->soloEnElHostCentral();
 
@@ -60,28 +59,20 @@ class RegistroDeDemoController extends Controller
             return $this->listo();
         }
 
-        $email = mb_strtolower(trim($datos['email']));
-
+        // NORMALIZAR, MIRAR DUPLICADO Y COMPROBAR TOPES VIVEN EN `SolicitaUnAlta`
+        // desde RFC-078, porque la API hace exactamente lo mismo. Lo que queda
+        // acá es lo propio de esta puerta: el señuelo y la forma de contestar.
+        //
         // SE INFORMA QUE YA EXISTE, y es una decisión con costo. Un desconocido
         // podría averiguar así si un correo tiene demo. La alternativa —callar—
         // deja a quien ya se registró esperando un correo que no va a llegar,
         // que es el problema real y frecuente. El tope por origen acota de a tres
         // intentos por día, así que no sirve para recorrer una lista.
-        if (Tenant::hayUnoActivoPara($email)) {
-            return back()->withInput()->withErrors([
-                'email' => 'Ya hay un demo activo para ese correo. Revisa tu bandeja de entrada y la carpeta de spam.',
-            ]);
-        }
-
-        // EL TOPE SE COMPRUEBA ANTES DE ENCOLAR (RFC-10, regla 1). Encolar altas
-        // que van a fallar es acumular basura en la cola y en el padrón.
         try {
-            $limites->verificar($request->ip());
-        } catch (LimiteAlcanzado $e) {
+            $altas->encolar($datos['email'], $request->ip());
+        } catch (YaHayUnDemo|LimiteAlcanzado $e) {
             return back()->withInput()->withErrors(['email' => $e->getMessage()]);
         }
-
-        AprovisionaUnInquilino::dispatch($email, $limites->hashDe((string) $request->ip()));
 
         return $this->listo();
     }
