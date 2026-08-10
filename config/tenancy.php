@@ -171,6 +171,31 @@ return [
 
     /*
     |---------------------------------------------------------------------------
+    | Alta por API (RFC-078)
+    |---------------------------------------------------------------------------
+    |
+    | El secreto que autoriza a un sitio propio —hoy la landing— a pedir un alta
+    | sin pasar por el formulario. Es un secreto compartido, no una identidad:
+    | sirve para decir «esto lo pide alguien de casa», nada más.
+    |
+    | VACÍO APAGA EL ENDPOINT ENTERO. Es deliberado, y en esa dirección: una
+    | puerta de alta que quedara abierta porque falta configurar algo sería el
+    | peor default posible. Mientras nadie ponga el secreto, la ruta contesta 404
+    | y el sistema se comporta como si RFC-078 no existiera.
+    |
+    | Quien lo posee puede además declarar el origen del visitante, que es lo que
+    | alimenta el tope por origen. Si el secreto se filtra, ese tope se vuelve
+    | declarativo y deja de proteger — por eso el tope duro de la instancia se
+    | comprueba igual y no admite que nadie lo declare.
+    |
+    */
+
+    'api' => [
+        'secreto' => env('TENANCY_SECRETO_DE_ALTAS'),
+    ],
+
+    /*
+    |---------------------------------------------------------------------------
     | Cerrojo de aprovisionamiento
     |---------------------------------------------------------------------------
     |

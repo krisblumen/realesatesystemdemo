@@ -3,6 +3,7 @@
 use App\Http\Middleware\AtiendeElHostCentral;
 use App\Http\Middleware\CierraElDemo;
 use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\ExigeElSecretoDeAltas;
 use App\Http\Middleware\ResolveTenant;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
@@ -22,6 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withEvents(discover: false)
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        // La API interna de altas (RFC-078). El prefijo `api` por defecto es el
+        // que ya espera `shouldRenderJsonWhen()` más abajo: un `abort()` en
+        // estas rutas sale en JSON y no en una página de error.
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -77,6 +82,20 @@ return Application::configure(basePath: dirname(__DIR__))
         // saber si es una de las excepciones, y el usuario ya autenticado para
         // saber si hay sesión.
         $middleware->appendToGroup('web', CierraElDemo::class);
+
+        // EL GRUPO `api` TAMBIÉN RESUELVE INQUILINO (RFC-078). No hereda nada de
+        // `web`: son grupos hermanos. Sin esto, `esElHostCentral()` decidiría sin
+        // que nadie hubiera resuelto el host, y el alta por API quedaría
+        // disponible desde el subdominio de cualquier inquilino.
+        //
+        // NO lleva `AtiendeElHostCentral`: ése redirige el host central al sitio
+        // promocional, que para una petición de servidor sería devolver un 302 a
+        // otra cosa en vez de atender.
+        $middleware->prependToGroup('api', ResolveTenant::class);
+
+        $middleware->alias([
+            'secreto.altas' => ExigeElSecretoDeAltas::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
