@@ -69,6 +69,27 @@ dirección.
 El límite cuenta contra la fila del inquilino, que sobrevive al borrado (RFC-09).
 Sin eso, bastaría esperar a que expire para volver a empezar.
 
+### Calibración: una dirección no es una persona
+
+El origen es una IP pública, y varias personas comparten una. Una inmobiliaria
+sale a internet por la dirección de su oficina: con el límite en 3, el cuarto
+empleado que quiera probar el demo queda bloqueado 24 horas sin haber hecho
+nada. En redes móviles es peor, porque el CGNAT pone miles de usuarios detrás de
+la misma dirección.
+
+El valor arrancó en **3** cuando la única puerta era una dirección discreta que
+sólo conocíamos nosotros. Al abrir la landing pública (RFC-078), empezó a
+rechazar visitantes legítimos el mismo día que se conectó.
+
+Queda en **10**, y el razonamiento importa más que el número: este límite **no
+raciona cupo**. Lo que protege la capacidad es el tope duro de la instancia, que
+ningún visitante puede sortear ni declarar. El límite por origen sólo evita que
+un actor se lleve todos los lugares de una sentada, y para eso 10 sirve igual
+que 3 sin castigar a una oficina entera.
+
+Si algún día el conteo pasa a hacerse por algo más específico que la dirección
+—una cookie, un correo verificado—, este número se puede volver a bajar.
+
 ## Qué pasa al llegar al límite
 
 El registro responde con un mensaje que dice **qué pasó y cuándo se puede volver
