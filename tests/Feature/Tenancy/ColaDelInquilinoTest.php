@@ -7,6 +7,7 @@ use App\Tenancy\InquilinoActual;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\URL;
 use Tests\Concerns\UsaBaseCentral;
 use Tests\Support\Tenancy\AvisoDePrueba;
 use Tests\Support\Tenancy\ContratoDePrueba;
@@ -44,6 +45,8 @@ class ColaDelInquilinoTest extends TestCase
 
     private ?string $cacheDelWorker = null;
 
+    private string $raizDelWorker = '';
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -54,6 +57,7 @@ class ColaDelInquilinoTest extends TestCase
 
         $this->delWorker = (string) Config::get('database.connections.pgsql.database');
         $this->cacheDelWorker = Config::get('cache.prefix');
+        $this->raizDelWorker = rtrim(URL::to('/'), '/');
 
         foreach ([self::BASE => 'F-001', self::OTRA => 'F-002'] as $base => $folio) {
             DB::connection('maintenance')->statement('DROP DATABASE IF EXISTS "'.$base.'"');
@@ -93,12 +97,14 @@ class ColaDelInquilinoTest extends TestCase
             'database' => $base,
         ]));
         Config::set('cache.prefix', 't_'.$slug.'_');
+        URL::forceRootUrl('https://'.$slug.'.demo.test');
 
         try {
             $fn();
         } finally {
             $this->apuntarA($this->delWorker);
             Config::set('cache.prefix', $this->cacheDelWorker);
+            URL::forceRootUrl($this->raizDelWorker);
 
             // Y SE OLVIDA EL INQUILINO, que es lo que hace la petición al
             // terminar. Sin esto la simulación miente: el inquilino quedaba
@@ -280,5 +286,33 @@ class ColaDelInquilinoTest extends TestCase
                 DB::connection('pgsql')->rollBack();
             }
         }
+    }
+
+    public function test_a_queued_job_builds_its_urls_with_its_tenants_host(): void
+    {
+        // EL DEFECTO QUE ESTO CIERRA, visto en producción con un contrato real.
+        //
+        // En un trabajo encolado no hay petición, así que `route()` y `url()` no
+        // tienen host y caen en `APP_URL` — el central. El enlace de firma le
+        // llegaba al cliente como `demo.landracore.com/contrato/…` en vez de
+        // `<slug>.demo.landracore.com/contrato/…`, y ese host redirige al sitio
+        // promocional: el cliente hacía clic y terminaba en otra página, sin
+        // ningún error que lo explicara.
+        //
+        // No era sólo el contrato: once notificaciones encoladas arman
+        // direcciones. La del contrato fue la única que alguien ejercitó.
+        $this->enElInquilino(fn () => TrabajoQueMira::dispatch(), self::BASE);
+
+        $this->correrElWorker();
+
+        // Se mira el HOST y no la dirección entera: el esquema lo decide
+        // `URL::forceScheme('https')`, que sólo corre en producción. Atar el
+        // test al esquema sería atarlo a otra decisión y romperlo por algo que
+        // no tiene nada que ver con este defecto.
+        $this->assertSame(
+            'probedemoprobecola.demo.test',
+            parse_url((string) TrabajoQueMira::$raizQueVio, PHP_URL_HOST),
+            'Un trabajo tiene que armar sus direcciones con el host de su inquilino, no con el central.',
+        );
     }
 }
