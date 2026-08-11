@@ -164,8 +164,25 @@ return [
          */
         'tope_ocupados' => (int) env('TENANCY_TOPE_OCUPADOS', 20),
 
-        /* Altas por origen dentro de la ventana. */
-        'por_origen' => (int) env('TENANCY_ALTAS_POR_ORIGEN', 3),
+        /*
+         * Altas por origen dentro de la ventana.
+         *
+         * EL ORIGEN ES UNA IP PÚBLICA, Y VARIAS PERSONAS COMPARTEN UNA. Una
+         * inmobiliaria sale a internet por la dirección de su oficina: si tres
+         * empleados prueban el demo, el cuarto queda bloqueado un día entero.
+         * En redes móviles es peor —el CGNAT pone miles de usuarios detrás de
+         * la misma dirección— y ninguno de ellos hizo nada malo.
+         *
+         * Por eso este número NO raciona cupo. Lo que protege la capacidad es
+         * `tope_ocupados`, que ningún visitante puede sortear. Éste sólo evita
+         * que un actor se lleve todos los lugares de una sentada, y para eso 10
+         * alcanza igual que 3.
+         *
+         * Estaba en 3 mientras la única puerta era una dirección que sólo
+         * conocíamos nosotros. Con la landing pública mandando visitantes
+         * reales (RFC-078), 3 empezó a rechazar gente legítima el mismo día.
+         */
+        'por_origen' => (int) env('TENANCY_ALTAS_POR_ORIGEN', 10),
         'ventana_horas' => (int) env('TENANCY_VENTANA_HORAS', 24),
     ],
 
