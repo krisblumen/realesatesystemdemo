@@ -9,6 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\URL;
 
 /**
  * Un trabajo que sólo anota contra qué base lo hicieron correr.
@@ -37,15 +38,22 @@ class TrabajoQueMira implements ShouldQueue
      */
     public static array $folios = [];
 
+    /**
+     * Con qué host armaría una dirección: `route()` y `url()` cuelgan de acá.
+     */
+    public static ?string $raizQueVio = null;
+
     public static function olvidar(): void
     {
         self::$baseQueVio = null;
+        self::$raizQueVio = null;
         self::$folios = [];
     }
 
     public function handle(): void
     {
         self::$baseQueVio = Config::get('database.connections.pgsql.database');
+        self::$raizQueVio = URL::to('/');
 
         // Sólo si hay algo que leer: este trabajo también se usa para casos sin
         // inquilino, donde la tabla no existe. Un trabajo que corriera contra la

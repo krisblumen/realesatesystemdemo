@@ -328,6 +328,26 @@ Una línea, como el usuario del sitio y desde el directorio de producción:
 * * * * * cd /home/<usuario>/htdocs/<dominio> && DB_DATABASE=demo_central php artisan schedule:run >> /dev/null 2>&1
 ```
 
+## Un trabajo encolado también hereda el HOST de su inquilino
+
+Mismo sello, segundo problema. En un trabajo encolado no hay petición, así que
+`route()` y `url()` no tienen de dónde sacar el host y caen en `APP_URL` — el
+host central.
+
+El síntoma apareció con un contrato real: el enlace de firma le llegaba al
+cliente como `demo.landracore.com/contrato/…` en vez de
+`<slug>.demo.landracore.com/contrato/…`. Y ese host redirige al sitio
+promocional, así que el cliente hacía clic y terminaba en otra página, sin ningún
+error que lo explicara.
+
+`InquilinoEnLaCola` sella también la raíz de las direcciones tal como la ve quien
+encola —en una petición del panel, el subdominio correcto— y la aplica con
+`URL::forceRootUrl()` antes de procesar. **Once notificaciones encoladas arman
+direcciones**; la del contrato fue la única que alguien ejercitó.
+
+El esquema (`http`/`https`) no viaja en el sello: lo decide
+`URL::forceScheme('https')`, que corre en producción.
+
 ## El limitador de peticiones vive en la central
 
 Un 500 en producción a los diez minutos de abrir `/guest`, y la causa vale más

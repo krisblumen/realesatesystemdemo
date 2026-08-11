@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\URL;
 
 /**
  * Un trabajo encolado vuelve a la base del inquilino que lo encoló.
@@ -100,7 +101,7 @@ class InquilinoEnLaCola
 
     private static function entrar(Job $trabajo): void
     {
-        /** @var array{base?: ?string, cache?: ?string}|null $sello */
+        /** @var array{base?: ?string, cache?: ?string, raiz?: ?string}|null $sello */
         $sello = $trabajo->payload()[self::SELLO] ?? null;
 
         // SIN SELLO NO SE TOCA NADA, ni al entrar ni al salir. Restaurar «por si
@@ -118,7 +119,7 @@ class InquilinoEnLaCola
             return;
         }
 
-        self::apuntarA($sello['base'] ?? null, $sello['cache'] ?? null);
+        self::apuntarA($sello['base'] ?? null, $sello['cache'] ?? null, $sello['raiz'] ?? null);
     }
 
     private static function salir(): void
@@ -129,11 +130,11 @@ class InquilinoEnLaCola
             return;
         }
 
-        self::apuntarA($previo['base'], $previo['cache']);
+        self::apuntarA($previo['base'], $previo['cache'], $previo['raiz']);
     }
 
     /**
-     * @return array{base: ?string, cache: ?string}
+     * @return array{base: ?string, cache: ?string, raiz: string}
      */
     private static function dondeEstamos(): array
     {
@@ -144,10 +145,25 @@ class InquilinoEnLaCola
             // `ResolveTenant` y dos lugares que la arman se separan en el primer
             // cambio.
             'cache' => Config::get('cache.prefix'),
+
+            // Y CON QUÉ HOST SE ARMAN LAS DIRECCIONES.
+            //
+            // En un trabajo encolado no hay petición, así que `route()` y `url()`
+            // no tienen de dónde sacar el host y caen en `APP_URL` — el host
+            // central. El enlace de firma de un contrato salía apuntando a
+            // `demo.landracore.com/contrato/…` en vez de al subdominio del
+            // inquilino, y ese host redirige al sitio promocional: el cliente
+            // hacía clic y terminaba en otra página.
+            //
+            // Se guarda la raíz TAL COMO LA VE quien encola, que en una petición
+            // del panel es exactamente el subdominio correcto. Once notificaciones
+            // encoladas arman direcciones; sellarlo acá las cubre a todas en vez
+            // de parchar una por una.
+            'raiz' => rtrim(URL::to('/'), '/'),
         ];
     }
 
-    private static function apuntarA(?string $base, ?string $prefijo): void
+    private static function apuntarA(?string $base, ?string $prefijo, ?string $raiz): void
     {
         Config::set('database.connections.pgsql.database', $base);
 
@@ -161,5 +177,12 @@ class InquilinoEnLaCola
 
         // El almacén ya resuelto conserva el prefijo viejo.
         Cache::forgetDriver(Config::get('cache.default'));
+
+        // Los trabajos encolados antes de que esto existiera no traen raíz. Se
+        // los deja como estaban en vez de mandarlos a `APP_URL`: sin sello no se
+        // toca nada, y media corrección es peor que ninguna.
+        if ($raiz !== null) {
+            URL::forceRootUrl($raiz);
+        }
     }
 }
