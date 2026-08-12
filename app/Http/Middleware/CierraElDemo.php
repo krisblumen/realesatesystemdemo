@@ -43,7 +43,11 @@ class CierraElDemo
         // frecuencia — y sigue resolviendo por subdominio, así que el token de
         // un inquilino no alcanza a otro.
         'contratos.publico.',
-        'contratos.verificacion',
+        // `contratos.verificar`, y el nombre importa: durante meses acá decía
+        // `contratos.verificacion`, que NO EXISTE. La lista no abría nada y el QR
+        // del contrato mandaba al login — la página que existe justamente para
+        // que un tercero verifique la integridad sin tener cuenta.
+        'contratos.verificar',
 
         // El canje del enlace para mostrar el sitio. Quien llega con él todavía
         // no tiene sesión —esta ruta es la que se la crea—, así que cerrarla
