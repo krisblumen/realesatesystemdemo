@@ -328,22 +328,28 @@ Una línea, como el usuario del sitio y desde el directorio de producción:
 * * * * * cd /home/<usuario>/htdocs/<dominio> && DB_DATABASE=demo_central php artisan schedule:run >> /dev/null 2>&1
 ```
 
-## Un trabajo encolado también hereda el HOST de su inquilino
+## Las cuatro superficies que un trabajo encolado tiene que heredar
 
-Mismo sello, segundo problema. En un trabajo encolado no hay petición, así que
-`route()` y `url()` no tienen de dónde sacar el host y caen en `APP_URL` — el
-host central.
+Un worker no tiene subdominio, así que hay que decirle todo. `InquilinoEnLaCola`
+sella cuatro cosas en el payload al encolar y las aplica antes de procesar.
+Cada una se descubrió por un defecto distinto en producción:
 
-El síntoma apareció con un contrato real: el enlace de firma le llegaba al
-cliente como `demo.landracore.com/contrato/…` en vez de
-`<slug>.demo.landracore.com/contrato/…`. Y ese host redirige al sitio
-promocional, así que el cliente hacía clic y terminaba en otra página, sin ningún
-error que lo explicara.
+| Superficie | Qué rompía cuando faltaba |
+|---|---|
+| **Base** | «relation "contratos_intermediacion" does not exist»: el modelo se rehidrata al deserializar |
+| **Caché** | Un inquilino leería las claves de otro el día que el caché salga de la base |
+| **Host** | El enlace de firma llegaba a `demo.landracore.com/contrato/…` y redirigía al sitio promocional |
+| **Quién es** | El PDF adjunto se buscaba en `7/` en vez de `tenants/<slug>/7/`: el correo de contrato firmado no salía |
 
-`InquilinoEnLaCola` sella también la raíz de las direcciones tal como la ve quien
-encola —en una petición del panel, el subdominio correcto— y la aplica con
-`URL::forceRootUrl()` antes de procesar. **Once notificaciones encoladas arman
-direcciones**; la del contrato fue la única que alguien ejercitó.
+La cuarta es la menos obvia y la que más costó ver. **El disco no pregunta en qué
+base vive el inquilino, pregunta quién es**: `RutaDeMediosPorInquilino` arma la
+ruta física con `InquilinoActual->slug()`. Sellar la base no alcanza, así que el
+sello lleva el slug y el worker vuelve a fijar el inquilino —una consulta al
+padrón, y sólo cuando cambia—.
+
+El síntoma engañaba: la notificación en el panel llegaba perfecta y el correo no.
+Parecía un problema de correo y era del disco. La diferencia es que el canal
+`database` no adjunta nada.
 
 El esquema (`http`/`https`) no viaja en el sello: lo decide
 `URL::forceScheme('https')`, que corre en producción.
