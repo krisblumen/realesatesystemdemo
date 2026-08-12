@@ -2,6 +2,7 @@
 
 namespace App\Tenancy;
 
+use App\Models\Tenant;
 use Illuminate\Contracts\Queue\Job;
 use Illuminate\Queue\Events\JobExceptionOccurred;
 use Illuminate\Queue\Events\JobProcessed;
@@ -101,7 +102,7 @@ class InquilinoEnLaCola
 
     private static function entrar(Job $trabajo): void
     {
-        /** @var array{base?: ?string, cache?: ?string, raiz?: ?string}|null $sello */
+        /** @var array{base?: ?string, cache?: ?string, raiz?: ?string, slug?: ?string}|null $sello */
         $sello = $trabajo->payload()[self::SELLO] ?? null;
 
         // SIN SELLO NO SE TOCA NADA, ni al entrar ni al salir. Restaurar «por si
@@ -119,7 +120,7 @@ class InquilinoEnLaCola
             return;
         }
 
-        self::apuntarA($sello['base'] ?? null, $sello['cache'] ?? null, $sello['raiz'] ?? null);
+        self::apuntarA($sello['base'] ?? null, $sello['cache'] ?? null, $sello['raiz'] ?? null, $sello['slug'] ?? null);
     }
 
     private static function salir(): void
@@ -130,11 +131,11 @@ class InquilinoEnLaCola
             return;
         }
 
-        self::apuntarA($previo['base'], $previo['cache'], $previo['raiz']);
+        self::apuntarA($previo['base'], $previo['cache'], $previo['raiz'], $previo['slug']);
     }
 
     /**
-     * @return array{base: ?string, cache: ?string, raiz: string}
+     * @return array{base: ?string, cache: ?string, raiz: string, slug: ?string}
      */
     private static function dondeEstamos(): array
     {
@@ -160,10 +161,21 @@ class InquilinoEnLaCola
             // encoladas arman direcciones; sellarlo acá las cubre a todas en vez
             // de parchar una por una.
             'raiz' => rtrim(URL::to('/'), '/'),
+
+            // Y QUIÉN ES EL INQUILINO, que no es lo mismo que en qué base vive.
+            //
+            // Los ARCHIVOS son la cuarta superficie, y no la cubre ninguna de las
+            // tres de arriba: `RutaDeMediosPorInquilino` arma la ruta física con
+            // `InquilinoActual->slug()`, que en un worker es null. El PDF de un
+            // contrato firmado se buscaba en `7/` en vez de `tenants/<slug>/7/`,
+            // el adjunto reventaba y el correo al agente no salía — mientras la
+            // notificación en el panel llegaba perfecta, porque esa no adjunta
+            // nada.
+            'slug' => app(InquilinoActual::class)->slug(),
         ];
     }
 
-    private static function apuntarA(?string $base, ?string $prefijo, ?string $raiz): void
+    private static function apuntarA(?string $base, ?string $prefijo, ?string $raiz, ?string $slug): void
     {
         Config::set('database.connections.pgsql.database', $base);
 
@@ -183,6 +195,38 @@ class InquilinoEnLaCola
         // toca nada, y media corrección es peor que ninguna.
         if ($raiz !== null) {
             URL::forceRootUrl($raiz);
+        }
+
+        self::fijarElInquilino($slug);
+    }
+
+    /**
+     * Deja `InquilinoActual` como estaría en una petición de ese inquilino.
+     *
+     * Se consulta el padrón, y sale barato: sólo cuando el inquilino CAMBIA. Con
+     * `sync` el trabajo corre dentro de la petición y el inquilino ya es el
+     * correcto, así que no se toca nada.
+     */
+    private static function fijarElInquilino(?string $slug): void
+    {
+        if (app(InquilinoActual::class)->slug() === $slug) {
+            return;
+        }
+
+        // Se suelta el singleton en vez de mutarlo: `InquilinoActual` no tiene
+        // forma de olvidar a nadie, y darle una sería darle a cualquier código
+        // la posibilidad de dejar la aplicación sin inquilino a mitad de una
+        // petición.
+        app()->forgetInstance(InquilinoActual::class);
+
+        if ($slug === null) {
+            return;
+        }
+
+        $tenant = Tenant::query()->firstWhere('slug', $slug);
+
+        if ($tenant !== null) {
+            app(InquilinoActual::class)->fijar($tenant);
         }
     }
 }

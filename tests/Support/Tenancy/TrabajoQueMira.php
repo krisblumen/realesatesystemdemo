@@ -2,6 +2,7 @@
 
 namespace Tests\Support\Tenancy;
 
+use App\Support\Frontend\RutaDeMediosPorInquilino;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * Un trabajo que sólo anota contra qué base lo hicieron correr.
@@ -43,10 +45,19 @@ class TrabajoQueMira implements ShouldQueue
      */
     public static ?string $raizQueVio = null;
 
+    /**
+     * Dónde buscaría en el DISCO el archivo de un inquilino.
+     *
+     * Es la cuarta superficie del aislamiento, y la que no depende de la base:
+     * `RutaDeMediosPorInquilino` arma la ruta con el slug del inquilino actual.
+     */
+    public static ?string $rutaQueVio = null;
+
     public static function olvidar(): void
     {
         self::$baseQueVio = null;
         self::$raizQueVio = null;
+        self::$rutaQueVio = null;
         self::$folios = [];
     }
 
@@ -54,6 +65,11 @@ class TrabajoQueMira implements ShouldQueue
     {
         self::$baseQueVio = Config::get('database.connections.pgsql.database');
         self::$raizQueVio = URL::to('/');
+
+        // Un medio sin guardar alcanza: la ruta se deriva del id y del inquilino.
+        $medio = new Media;
+        $medio->id = 7;
+        self::$rutaQueVio = (new RutaDeMediosPorInquilino)->getPath($medio);
 
         // Sólo si hay algo que leer: este trabajo también se usa para casos sin
         // inquilino, donde la tabla no existe. Un trabajo que corriera contra la

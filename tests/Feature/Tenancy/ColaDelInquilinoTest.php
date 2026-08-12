@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Tenancy;
 
+use App\Enums\TenantEstado;
 use App\Models\Tenant;
 use App\Tenancy\InquilinoActual;
 use Illuminate\Support\Facades\Config;
@@ -313,6 +314,41 @@ class ColaDelInquilinoTest extends TestCase
             'probedemoprobecola.demo.test',
             parse_url((string) TrabajoQueMira::$raizQueVio, PHP_URL_HOST),
             'Un trabajo tiene que armar sus direcciones con el host de su inquilino, no con el central.',
+        );
+    }
+
+    public function test_a_queued_job_finds_its_tenants_files_on_disk(): void
+    {
+        // LA CUARTA SUPERFICIE, y la descubrí porque un contrato firmado no
+        // mandaba correo ni al cliente ni al agente — mientras la notificación
+        // en el panel llegaba perfecta.
+        //
+        // `ContratoFirmado` adjunta el PDF final, y la ruta física la arma
+        // `RutaDeMediosPorInquilino` con `InquilinoActual->slug()`. En un worker
+        // eso era null, así que el archivo se buscaba en `7/` en vez de
+        // `tenants/<slug>/7/`, el adjunto reventaba y el correo no salía. El
+        // canal `database` no adjunta nada: por eso ese sí llegaba, y el síntoma
+        // parecía «falla el correo» en vez de «falla el disco».
+        //
+        // La base, el caché y el host no alcanzaban: el disco pregunta QUIÉN es
+        // el inquilino, no en qué base vive.
+        $tenant = Tenant::create([
+            'slug' => 'probedemoprobecola',
+            'database' => self::BASE,
+            'email' => 'dueno@ejemplo.com',
+            'template_version' => 'demo_template',
+            'expira_en' => now()->addDays(30),
+            'estado' => TenantEstado::Activo,
+        ]);
+
+        $this->enElInquilino(fn () => TrabajoQueMira::dispatch(), self::BASE);
+
+        $this->correrElWorker();
+
+        $this->assertSame(
+            "tenants/{$tenant->slug}/7/",
+            TrabajoQueMira::$rutaQueVio,
+            'Un trabajo tiene que buscar los archivos donde su inquilino los escribió.',
         );
     }
 }
