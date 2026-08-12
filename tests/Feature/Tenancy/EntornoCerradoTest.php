@@ -3,6 +3,7 @@
 namespace Tests\Feature\Tenancy;
 
 use App\Enums\TenantEstado;
+use App\Http\Middleware\CierraElDemo;
 use App\Models\Tenant;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\DB;
@@ -58,6 +59,38 @@ class EntornoCerradoTest extends TestCase
         DB::connection('maintenance')->statement('DROP DATABASE IF EXISTS "'.self::BASE.'"');
 
         parent::tearDown();
+    }
+
+    public function test_every_open_route_name_belongs_to_a_real_route(): void
+    {
+        // EL AGUJERO QUE ESTE TEST TAPA, y costó un defecto en producción.
+        //
+        // Los tests de abajo registran rutas de SONDA con nombres elegidos para
+        // que coincidan con la lista. Eso prueba que el middleware compara bien
+        // los prefijos — y no prueba nada sobre si esos nombres existen.
+        //
+        // `contratos.verificacion` estuvo en la lista sin ser el nombre de
+        // ninguna ruta: las de verdad se llaman `contratos.verificar`. La lista
+        // no abría nada, y la página de verificación de un contrato —la que
+        // existe para que un tercero compruebe la integridad SIN tener cuenta—
+        // mandaba al login.
+        //
+        // Un nombre que no existe no rompe nada visible: simplemente no abre. Es
+        // el modo de falla más silencioso de una lista blanca.
+        $registrados = collect(Route::getRoutes())
+            ->map(fn ($ruta) => $ruta->getName())
+            ->filter()
+            ->values();
+
+        $abiertas = (new \ReflectionClass(CierraElDemo::class))->getConstant('ABIERTAS');
+
+        foreach ($abiertas as $prefijo) {
+            $this->assertTrue(
+                $registrados->contains(fn (string $nombre) => str_starts_with($nombre, $prefijo)),
+                "«{$prefijo}» está en la lista de rutas abiertas y no es el nombre de ninguna ruta. ".
+                'No abre nada, y nadie se entera hasta que alguien la necesita.',
+            );
+        }
     }
 
     public function test_without_a_session_a_tenant_route_gives_no_content(): void
