@@ -1,4 +1,4 @@
-@php($enDemo = app(App\Tenancy\InquilinoActual::class)->hayInquilino())
+@php($enDemo = app(App\Tenancy\InquilinoActual::class)->esUnaDemostracion())
 
 {{--
     El aviso de que esto es una demostración.
