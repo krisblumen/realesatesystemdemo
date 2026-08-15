@@ -29,7 +29,7 @@ class ContratosEnProcesoWidget extends Widget
 {
     protected static string $view = 'filament.widgets.contratos-en-proceso';
 
-    protected static ?int $sort = 10;
+    protected static ?int $sort = 11;
 
     /**
      * Cuántos días antes se avisa que una vigencia se termina.
