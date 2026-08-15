@@ -12,5 +12,5 @@ class PropietariosSectionHeader extends SectionHeaderWidget
 
     protected static ?string $sectionDescription = 'Cartera de propietarios y comisiones pactadas.';
 
-    protected static ?int $sort = 9;
+    protected static ?int $sort = 11;
 }

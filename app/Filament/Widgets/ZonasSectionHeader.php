@@ -8,5 +8,5 @@ class ZonasSectionHeader extends SectionHeaderWidget
 
     protected static ?string $sectionDescription = 'Cobertura comercial.';
 
-    protected static ?int $sort = 12;
+    protected static ?int $sort = 13;
 }
