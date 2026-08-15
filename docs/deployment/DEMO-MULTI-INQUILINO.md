@@ -315,6 +315,72 @@ en vez del script, el cierre del demo la manda al login y la respuesta pasa a se
 un 302 hacia `/index.php/admin/login`. Además, cualquier edición del sitio desde
 el panel pisa el vhost y se lleva la excepción puesta a mano.
 
+## CloudPanel borra el comodín del `server_name`, y no deja rastro
+
+**Ya pasó una vez y va a volver a pasar.** Cualquier cambio hecho al sitio desde
+CloudPanel regenera el vhost, y el `server_name` vuelve a quedar así:
+
+```nginx
+server_name demo.landracore.com;
+```
+
+Sin `*.demo.landracore.com`, **ningún subdominio de inquilino responde**. Y el
+síntoma no se parece a lo que uno esperaría de un error de configuración.
+
+### Cómo se ve
+
+`curl` devuelve código **000** —ni siquiera un código HTTP— y el error real es:
+
+```
+error:1404B458:SSL routines:ST_CONNECT:tlsv1 unrecognized name
+```
+
+nginx manda ese alerta cuando el nombre pedido no coincide con ningún vhost. La
+conexión muere en el saludo TLS, así que **la aplicación nunca se entera**: no
+hay nada en `storage/logs/laravel.log`, ni en el padrón, ni en ninguna parte
+nuestra. Buscar ahí es perder la tarde.
+
+El host central sigue funcionando perfecto, lo que empeora el diagnóstico:
+parece un problema de inquilinos y es uno de nombres.
+
+### Cómo confirmarlo en treinta segundos
+
+```bash
+curl -sS -o /dev/null -w '%{http_code}\n' https://<slug>.demo.<dominio>/admin
+sudo grep -n 'server_name' /etc/nginx/sites-enabled/demo.<dominio>.conf
+```
+
+**El certificado casi nunca es el culpable**, aunque el error diga TLS. Se
+comprueba desde cualquier máquina:
+
+```bash
+echo | openssl s_client -connect demo.<dominio>:443 -servername demo.<dominio> 2>/dev/null \
+  | openssl x509 -noout -dates -ext subjectAltName
+```
+
+Si ahí aparece `DNS:*.demo.<dominio>`, el certificado está bien y el problema es
+el `server_name`.
+
+### El arreglo, y el arreglo de verdad
+
+Inmediato — con respaldo, y comprobando ANTES de recargar, porque una recarga con
+la configuración rota tumba los ocho sitios del servidor y no sólo este:
+
+```bash
+sudo cp /etc/nginx/sites-enabled/demo.<dominio>.conf /root/demo-vhost-$(date +%F).bak
+sudo sed -i --follow-symlinks 's/^\(\s*server_name\) demo\.<dominio>;/\1 demo.<dominio> *.demo.<dominio>;/' \
+  /etc/nginx/sites-enabled/demo.<dominio>.conf
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+Hay DOS líneas `server_name` —el bloque de 80 y el de 443— y las dos necesitan
+el comodín.
+
+**Pero mientras el comodín viva sólo en un archivo editado a mano, esto vuelve.**
+La forma de que sobreviva es darlo de alta en CloudPanel como dominio adicional
+del sitio, para que quede en la configuración que el panel GENERA en vez de en la
+que el panel PISA.
+
 ## Tareas programadas: una sola línea de cron
 
 **No hace falta un servicio de systemd para la cola.** El programa de tareas ya
