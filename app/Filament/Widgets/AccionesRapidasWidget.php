@@ -24,7 +24,15 @@ class AccionesRapidasWidget extends Widget
 {
     protected static string $view = 'filament.widgets.acciones-rapidas';
 
-    protected static ?int $sort = 10;
+    /**
+     * Arriba de todo, al lado del widget de cuenta.
+     *
+     * El de cuenta de Filament está en -3, así que -2 lo deja a su derecha en la
+     * misma fila. Va ahí y no abajo porque es el punto de partida: quien entra a
+     * un demo tiene tres minutos de curiosidad, y un botón que aparece después de
+     * scrollear medio tablero llega tarde.
+     */
+    protected static ?int $sort = -2;
 
     /**
      * @return array<int, array{etiqueta: string, icono: string, url: string}>

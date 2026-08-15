@@ -34,7 +34,7 @@ class LeadsByMonthChart extends ChartWidget
 
     private const ACENTO = '#f5a624';
 
-    private const APAGADO = '#cbd2d9';
+    private const APAGADO = '#c3cbd4';
 
     /**
      * Cuántos meses del final se resaltan.
@@ -82,6 +82,11 @@ class LeadsByMonthChart extends ChartWidget
                 'data' => $datos,
                 'backgroundColor' => $colores,
                 'borderRadius' => 4,
+
+                // SIN CONTORNO. Filament le pone borde a las barras por defecto,
+                // y con relleno claro ese contorno pesa más que la barra: se
+                // leen como cajas vacías en vez de como cantidades.
+                'borderWidth' => 0,
             ]],
             'labels' => $etiquetas,
         ];
