@@ -74,6 +74,12 @@ class LeadsByAgentChart extends ChartWidget
                 // Sin contorno: el borde por defecto de Filament ensucia la
                 // barra en vez de definirla. Ver la nota de `LeadsByMonthChart`.
                 'borderWidth' => 0,
+
+                // La mitad de gruesas. Chart.js usa 0.9 por defecto: con pocos
+                // agentes, barras de ese grosor se comen el espacio entre
+                // nombres y la lista se lee como un bloque macizo en vez de como
+                // una comparación.
+                'barPercentage' => 0.45,
             ]],
             'labels' => $agentes->pluck('name')->all(),
         ];
