@@ -16,15 +16,12 @@ use Illuminate\Database\Eloquent\Builder;
  * el día que alguien agregue un estado en el medio o reordene el enum, cada
  * color pasa a significar otra cosa y nada falla — el gráfico simplemente miente.
  *
- * La escala es de grises con UN solo acento: el ámbar de la marca marca lo que
- * está publicado —que es lo único que le importa a quien mira— y todo lo demás
- * queda en segundo plano. Los cerrados usan los dos extremos de la escala
- * (`slate-300` y `slate-700`) para distinguirse entre sí.
- *
- * Y BORRADOR VA UN TONO MÁS CLARO que vendido, no por gusto: con los dos en
- * `slate-300` quedaban del mismo color exacto en la dona. En la leyenda se
- * distinguían, en el dibujo no — y una dona donde dos porciones son del mismo
- * color deja de ser un gráfico.
+ * UN SOLO ACENTO: el ámbar de la marca es lo publicado —lo único que le importa
+ * a quien mira— y todo lo demás queda en segundo plano. Los otros cuatro se
+ * separan por luminosidad, de lo más claro a lo más oscuro, y cada uno tiene que
+ * distinguirse del vecino EN EL DIBUJO y no sólo en la leyenda: una dona con dos
+ * porciones del mismo color deja de ser un gráfico. Ya pasó una vez, con
+ * borrador y vendido en el mismo gris.
  */
 class PropertiesByStatusChart extends ChartWidget
 {
@@ -74,9 +71,9 @@ class PropertiesByStatusChart extends ChartWidget
         return match ($estado) {
             PropertyStatus::Borrador => '#e2e8f0',   // slate-200: el más claro, todavía no existe para nadie
             PropertyStatus::Publicado => '#f5a624',  // ámbar de la marca: lo que está a la venta
-            PropertyStatus::Pausado => '#55636f',    // gris oscuro: existe, pero no se muestra
-            PropertyStatus::Vendido => '#cbd5e1',    // slate-300
-            PropertyStatus::Rentado => '#334155',    // slate-700
+            PropertyStatus::Pausado => '#121923',    // casi negro: existe, pero no se muestra
+            PropertyStatus::Vendido => '#333c4d',    // azul pizarra oscuro
+            PropertyStatus::Rentado => '#97add2',    // azul claro: cerrada y todavía viva
         };
     }
 

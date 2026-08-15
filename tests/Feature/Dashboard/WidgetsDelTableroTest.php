@@ -270,9 +270,9 @@ class WidgetsDelTableroTest extends TestCase
         $esperado = [
             PropertyStatus::Borrador->label() => '#e2e8f0',
             PropertyStatus::Publicado->label() => '#f5a624',
-            PropertyStatus::Pausado->label() => '#55636f',
-            PropertyStatus::Vendido->label() => '#cbd5e1',
-            PropertyStatus::Rentado->label() => '#334155',
+            PropertyStatus::Pausado->label() => '#121923',
+            PropertyStatus::Vendido->label() => '#333c4d',
+            PropertyStatus::Rentado->label() => '#97add2',
         ];
 
         foreach ($esperado as $etiqueta => $color) {
