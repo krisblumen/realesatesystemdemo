@@ -119,6 +119,11 @@ class AdminPanelProvider extends PanelProvider
             )
             ->renderHook(
                 PanelsRenderHook::SCRIPTS_AFTER,
+                fn (): string => view('filament.editor-de-imagen-inmediato')->render(),
+            )
+
+            ->renderHook(
+                PanelsRenderHook::SCRIPTS_AFTER,
                 fn (): string => view('filament.saved-flash')->render(),
             )
             ->renderHook(
