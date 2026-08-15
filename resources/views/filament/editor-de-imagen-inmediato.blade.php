@@ -1,29 +1,35 @@
 {{--
-    El editor de imagen se abre solo, apenas se elige el archivo.
+    El editor de imagen se abre solo, apenas termina de subir el archivo.
 
     EL PROBLEMA QUE RESUELVE. El recorte vivía detrás de un lápiz chiquito que
-    sólo aparece SOBRE la miniatura, o sea después de subir. Quien nunca lo vio
-    no sabe que existe: sube la foto, la ve torcida o mal encuadrada, y se
-    resigna. Una función que hay que descubrir es una función que casi nadie usa.
+    sólo aparece SOBRE la miniatura. Quien nunca lo vio no sabe que existe: sube
+    la foto, la ve mal encuadrada y se resigna. Una función que hay que descubrir
+    es una función que casi nadie usa.
 
-    CÓMO. El complemento `image-edit` de FilePond —que Filament ya trae— tiene la
-    opción `imageEditInstantEdit`, que abre el editor al agregar el archivo. Viene
-    apagada y se enciende acá, sin tocar nada de Filament: si mañana cambia por
-    dentro, esto deja de tener efecto y el lápiz sigue estando. Se degrada a lo
-    que había, no a algo roto.
+    POR QUÉ NO SE USA `imageEditInstantEdit`, que es la opción que el complemento
+    de FilePond trae justo para esto. Lo intenté y ROMPE el guardado: esa opción
+    espera el contrato del complemento —que el editor conteste con `onconfirm` o
+    `oncancel` para que FilePond sepa qué hacer con el archivo— y el
+    `imageEditEditor` de Filament tiene el `onconfirm` VACÍO, porque resuelve el
+    guardado por su cuenta en `saveEditor()`. Con la apertura instantánea, el
+    archivo queda esperando una respuesta que nunca llega: el botón de recortar
+    no hace nada y el de guardar sin recortar deja la subida colgada.
 
-    POR QUÉ UN OBSERVADOR Y NO EL EVENTO `FilePond:init`: ese evento no llega
-    hasta `document` —lo comprobé en la página—, y además los campos aparecen en
-    cualquier momento, no sólo al cargar: adentro de un modal, de una pestaña o
-    de un repetidor que alguien recién abrió.
+    LO QUE SE HACE EN CAMBIO es llamar a `loadEditor(file)` —el mismo método que
+    invoca el lápiz— cuando el archivo YA TERMINÓ DE SUBIR. Es exactamente el
+    camino que ya funciona, sólo que sin esperar a que alguien encuentre el
+    botón. Si Filament cambia por dentro, esto deja de tener efecto y el lápiz
+    sigue estando: se degrada a lo que había, no a algo roto.
 
     SÓLO EN CAMPOS DE UNA SOLA IMAGEN. En la galería, que admite treinta, abrir
-    el editor por cada archivo convertiría subir fotos en una tortura.
+    el editor por cada archivo sería una tortura.
 --}}
 <script>
     (function () {
-        const encender = () => {
-            if (! window.FilePond) {
+        const YA_ENGANCHADO = '_landraEditorAutomatico';
+
+        const enganchar = () => {
+            if (! window.FilePond || ! window.Alpine) {
                 return;
             }
 
@@ -36,11 +42,40 @@
                     return;
                 }
 
-                if (! pond || pond.allowMultiple || ! pond.allowImageEdit) {
+                if (! pond || pond[YA_ENGANCHADO] || pond.allowMultiple || ! pond.allowImageEdit) {
                     return;
                 }
 
-                pond.imageEditInstantEdit = true;
+                pond[YA_ENGANCHADO] = true;
+
+                // `processfile` y no `addfile`: recién ahí el archivo está en el
+                // mismo estado que cuando alguien hace clic en el lápiz. Abrirlo
+                // mientras todavía sube deja al editor peleando con la subida.
+                pond.on('processfile', (error, archivo) => {
+                    if (error || ! archivo?.file) {
+                        return;
+                    }
+
+                    // NO SE REABRE CON LA SALIDA DEL PROPIO EDITOR, y sin esto es
+                    // un bucle: guardar el recorte agrega un archivo nuevo, ese
+                    // archivo sube, y esta misma función lo toma como si alguien
+                    // lo hubiera elegido. El editor se abría de vuelta y no se
+                    // cerraba nunca.
+                    //
+                    // `-vN` es la firma que Filament le pone a lo que sale del
+                    // editor (`saveEditor()` en `file-upload.js`). Es un acuerdo
+                    // con su convención, y si algún día la cambian el costo es que
+                    // el editor abra dos veces — molesto, no roto.
+                    if (/-v\d+$/.test(archivo.filename.replace(/\.[^.]+$/, ''))) {
+                        return;
+                    }
+
+                    const componente = Alpine.$data(elemento);
+
+                    if (typeof componente?.loadEditor === 'function') {
+                        componente.loadEditor(archivo.file);
+                    }
+                });
             });
         };
 
@@ -49,7 +84,7 @@
         let pendiente = null;
         const agendar = () => {
             clearTimeout(pendiente);
-            pendiente = setTimeout(encender, 50);
+            pendiente = setTimeout(enganchar, 50);
         };
 
         new MutationObserver(agendar).observe(document.body, { childList: true, subtree: true });

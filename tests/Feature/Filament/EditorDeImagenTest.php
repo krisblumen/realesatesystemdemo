@@ -98,8 +98,17 @@ class EditorDeImagenTest extends TestCase
         // cuida es que nadie saque la línea del proveedor sin darse cuenta.
         $this->actingAs($this->owner());
 
-        $this->get(PropertyResource::getUrl('create'))
-            ->assertOk()
-            ->assertSee('imageEditInstantEdit', escape: false);
+        $respuesta = $this->get(PropertyResource::getUrl('create'))->assertOk();
+
+        // `loadEditor` es el método de Filament que abre el editor: el mismo que
+        // usa el lápiz. Que el script lo nombre es lo que prueba que sigue
+        // enganchado al camino bueno.
+        $respuesta->assertSee('loadEditor', escape: false);
+
+        // Y que NO vuelva `imageEditInstantEdit`, que fue el primer intento y
+        // rompía el guardado: esa opción espera que el editor le conteste con
+        // `onconfirm`, y el de Filament lo tiene vacío porque guarda por su
+        // cuenta. El archivo quedaba esperando una respuesta que nunca llegaba.
+        $respuesta->assertDontSee('imageEditInstantEdit', escape: false);
     }
 }
