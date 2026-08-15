@@ -9,6 +9,24 @@ use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * Las cuatro tarjetas de arriba del tablero, como en la maqueta de la landing.
+ *
+ * DOS CAMBIOS CONTRA LO QUE HABÍA:
+ *
+ * 1. VENDIDOS Y RENTADOS VAN SEPARADOS. Estaban sumados en una sola tarjeta, y
+ *    son dos negocios distintos: una inmobiliaria que vende mucho y renta poco
+ *    no se parece en nada a una que hace al revés. Sumarlos esconde justo el
+ *    dato por el que alguien mira este tablero.
+ *
+ * 2. FUERA «INMUEBLES TOTALES». Es la suma de las otras tres, así que no
+ *    agregaba información y sí ocupaba el lugar de una tarjeta. Cuatro tarjetas
+ *    entran en una fila; cinco parten la fila y el tablero pierde su forma.
+ *
+ * UNA SOLA CONSULTA para las cuatro. Antes eran cuatro `count()` separados
+ * —cinco, contando el total— sobre la misma tabla y con el mismo filtro. En un
+ * tablero que se dibuja en cada carga del panel, eso se paga siempre.
+ */
 class PropertiesStatsWidget extends BaseWidget
 {
     use ScopesToAgent;
@@ -20,25 +38,30 @@ class PropertiesStatsWidget extends BaseWidget
      */
     protected function getStats(): array
     {
+        $porEstado = $this->baseQuery()
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $contar = fn (PropertyStatus $estado): int => (int) ($porEstado[$estado->value] ?? 0);
+
         return [
-            Stat::make('Inmuebles totales', $this->baseQuery()->count())
-                ->description('Todos los inmuebles')
-                ->descriptionIcon('heroicon-m-home'),
-            Stat::make('Publicados', $this->baseQuery()->where('status', PropertyStatus::Publicado->value)->count())
-                ->description('Visibles al público')
+            Stat::make('Publicados', $contar(PropertyStatus::Publicado))
+                ->description('inmuebles en el sitio')
                 ->descriptionIcon('heroicon-m-check-badge')
                 ->color('success'),
-            Stat::make('Vendidos / Rentados', $this->baseQuery()->whereIn('status', [
-                PropertyStatus::Vendido->value,
-                PropertyStatus::Rentado->value,
-            ])->count())
-                ->description('Operaciones cerradas')
-                ->descriptionIcon('heroicon-m-banknotes')
-                ->color('info'),
-            Stat::make('Borradores', $this->baseQuery()->where('status', PropertyStatus::Borrador->value)->count())
-                ->description('Pendientes de publicar')
+            Stat::make('Borradores', $contar(PropertyStatus::Borrador))
+                ->description('por completar')
                 ->descriptionIcon('heroicon-m-pencil-square')
                 ->color('gray'),
+            Stat::make('Vendidos', $contar(PropertyStatus::Vendido))
+                ->description('operaciones cerradas')
+                ->descriptionIcon('heroicon-m-banknotes')
+                ->color('success'),
+            Stat::make('Rentados', $contar(PropertyStatus::Rentado))
+                ->description('contratos vigentes')
+                ->descriptionIcon('heroicon-m-key')
+                ->color('warning'),
         ];
     }
 
