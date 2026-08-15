@@ -61,6 +61,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -110,6 +111,30 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
+
+        // LOS DOS BOTONES DEL EDITOR DE IMAGEN, renombrados.
+        //
+        // Filament los llama «Cancelar» y «Guardar», y con el editor abriéndose
+        // solo esos nombres mienten sobre lo que hacen. «Cancelar» no descarta
+        // nada: cierra el modal y deja la imagen tal como se subió —lo comprobé
+        // en `file-upload.js`, su `oncancel` sólo llama a `closeEditor()`—. Pero
+        // quien lo lee entiende «cancelar la subida» y no se anima a tocarlo.
+        //
+        // Se cambian por lo que hacen: guardar sin recortar, o recortar y
+        // guardar. Con `addLines` y no copiando el archivo de traducciones de
+        // Filament: son trescientas líneas que quedarían viejas en la próxima
+        // actualización para cambiar dos.
+        // El `load()` NO es de más. `addLines` marca el grupo como cargado, así
+        // que sin esto Laravel nunca lee el archivo de Filament y todo lo demás
+        // de ese archivo —«Restablecer», los modos de arrastre, los avisos de
+        // SVG— queda sin traducir. Cambiar dos etiquetas rompía las otras
+        // treinta, y en silencio: salen como la clave cruda.
+        Lang::load('filament-forms', 'components', 'es');
+
+        Lang::addLines([
+            'components.file_upload.editor.actions.cancel.label' => 'Guardar sin recortar',
+            'components.file_upload.editor.actions.save.label' => 'Recortar y guardar',
+        ], 'es', 'filament-forms');
 
         // Un trabajo encolado vuelve solo a la base de su inquilino. Se registra
         // acá y no en cada trabajo porque el mecanismo tiene que actuar ANTES de
