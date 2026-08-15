@@ -55,4 +55,24 @@ class InquilinoActual
     {
         return $this->tenant !== null;
     }
+
+    /**
+     * ¿Lo que se está generando acá es una demostración?
+     *
+     * ES LO MISMO QUE «hay inquilino», y tiene nombre propio a propósito: en el
+     * punto de uso lo que se pregunta no es de quién es la petición, sino si el
+     * documento que sale tiene que ir marcado. Con `hayInquilino()` había que
+     * saber, además, que un inquilino SIEMPRE es un demo — y eso es cierto hoy
+     * y no está escrito en ninguna parte del nombre.
+     *
+     * No es una bandera de configuración, y ese es el punto: una bandera es algo
+     * que alguien puede olvidarse de encender, y el síntoma de olvidarla es un
+     * contrato o una lona de demostración que parecen reales. Una instalación
+     * sin inquilinos —la plataforma corriendo para un cliente propio— emite
+     * documentos sin marca sin que nadie tenga que acordarse de apagarla.
+     */
+    public function esUnaDemostracion(): bool
+    {
+        return $this->hayInquilino();
+    }
 }

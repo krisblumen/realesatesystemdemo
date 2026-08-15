@@ -9,6 +9,27 @@
     El QR (si hay inmueble) apunta al detalle público del inmueble; sin inmueble, se
     omiten el recuadro de QR y su leyenda.
 --}}
+@php
+    // LA RANURA DEL LOGO, y por qué se calcula en vez de escribirse.
+    //
+    // Antes el CSS fijaba `width: 950pt` y nada más. Con el logo horizontal
+    // original funcionaba; cuando la des-marcación lo cambió por uno casi
+    // cuadrado (proporción 0.95), esos mismos 950pt de ancho pasaron a ser
+    // 998pt de ALTO — de 330pt a 1328pt— y el logo se comió la palabra VENTA,
+    // que arranca en 1060pt.
+    //
+    // Una caja con una sola dimensión no acota nada. Acá se declara la ranura
+    // entera y el logo se encaja adentro sin deformarse, sea cual sea la forma
+    // del archivo que alguien ponga mañana.
+    $ranura = ['ancho' => 1400.0, 'alto' => 700.0, 'izquierda' => 575.5, 'arriba' => 300.0];
+
+    $logo = \App\Support\EncajeDeSvg::contener(
+        public_path('images/brand/Logo_lonas.svg'),
+        $ranura['ancho'], $ranura['alto'], $ranura['izquierda'], $ranura['arriba'],
+    );
+
+    $esDemostracion = app(\App\Tenancy\InquilinoActual::class)->esUnaDemostracion();
+@endphp
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -50,12 +71,9 @@
             border: 14pt solid #F4960E;
             border-radius: 50pt;
         }
-        .logo {
-            position: absolute;
-            left: 800pt;
-            top: 330pt;
-            width: 950pt;
-        }
+        /* Sin medidas: las pone el encaje, arriba. Dejarlas acá sería tener la
+           geometría en dos lugares y que uno de los dos mienta. */
+        .logo { position: absolute; }
         .tipo {
             position: absolute;
             left: 190pt;
@@ -114,6 +132,33 @@
             height: 570pt;
             margin-top: 55pt;
         }
+        /*
+            LA MARCA DE AGUA DE DEMOSTRACIÓN.
+
+            Una lona se IMPRIME: 90×120cm colgados en la calle. Es la pieza del
+            demo con más chance de terminar en el mundo real sin que nadie
+            recuerde de dónde salió, así que la marca va grande y repetida, no
+            en una esquina.
+
+            `transform: rotate()` y `opacity` andan en esta versión de dompdf —
+            el contrato los usa en producción desde hace meses—, a diferencia de
+            `linear-gradient()`, que no (ver la nota del encabezado).
+
+            En blanco porque el fondo es una foto oscura con un degradado navy
+            encima; el ocre del contrato se pierde ahí.
+        */
+        .marca-demo {
+            position: absolute;
+            left: 0;
+            width: 2551pt;
+            text-align: center;
+            font-size: 250pt;
+            font-weight: bold;
+            color: #ffffff;
+            opacity: 0.17;
+            letter-spacing: 24pt;
+            transform: rotate(-24deg);
+        }
         .qr-caption {
             position: absolute;
             left: 280pt;
@@ -131,7 +176,8 @@
 
         <div class="frame"></div>
 
-        <img class="logo" src="{{ public_path('images/brand/Logo_lonas.svg') }}" alt="Landra">
+        <img class="logo" src="{{ public_path('images/brand/Logo_lonas.svg') }}" alt="Landra"
+             style="left: {{ round($logo['izquierda'], 1) }}pt; top: {{ round($logo['arriba'], 1) }}pt; width: {{ round($logo['ancho'], 1) }}pt; height: {{ round($logo['alto'], 1) }}pt;">
 
         <div class="tipo">{{ strtoupper($operationType->label()) }}</div>
 
@@ -149,6 +195,14 @@
                 <img src="{{ $qrDataUri }}" alt="QR del inmueble">
             </div>
             <div class="qr-caption">Consulta las características de este inmueble en el QR</div>
+        @endif
+
+        @if ($esDemostracion)
+            {{-- Al final del documento: en dompdf lo que se dibuja después queda
+                 encima, y una marca de agua tapada por la foto no marca nada. --}}
+            <div class="marca-demo" style="top: 620pt;">DEMOSTRACIÓN</div>
+            <div class="marca-demo" style="top: 1560pt;">DEMOSTRACIÓN</div>
+            <div class="marca-demo" style="top: 2500pt;">DEMOSTRACIÓN</div>
         @endif
     </div>
 </body>
