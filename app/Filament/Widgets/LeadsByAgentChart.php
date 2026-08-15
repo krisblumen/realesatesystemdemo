@@ -50,6 +50,16 @@ class LeadsByAgentChart extends ChartWidget
     {
         $agentes = User::role('agente')
             ->withCount('leads')
+            ->has('leads')
+
+            // SIN LOS QUE NO TRAJERON NADA. Una barra de largo cero no compara:
+            // ocupa un renglón entero para decir «nada» y empuja hacia arriba a
+            // los que sí trajeron. En un demo recién creado, donde casi ningún
+            // agente tiene leads todavía, el gráfico era una lista de nombres
+            // con líneas en blanco.
+            //
+            // Quién tiene cero es un dato real, pero se responde en el listado
+            // de agentes. Acá la pregunta es quién trae más.
             ->orderByDesc('leads_count')
             ->limit(self::CUANTOS)
             ->get();
@@ -60,6 +70,10 @@ class LeadsByAgentChart extends ChartWidget
                 'data' => $agentes->pluck('leads_count')->all(),
                 'backgroundColor' => self::ACENTO,
                 'borderRadius' => 4,
+
+                // Sin contorno: el borde por defecto de Filament ensucia la
+                // barra en vez de definirla. Ver la nota de `LeadsByMonthChart`.
+                'borderWidth' => 0,
             ]],
             'labels' => $agentes->pluck('name')->all(),
         ];

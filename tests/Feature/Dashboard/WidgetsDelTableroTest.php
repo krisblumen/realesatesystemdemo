@@ -3,12 +3,17 @@
 namespace Tests\Feature\Dashboard;
 
 use App\Enums\EstadoContrato;
+use App\Enums\PropertyStatus;
 use App\Enums\UserStatus;
 use App\Enums\ZoneStatus;
 use App\Filament\Widgets\AccionesRapidasWidget;
 use App\Filament\Widgets\ContratosEnProcesoWidget;
+use App\Filament\Widgets\LeadsByAgentChart;
+use App\Filament\Widgets\LeadsByMonthChart;
+use App\Filament\Widgets\PropertiesByStatusChart;
 use App\Filament\Widgets\ZonasActivasWidget;
 use App\Models\ContratoIntermediacion;
+use App\Models\Lead;
 use App\Models\Property;
 use App\Models\User;
 use App\Models\Zone;
@@ -192,5 +197,86 @@ class WidgetsDelTableroTest extends TestCase
         // el bloque se llama «activas» y tiene que decir la verdad.
         $this->assertNotContains('Zona Apagada', $zonas->pluck('nombre')->all());
         $this->assertSame(2, Livewire::test(ZonasActivasWidget::class)->instance()->getTotalDeZonas());
+    }
+
+    public function test_an_agent_with_no_leads_does_not_take_up_a_row(): void
+    {
+        // Una barra de largo cero no compara nada: ocupa un renglón para decir
+        // «nada» y empuja hacia arriba a los que sí trajeron. Se vio en la
+        // previsualización con tres agentes sin leads llenando el gráfico.
+        $this->actingAs($this->usuario('owner'));
+
+        $conLeads = $this->usuario('agente');
+        $conLeads->forceFill(['name' => 'Trae leads', 'email' => 'trae@landra.test'])->save();
+        Lead::factory()->count(2)->create(['agent_id' => $conLeads->id]);
+
+        $sinLeads = User::create([
+            'name' => 'No trae nada',
+            'email' => 'vacio@landra.test',
+            'password' => 'una-contrasena-larga',
+            'status' => UserStatus::Active,
+            'email_verified_at' => now(),
+        ]);
+        $sinLeads->assignRole('agente');
+
+        $metodo = new \ReflectionMethod(LeadsByAgentChart::class, 'getData');
+        $metodo->setAccessible(true);
+        $datos = $metodo->invoke(app(LeadsByAgentChart::class));
+
+        $this->assertContains('Trae leads', $datos['labels']);
+        $this->assertNotContains('No trae nada', $datos['labels']);
+    }
+
+    public function test_the_bars_have_no_outline(): void
+    {
+        // PEDIDO EXPLÍCITO, y por eso queda fijado. Filament le pone contorno a
+        // las barras por defecto, y con relleno claro ese contorno pesa más que
+        // la barra: se leen como cajas vacías en vez de como cantidades.
+        //
+        // Es una comprobación de forma y no de conducta —lo visual lo verifiqué
+        // en el navegador—, pero protege de que el contorno vuelva sin que nadie
+        // lo note hasta verlo en pantalla.
+        $this->actingAs($this->usuario('owner'));
+
+        foreach ([LeadsByMonthChart::class, LeadsByAgentChart::class] as $grafico) {
+            $metodo = new \ReflectionMethod($grafico, 'getData');
+            $metodo->setAccessible(true);
+
+            foreach ($metodo->invoke(app($grafico))['datasets'] as $conjunto) {
+                $this->assertSame(0, $conjunto['borderWidth'] ?? null, "«{$grafico}» dibuja las barras con contorno.");
+            }
+        }
+    }
+
+    public function test_each_status_keeps_its_own_colour_no_matter_the_order(): void
+    {
+        // EL DEFECTO QUE ESTO CIERRA ES SILENCIOSO. Los colores eran un arreglo
+        // de cinco en fila, apareado con `PropertyStatus::cases()` por orden de
+        // llegada. El día que alguien agregue un estado en el medio o reordene
+        // el enum, cada color pasa a significar otra cosa y NADA falla: el
+        // gráfico simplemente miente, y se descubre mirándolo.
+        //
+        // Los valores son los que pidió el usuario: dos grises para lo que no
+        // está a la venta, el ámbar de la marca para lo publicado, y dos verdes
+        // para las operaciones cerradas.
+        $this->actingAs($this->usuario('owner'));
+
+        $metodo = new \ReflectionMethod(PropertiesByStatusChart::class, 'getData');
+        $metodo->setAccessible(true);
+        $datos = $metodo->invoke(app(PropertiesByStatusChart::class));
+
+        $porEtiqueta = array_combine($datos['labels'], $datos['datasets'][0]['backgroundColor']);
+
+        $esperado = [
+            PropertyStatus::Borrador->label() => '#e2e8f0',
+            PropertyStatus::Publicado->label() => '#f5a624',
+            PropertyStatus::Pausado->label() => '#55636f',
+            PropertyStatus::Vendido->label() => '#cbd5e1',
+            PropertyStatus::Rentado->label() => '#334155',
+        ];
+
+        foreach ($esperado as $etiqueta => $color) {
+            $this->assertSame($color, $porEtiqueta[$etiqueta] ?? null, "«{$etiqueta}» cambió de color.");
+        }
     }
 }
