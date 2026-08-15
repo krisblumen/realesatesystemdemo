@@ -3,6 +3,8 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\PropertyStatus;
+use App\Filament\Resources\PropertyResource;
+use App\Filament\Resources\PropertyResource\Pages\ListProperties;
 use App\Filament\Widgets\Concerns\ScopesToAgent;
 use App\Models\Property;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
@@ -46,14 +48,21 @@ class PropertiesStatsWidget extends BaseWidget
         $contar = fn (PropertyStatus $estado): int => (int) ($porEstado[$estado->value] ?? 0);
 
         return [
+            // PUBLICADOS Y BORRADORES LLEVAN AL LISTADO YA FILTRADO, y los otros
+            // dos no. No es inconsistencia: son las dos únicas sobre las que hay
+            // algo que hacer. Ver un borrador es ir a terminarlo; ver un
+            // publicado es ir a revisarlo. Vendidos y rentados son historia — un
+            // enlace ahí promete una acción que no existe.
             Stat::make('Publicados', $contar(PropertyStatus::Publicado))
                 ->description('inmuebles en el sitio')
                 ->descriptionIcon('heroicon-m-check-badge')
-                ->color('success'),
+                ->color('success')
+                ->url(self::listadoFiltradoPor(PropertyStatus::Publicado)),
             Stat::make('Borradores', $contar(PropertyStatus::Borrador))
                 ->description('por completar')
                 ->descriptionIcon('heroicon-m-pencil-square')
-                ->color('gray'),
+                ->color('gray')
+                ->url(self::listadoFiltradoPor(PropertyStatus::Borrador)),
             Stat::make('Vendidos', $contar(PropertyStatus::Vendido))
                 ->description('operaciones cerradas')
                 ->descriptionIcon('heroicon-m-banknotes')
@@ -63,6 +72,21 @@ class PropertiesStatsWidget extends BaseWidget
                 ->descriptionIcon('heroicon-m-key')
                 ->color('warning'),
         ];
+    }
+
+    /**
+     * El listado abierto en la PESTAÑA de ese estado.
+     *
+     * Con `tableFilters` no alcanzaba: el listado está partido en pestañas, y la
+     * pestaña activa manda sobre el filtro. El enlace filtraba bien y aterrizaba
+     * en «Publicados» igual — con lo cual quien hacía clic en «Borradores» veía
+     * publicados y ningún error que lo explicara.
+     */
+    private static function listadoFiltradoPor(PropertyStatus $estado): string
+    {
+        return PropertyResource::getUrl('index', [
+            'activeTab' => ListProperties::pestanaDe($estado),
+        ]);
     }
 
     private function baseQuery(): Builder

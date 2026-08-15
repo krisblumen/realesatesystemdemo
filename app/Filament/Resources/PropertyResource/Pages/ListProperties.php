@@ -40,6 +40,27 @@ class ListProperties extends ListRecords
     }
 
     /**
+     * En qué pestaña vive un estado.
+     *
+     * VIVE ACÁ, al lado de `getTabs()`, y no copiado en quien arma el enlace: si
+     * alguien renombra una pestaña y la clave queda escrita en otro archivo, el
+     * enlace sigue funcionando y abre la pestaña equivocada. Sin error, sin
+     * aviso — el usuario hace clic en «Borradores» y ve los publicados.
+     *
+     * Que sea un `match` sin rama por defecto es a propósito: agregar un estado
+     * al enum y olvidarse de esto revienta acá y no en la pantalla de alguien.
+     */
+    public static function pestanaDe(PropertyStatus $estado): string
+    {
+        return match ($estado) {
+            PropertyStatus::Publicado => 'publicados',
+            PropertyStatus::Pausado => 'pausados',
+            PropertyStatus::Borrador => 'borradores',
+            PropertyStatus::Vendido, PropertyStatus::Rentado => 'cerrados',
+        };
+    }
+
+    /**
      * @param  array<int, PropertyStatus>  $statuses
      */
     private function statusTab(string $label, array $statuses): Tab

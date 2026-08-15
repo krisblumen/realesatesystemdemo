@@ -8,7 +8,7 @@ class AgentesSectionHeader extends SectionHeaderWidget
 {
     use ScopesToAgent;
 
-    protected static ?int $sort = 7;
+    protected static ?int $sort = 8;
 
     public function getSectionTitle(): ?string
     {

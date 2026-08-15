@@ -13,7 +13,25 @@ class LeadsStatsWidget extends BaseWidget
 {
     use ScopesToAgent;
 
-    protected static ?int $sort = 5;
+    protected static ?int $sort = 7;
+
+    /**
+     * Al lado del gráfico de leads por mes, y en UNA columna.
+     *
+     * Las tres tarjetas dicen lo mismo que el gráfico —cuántos leads hay y
+     * cuándo llegaron— así que separadas por media pantalla obligan a mirar dos
+     * veces para leer una sola idea. Juntas, el número y la curva se comparan de
+     * un vistazo.
+     *
+     * En una columna y no en fila: comparten el ancho con el gráfico, y tres
+     * tarjetas apretadas en medio ancho no entran sin partir los números.
+     */
+    protected int|string|array $columnSpan = 1;
+
+    protected function getColumns(): int
+    {
+        return 1;
+    }
 
     /**
      * @return array<int, Stat>

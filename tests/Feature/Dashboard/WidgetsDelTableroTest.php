@@ -6,11 +6,13 @@ use App\Enums\EstadoContrato;
 use App\Enums\PropertyStatus;
 use App\Enums\UserStatus;
 use App\Enums\ZoneStatus;
+use App\Filament\Resources\PropertyResource\Pages\ListProperties;
 use App\Filament\Widgets\AccionesRapidasWidget;
 use App\Filament\Widgets\ContratosEnProcesoWidget;
 use App\Filament\Widgets\LeadsByAgentChart;
 use App\Filament\Widgets\LeadsByMonthChart;
 use App\Filament\Widgets\PropertiesByStatusChart;
+use App\Filament\Widgets\PropertiesStatsWidget;
 use App\Filament\Widgets\ZonasActivasWidget;
 use App\Models\ContratoIntermediacion;
 use App\Models\Lead;
@@ -278,5 +280,40 @@ class WidgetsDelTableroTest extends TestCase
         foreach ($esperado as $etiqueta => $color) {
             $this->assertSame($color, $porEtiqueta[$etiqueta] ?? null, "«{$etiqueta}» cambió de color.");
         }
+    }
+
+    public function test_the_two_actionable_cards_land_on_their_own_tab(): void
+    {
+        // EL DEFECTO QUE ESTE TEST CIERRA, y era silencioso. La primera versión
+        // enlazaba con `tableFilters`, pero el listado está partido en PESTAÑAS
+        // y la pestaña activa manda sobre el filtro: el enlace de «Borradores»
+        // aterrizaba en «Publicados», sin ningún error que lo explicara.
+        //
+        // Se comprueba además que la clave de pestaña EXISTE de verdad: un
+        // `activeTab` inventado no falla, simplemente abre la primera.
+        $this->actingAs($this->usuario('owner'));
+
+        $widget = Livewire::test(PropertiesStatsWidget::class)->instance();
+        $metodo = new \ReflectionMethod($widget, 'getStats');
+        $metodo->setAccessible(true);
+
+        $porEtiqueta = collect($metodo->invoke($widget))
+            ->mapWithKeys(fn ($stat) => [$stat->getLabel() => $stat->getUrl()]);
+
+        $pestanas = array_keys(app(ListProperties::class)->getTabs());
+
+        foreach (['Publicados' => 'publicados', 'Borradores' => 'borradores'] as $tarjeta => $pestana) {
+            $this->assertStringContainsString(
+                "activeTab={$pestana}",
+                (string) $porEtiqueta[$tarjeta],
+                "«{$tarjeta}» tiene que abrir su propia pestaña, no la primera.",
+            );
+            $this->assertContains($pestana, $pestanas, "La pestaña «{$pestana}» no existe en el listado.");
+        }
+
+        // Vendidos y rentados son historia: un enlace ahí promete una acción que
+        // no existe.
+        $this->assertNull($porEtiqueta['Vendidos']);
+        $this->assertNull($porEtiqueta['Rentados']);
     }
 }

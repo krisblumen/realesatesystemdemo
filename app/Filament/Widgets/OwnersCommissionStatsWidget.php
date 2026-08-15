@@ -13,7 +13,7 @@ class OwnersCommissionStatsWidget extends BaseWidget
 {
     use ScopesToAgent;
 
-    protected static ?int $sort = 10;
+    protected static ?int $sort = 11;
 
     /**
      * @return array<int, Stat>

@@ -10,7 +10,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class ZonesOverviewWidget extends BaseWidget
 {
-    protected static ?int $sort = 12;
+    protected static ?int $sort = 14;
 
     public static function canView(): bool
     {

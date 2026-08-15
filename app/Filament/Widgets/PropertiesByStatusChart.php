@@ -31,7 +31,10 @@ class PropertiesByStatusChart extends ChartWidget
 
     public function getHeading(): string
     {
-        return $this->isAgentScope() ? 'Mis inmuebles por estado' : 'Inmuebles por estado';
+        // «Status de inmuebles» y no «Inmuebles por estado»: lo segundo se lee
+        // como una ubicación —inmuebles por estado de la república— y en un
+        // sistema inmobiliario mexicano esa confusión es inmediata.
+        return $this->isAgentScope() ? 'Status de mis inmuebles' : 'Status de inmuebles';
     }
 
     /**

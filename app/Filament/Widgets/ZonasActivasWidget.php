@@ -24,7 +24,7 @@ class ZonasActivasWidget extends Widget
 {
     protected static string $view = 'filament.widgets.zonas-activas';
 
-    protected static ?int $sort = 11;
+    protected static ?int $sort = 13;
 
     private const CUANTAS = 5;
 
